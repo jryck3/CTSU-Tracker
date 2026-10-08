@@ -27,7 +27,7 @@
   .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
   .kpi .v { font-size: 26px; font-weight: 650; color: var(--navy); }
   .kpi .l { color: var(--muted); font-size: 12.5px; }
-  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 14px; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
   .card.missing { border-style: dashed; color: var(--muted); }
   .card .top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
@@ -53,7 +53,8 @@
   .chip.rp { background: #f1ebfb; color: var(--rp); }
   .chip.file { background: #e6f4ea; color: var(--green); }
   .chip.mine { background: #fdf6e3; color: #975a16; }
-  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; min-width: 0; }
+  .filters, .pace, main { min-width: 0; }
   .mine-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
   .combo { position: relative; flex: 1 1 380px; max-width: 640px; }
   .combo input { width: 100%; font: inherit; font-size: 14px; padding: 9px 12px; border: 1px solid #c3ccd8; border-radius: 8px; }
@@ -80,8 +81,9 @@
   .canvas-wrap { position: relative; height: 330px; }
   .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
   .filters input[type=search], .filters select { font: inherit; font-size: 13px; padding: 6px 9px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
-  .filters input[type=search] { min-width: 260px; }
-  .filters select { max-width: 220px; }
+  .filters input[type=search] { min-width: min(100%, 260px); flex: 1 1 220px; }
+  .filters select { max-width: 220px; min-width: 0; width: 160px; }
+  .m-sort { display: none; align-items: center; gap: 6px; font-size: 13px; }
   .check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 7px; background: #fff; cursor: pointer; user-select: none; }
   .check:has(input:checked) { border-color: var(--accent); background: #ebf4ff; color: var(--navy); }
   .count { color: var(--muted); font-size: 12.5px; margin-left: auto; }
@@ -90,24 +92,25 @@
   .pace-list { list-style: none; margin: 0; padding: 0; }
   .pace-list li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 8px 0; border-top: 1px solid var(--line); }
   .pace-list li.none { display: block; color: var(--muted); font-size: 12.5px; }
-  .pi-title { font-size: 12.5px; color: #3d4756; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pi-title { font-size: 12.5px; color: #3d4756; overflow-wrap: anywhere; }
   .pi-meta { font-size: 11.5px; color: var(--muted); }
   .pi-val { font-weight: 650; color: var(--navy); white-space: nowrap; font-size: 14px; }
-  .table-wrap { overflow-x: auto; }
+  .table-wrap { overflow-x: auto; container-type: inline-size; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th { text-align: left; font-weight: 600; color: var(--muted); font-size: 12px; border-bottom: 2px solid var(--line); padding: 0; white-space: nowrap; }
   th button { all: unset; cursor: pointer; padding: 8px 8px; display: block; }
   th button:focus-visible { outline: 2px solid var(--accent); }
   th .arrow { font-size: 10px; margin-left: 3px; }
-  td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
   th.star-col, td.star-col { width: 30px; padding: 8px 0 8px 8px; }
   tr.row { cursor: pointer; }
   tr.row:hover td { background: #f8fafc; }
   tr.mine td:first-child { box-shadow: inset 3px 0 0 var(--star); }
-  td.title-cell { min-width: 300px; max-width: 520px; }
-  td.acc-cell { min-width: 150px; }
-  tr.detail td { background: #fafbfd; font-size: 12.5px; }
-  .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 6px 18px; }
+  td.title-cell { min-width: 180px; max-width: 360px; }
+  td.acc-cell { min-width: 120px; }
+  tr.detail td { background: #fafbfd; font-size: 12.5px; padding: 0; }
+  .detail-inner { position: sticky; left: 0; box-sizing: border-box; width: 100cqi; max-width: 100cqi; padding: 12px 14px 14px; overflow-wrap: anywhere; }
+  .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 6px 18px; }
   .detail-grid b { color: var(--muted); font-weight: 600; }
   .brief { margin-top: 14px; display: grid; gap: 14px; }
   .brief h4 { margin: 0 0 6px; font-size: 13px; color: var(--navy); }
@@ -118,16 +121,46 @@
   .flow .rail { display: flex; flex-direction: column; align-items: center; }
   .flow .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); margin-top: 4px; flex: none; }
   .flow .line { width: 2px; flex: 1; background: #c5d4e8; min-height: 12px; }
-  .flow .step-body { padding-bottom: 10px; }
+  .flow .step-body { padding-bottom: 10px; min-width: 0; overflow-wrap: anywhere; }
   .flow .step-body b { display: block; color: var(--navy); }
-  .arms { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin: 8px 0 0; }
+  .arms { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 8px; margin: 8px 0 0; }
   .arm { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; background: #fff; }
   .arm b { color: var(--navy); }
   .brief ul { margin: 0; padding-left: 18px; }
   .brief li { margin: 3px 0; }
-  .pre { width: 100%; border-collapse: collapse; font-size: 12.5px; background: #fff; }
-  .pre th, .pre td { border: 1px solid var(--line); padding: 5px 8px; text-align: left; vertical-align: top; }
+  .pre { width: 100%; border-collapse: collapse; font-size: 12.5px; background: #fff; table-layout: fixed; }
+  .pre th, .pre td { border: 1px solid var(--line); padding: 5px 8px; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
   .pre th { background: #f4f7fb; color: var(--muted); font-weight: 600; }
+  .study-cards { display: none; }
+  .study-card { border: 1px solid var(--line); border-radius: 10px; background: #fff; overflow: hidden; }
+  .study-card.mine { box-shadow: inset 3px 0 0 var(--star); }
+  .sc-top { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 8px; align-items: start; padding: 10px 10px 8px; }
+  .sc-open { all: unset; cursor: pointer; display: grid; gap: 3px; min-width: 0; }
+  .sc-open:focus-visible { outline: 2px solid var(--accent); border-radius: 4px; }
+  .sc-name { font-size: 15px; }
+  .sc-meta, .sc-title, .sc-row { overflow-wrap: anywhere; }
+  .sc-meta { color: var(--muted); font-size: 12.5px; }
+  .sc-title { color: #333d4a; }
+  .sc-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .study-card .detail-inner { position: static; width: auto; max-width: none; border-top: 1px solid var(--line); background: #fafbfd; }
+  @media (max-width: 760px) {
+    header { padding: 14px 16px; }
+    main { padding: 12px 12px 28px; }
+    .cards { grid-template-columns: 1fr; }
+    .filters input[type=search] { flex-basis: 100%; }
+    .filters select { width: 100%; max-width: 100%; flex: 1 1 calc(50% - 8px); }
+    .combo { flex-basis: 100%; max-width: none; }
+    .canvas-wrap { height: 240px; }
+    .count { margin-left: 0; }
+    .table-wrap { display: none; }
+    .study-cards { display: grid; gap: 10px; }
+    .m-sort { display: inline-flex; }
+    .pre thead { display: none; }
+    .pre, .pre tbody, .pre tr, .pre td { display: block; width: auto; }
+    .pre tr { padding: 8px 0; border-bottom: 1px solid var(--line); }
+    .pre td { border: 0; padding: 1px 0; }
+    .pre td:first-child { font-weight: 650; color: var(--navy); }
+  }
   a { color: var(--accent); }
   .btn { font: inherit; font-size: 12.5px; padding: 5px 11px; border-radius: 6px; border: 1px solid var(--accent); background: #fff; color: var(--accent); cursor: pointer; }
   .btn.on { background: var(--accent); color: #fff; }
@@ -213,6 +246,16 @@
       <select id="f-lead" aria-label="Lead group"><option value="">All lead groups</option></select>
       <select id="f-role" aria-label="RT role"><option value="">Any RT role</option></select>
       <select id="f-phase" aria-label="Phase"><option value="">Any phase</option></select>
+      <label class="m-sort">Sort
+        <select id="m-sort" aria-label="Sort studies">
+          <option value="protocol">Protocol</option>
+          <option value="lead">Lead group</option>
+          <option value="disease">Site</option>
+          <option value="phase">Phase</option>
+          <option value="pct">Accrual</option>
+          <option value="avg_rate">Average per month</option>
+        </select>
+      </label>
       <button class="linkbtn" id="reset" type="button">Reset filters</button>
       <span class="count" id="count"></span>
     </div>
@@ -236,6 +279,7 @@
         <tbody id="tbody"></tbody>
       </table>
     </div>
+    <div class="study-cards" id="study-cards"></div>
   </section>
 
   <details class="methods">
@@ -244,7 +288,7 @@
       <li><b>Accrual</b> comes from the public CTSU Protocol List (<a href="https://ctsu.cancer.gov/protocol" target="_blank" rel="noopener">ctsu.cancer.gov/protocol</a>), which lists active and temporarily closed NCI trials open to cross-group participation and reports actual over planned intervention accrual. These are study-wide totals across all sites, not accrual at any one institution.</li>
       <li><b>History</b> is built from one CTSU snapshot per day, starting <span id="hist-start"></span>. CTSU does not publish past accrual, so the line from the study start date to the first snapshot is a straight-line interpolation (dashed), not observed data.</li>
       <li><b>Average rate</b> = current accrual divided by months since the actual study start date on ClinicalTrials.gov. Early ramp-up makes this lower than the current rate for most young trials. <b>Recent rate</b> = change over the last 30 days of snapshots, scaled to a month. <b>Projected target date</b> assumes the average rate continues.</li>
-      <li><b>Accrual pace</b> lists the fastest open studies that match the explorer filters, have been open at least 6 months, and have not reached their target. <i>Patients per month</i> favors large trials; <i>% of target per month</i> adjusts for trial size. The study table under that list is alphabetical by protocol until a column heading is used to sort it.</li>
+      <li><b>Accrual pace</b> lists the fastest open studies that match the explorer filters, have been open at least 6 months, and have not reached their target. <i>Patients per month</i> favors large trials; <i>% of target per month</i> adjusts for trial size. The studies under that list start in protocol order. Column headings sort the table. On a phone, the same list is cards, with a Sort menu, and an opened study wraps to the screen.</li>
       <li><b>Protocol brief</b> on an opened study is a rendition of the current protocol on file: schema, eligibility points that change who can enroll, pre-registration assessments, and amendment dates. It is not a copy of the protocol page. Confirm the current protocol before enrollment.</li>
       <li><b>RT classification</b> uses ClinicalTrials.gov interventions and titles. <i>RT-focused</i>: RT named in the title. <i>RT component</i>: protocol-specified RT intervention (often part of the treatment backbone). <i>Radiopharmaceutical</i>: therapeutic isotope (for example Lu-177, Ac-225) without external-beam RT. Imaging tracers and MUGA scans are excluded. Manual overrides are listed in the evidence for each study.</li>
       <li id="m-sync"></li>
@@ -763,7 +807,7 @@ function renderPace() {
   $("fast").innerHTML = fast.map(paceItem).join("") || none;
   const t = scopeText();
   $("pace-h").textContent = `Accrual pace: ${t}`;
-  $("pace-note").textContent = `Fastest accrual since activation among ${elig.length} ${t} that have been accruing at least ${PACE_MIN_MONTHS} months and are below target. The table below is alphabetical by protocol. Click a column heading to sort, or use the filters for lead group, disease site, and phase. Click ☆ to add a study to My trials.`;
+  $("pace-note").textContent = `Fastest accrual since activation among ${elig.length} ${t} that have been accruing at least ${PACE_MIN_MONTHS} months and are below target. Studies below start in protocol order. Sort from a column heading, or from the Sort menu on a phone.`;
 }
 
 function renderHead() {
@@ -814,11 +858,11 @@ function briefHtml(s) {
   </div>`;
 }
 
-function detailRow(s) {
+function detailInner(s) {
   const ev = (s.rt_evidence || []).map(esc).join("<br>") || "None";
   const t30 = s.trailing30 ? `${num(s.trailing30.per_month)} /mo (+${s.trailing30.delta} over ${s.trailing30.days} days)` : "Pending (needs 7+ days of snapshots)";
   const on = store.has(s.protocol);
-  return `<tr class="detail"><td colspan="${COLS.length + 1}">
+  return `<div class="detail-inner">
     <div class="detail-grid">
       <div><b>NCT</b><br>${s.nct ? `<a href="${ctgov(s.nct)}" target="_blank" rel="noopener">${esc(s.nct)}</a>` : "n/a"}</div>
       <div><b>Disease</b><br>${esc(s.disease)}</div>
@@ -832,14 +876,50 @@ function detailRow(s) {
     </div>
     ${briefHtml(s)}
     <div style="margin-top:8px"><button class="btn${on ? " on" : ""}" type="button" data-star="${esc(s.protocol)}">${on ? "Remove from My trials" : "Add to My trials"}</button></div>
-  </td></tr>`;
+  </div>`;
 }
 
-function render() {
-  renderHead();
+function detailRow(s) {
+  return `<tr class="detail"><td colspan="${COLS.length + 1}">${detailInner(s)}</td></tr>`;
+}
+
+function studyCard(s) {
+  const open = state.expanded.has(s.protocol);
+  return `<article class="study-card${store.has(s.protocol) ? " mine" : ""}" data-p="${esc(s.protocol)}">
+    <div class="sc-top">
+      ${starBtn(s.protocol)}
+      <button class="sc-open" type="button" aria-expanded="${open}">
+        <span class="sc-name"><b>${esc(s.protocol)}</b>${s.alias ? ` <span class="muted">${esc(s.alias)}</span>` : ""}</span>
+        <span class="sc-meta">${esc(s.lead)} · ${esc(s.disease || "Site n/a")} · Phase ${esc(s.phase)}</span>
+        <span class="sc-title">${esc(s.title)}</span>
+        <span class="sc-row">${roleChip(s.rt_role)} ${statusChip(s.status)} <span>${s.accrual != null ? num(s.accrual, 0) : ""}${s.target ? " / " + num(s.target, 0) : ""}${s.pct != null ? ` (${num(s.pct)}%)` : ""}</span>${s.avg_rate != null ? ` <span class="muted">${num(s.avg_rate)} /mo</span>` : ""}</span>
+      </button>
+    </div>
+    ${open ? detailInner(s) : ""}
+  </article>`;
+}
+
+const mobileQuery = window.matchMedia("(max-width: 760px)");
+
+function renderStudies() {
   const r = rows();
   $("count").textContent = `${r.length} ${r.length === 1 ? "study" : "studies"}`;
-  $("tbody").innerHTML = r.map(s => `
+  if ($("m-sort").querySelector(`option[value="${state.sort}"]`)) $("m-sort").value = state.sort;
+  const phone = mobileQuery.matches;
+  document.querySelector(".table-wrap").style.display = phone ? "none" : "";
+  $("study-cards").style.display = phone ? "grid" : "none";
+  if (phone) {
+    $("study-cards").innerHTML = r.map(studyCard).join("") || `<div class="empty"><p>No studies match these filters.</p></div>`;
+    document.querySelectorAll(".sc-open").forEach(btn => {
+      btn.onclick = () => {
+        const p = btn.closest("[data-p]").dataset.p;
+        state.expanded.has(p) ? state.expanded.delete(p) : state.expanded.add(p);
+        render();
+      };
+    });
+  } else {
+    renderHead();
+    $("tbody").innerHTML = r.map(s => `
     <tr class="row${store.has(s.protocol) ? " mine" : ""}" data-p="${esc(s.protocol)}" tabindex="0" aria-expanded="${state.expanded.has(s.protocol)}">
       <td class="star-col">${starBtn(s.protocol)}</td>
       <td><b>${esc(s.protocol)}</b>${s.alias ? `<div class="muted" style="font-size:12px">${esc(s.alias)}</div>` : ""}</td>
@@ -855,11 +935,24 @@ function render() {
       <td>${fmtMonth(s.projected_completion)}</td>
     </tr>${state.expanded.has(s.protocol) ? detailRow(s) : ""}`).join("") ||
     `<tr><td colspan="${COLS.length + 1}" class="muted">No studies match these filters.</td></tr>`;
-  document.querySelectorAll("tr.row").forEach(tr => {
-    const toggle = () => { const p = tr.dataset.p; state.expanded.has(p) ? state.expanded.delete(p) : state.expanded.add(p); render(); };
-    tr.onclick = e => { if (!e.target.closest("button, a")) toggle(); };
-    tr.onkeydown = e => { if (e.target === tr && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); toggle(); } };
-  });
+    document.querySelectorAll("tr.row").forEach(tr => {
+      const toggle = () => { const p = tr.dataset.p; state.expanded.has(p) ? state.expanded.delete(p) : state.expanded.add(p); render(); };
+      tr.onclick = e => { if (!e.target.closest("button, a")) toggle(); };
+      tr.onkeydown = e => { if (e.target === tr && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); toggle(); } };
+    });
+    fitDetails();
+  }
+}
+
+function fitDetails() {
+  const wrap = document.querySelector(".table-wrap");
+  if (!wrap || mobileQuery.matches) return;
+  const width = wrap.clientWidth + "px";
+  document.querySelectorAll("tr.detail .detail-inner").forEach(el => { el.style.width = width; });
+}
+
+function render() {
+  renderStudies();
   renderPace();
 }
 
@@ -870,8 +963,8 @@ function showInTable(p) {
   }
   state.expanded.add(p);
   render();
-  const tr = document.querySelector(`tr.row[data-p="${CSS.escape(p)}"]`);
-  if (tr) { tr.scrollIntoView({block: "center", behavior: "smooth"}); tr.focus({preventScroll: true}); }
+  const el = document.querySelector(`${mobileQuery.matches ? "article.study-card" : "tr.row"}[data-p="${CSS.escape(p)}"]`);
+  if (el) el.scrollIntoView({block: "center", behavior: "smooth"});
 }
 
 function syncFilterInputs() {
@@ -889,6 +982,13 @@ $("f-phase1").onchange = e => { state.showPhase1 = e.target.checked; render(); }
 [["f-disease", "disease"], ["f-lead", "lead"], ["f-role", "role"], ["f-phase", "phase"]].forEach(([id, k]) =>
   $(id).onchange = e => { state[k] = e.target.value; render(); });
 $("reset").onclick = () => { Object.assign(state, DEFAULTS); syncFilterInputs(); render(); };
+$("m-sort").onchange = e => {
+  state.sort = e.target.value;
+  state.dir = ["pct", "avg_rate", "accrual"].includes(state.sort) ? -1 : 1;
+  render();
+};
+mobileQuery.addEventListener("change", () => render());
+window.addEventListener("resize", fitDetails);
 
 function setPace(mode) {
   paceMode = mode;
