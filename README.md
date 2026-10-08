@@ -4,7 +4,7 @@
 
 Track NCI trials on the CTSU Protocol List, flag the ones involving radiation therapy, follow accrual over time for trials each user cares about (for example, the trials open at their institution), and keep current protocol documents on file locally.
 
-Public dashboard: https://jryck3.github.io/Rad-Onc-Review/
+Public dashboard: https://jryck3.github.io/CTSU-Tracker/ (repo renamed from Rad-Onc-Review on October 7, 2026; the old Pages URL does not redirect)
 
 ## Status
 
@@ -55,7 +55,7 @@ Done October 7, 2026: Firebase project `ctsu-dashboard` (display name "CTSU Dash
 2. **Authentication** > Get started > Sign-in method > enable **Google**. Under Settings > Authorized domains, add `jryck3.github.io`.
 3. **Firestore Database** > Create database (production mode). Replace the rules with the contents of `firestore.rules` and publish.
 4. Save the web config as a repository variable (not a secret; the values are public identifiers that end up in the page):
-   `gh variable set FIREBASE_WEB_CONFIG --repo jryck3/Rad-Onc-Review --body '{"apiKey":"...","authDomain":"...","projectId":"...","appId":"..."}'`
+   `gh variable set FIREBASE_WEB_CONFIG --repo jryck3/CTSU-Tracker --body '{"apiKey":"...","authDomain":"...","projectId":"...","appId":"..."}'`
 5. Run the workflow from the Actions tab (or wait for the daily run). The Sign in with Google button then appears.
 
 Optional hardening: in Google Cloud console > APIs & Services > Credentials, restrict the browser API key to the `https://jryck3.github.io/*` and `https://<project-id>.firebaseapp.com/*` referrers (the second hosts the sign-in popup).
