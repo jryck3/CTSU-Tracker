@@ -49,6 +49,8 @@ To refresh protocols, sign in to CTSU (ID.me) in the automation Chrome window, t
 
 ## Google sign-in setup (one time)
 
+Done October 7, 2026: Firebase project `ctsu-dashboard` (display name "CTSU Dashboard", Spark plan, Firestore in nam5) under jeff.ryckman@gmail.com. The steps below document the setup in case it needs to be redone.
+
 1. In the [Firebase console](https://console.firebase.google.com/), create a project (Google Analytics not needed) and add a **Web app**. Copy its config object.
 2. **Authentication** > Get started > Sign-in method > enable **Google**. Under Settings > Authorized domains, add `jryck3.github.io`.
 3. **Firestore Database** > Create database (production mode). Replace the rules with the contents of `firestore.rules` and publish.
