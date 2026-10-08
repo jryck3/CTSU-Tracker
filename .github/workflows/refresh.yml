@@ -24,6 +24,8 @@ jobs:
           python-version: "3.12"
 
       - name: Snapshot CTSU and rebuild the dashboard
+        env:
+          FIREBASE_WEB_CONFIG: ${{ vars.FIREBASE_WEB_CONFIG }}
         run: python scripts/refresh.py
 
       - name: Commit history and public page

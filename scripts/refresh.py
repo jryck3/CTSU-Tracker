@@ -12,6 +12,11 @@ Refresh the CTSU trials workspace.
    when protocols/manifest.json exists, the local dashboard
    (dashboard/index.html) that also shows which protocols are on file.
 
+The public page starts with an empty "My trials" list that each visitor fills
+in; Google sign-in (Firebase) is offered when FIREBASE_WEB_CONFIG holds the
+Firebase web app config as JSON. The local page starts from
+config/institution_trials.json.
+
 GitHub Actions runs this daily and commits the history and public page. On the
 Mac, use --no-save after `git pull` so tracked files are left to Actions.
 
@@ -21,6 +26,7 @@ Usage:
 import argparse
 import csv
 import json
+import os
 import re
 import ssl
 import sys
@@ -41,7 +47,10 @@ MANIFEST = ROOT / "protocols" / "manifest.json"
 TEMPLATE = ROOT / "dashboard" / "template.html"
 DASHBOARD = ROOT / "dashboard" / "index.html"
 PUBLIC_SITE = ROOT / "docs" / "index.html"
-LOCAL_ONLY_FIELDS = ("protocol_on_file", "protocol_version")
+SITE_URL = "https://jryck3.github.io/Rad-Onc-Review/"
+LOCAL_ONLY_FIELDS = ("protocol_on_file", "protocol_version", "ours")
+LOCAL_ONLY_KEYS = ("institution", "institution_label", "institution_missing")
+FIREBASE_KEYS = ("apiKey", "authDomain", "projectId", "appId")
 
 CTSU_BROWSE_URL = "https://ctsu.cancer.gov/web-data-service/v1/protocols/browse"
 CTGOV_URL = "https://clinicaltrials.gov/api/v2/studies"
@@ -308,6 +317,7 @@ def build(protocols, history, fetched_at, today):
         status_mod = ps.get("statusModule", {})
         start = parse_date(status_mod.get("startDateStruct", {}).get("date"))
         start_type = status_mod.get("startDateStruct", {}).get("type")
+        acronym = ps.get("identificationModule", {}).get("acronym")
         accrual, target = p.get("interventionAccrualTotal"), p.get("interventionAccrualTarget")
         role, evidence = classify_rt(p, ps, overrides)
 
@@ -348,7 +358,7 @@ def build(protocols, history, fetched_at, today):
             "trailing30": trailing_rate(pts, today, 30),
             "trailing90": trailing_rate(pts, today, 90),
             "ours": proto in ours,
-            "alias": ours.get(proto, {}).get("alias"),
+            "alias": ours.get(proto, {}).get("alias") or acronym,
             "protocol_on_file": bool(doc.get("files")),
             "protocol_version": doc.get("version"),
         })
@@ -361,6 +371,7 @@ def build(protocols, history, fetched_at, today):
         "history_start": min((pts[0]["date"] for pts in history.values() if pts), default=today.isoformat()),
         "snapshot_days": len({p["date"] for pts in history.values() for p in pts}),
         "sources": {"ctsu": "https://ctsu.cancer.gov/protocol", "ctgov": "https://clinicaltrials.gov"},
+        "site_url": SITE_URL,
         "institution_label": config.get("institution_label"),
         "institution": [t["protocol"] for t in config["trials"]],
         "institution_missing": missing,
@@ -378,13 +389,36 @@ def build(protocols, history, fetched_at, today):
     return payload
 
 
-def render_dashboard(payload, out, local):
+def firebase_config():
+    """Firebase web app config from the FIREBASE_WEB_CONFIG environment variable
+    (a GitHub Actions repository variable). These values identify the project and
+    are public by design; access is enforced by Firestore rules."""
+    raw = os.environ.get("FIREBASE_WEB_CONFIG", "").strip()
+    if not raw:
+        return None
+    cfg = json.loads(raw)
+    missing = [k for k in FIREBASE_KEYS if not cfg.get(k)]
+    if missing:
+        raise ValueError(f"FIREBASE_WEB_CONFIG is missing {', '.join(missing)}")
+    return cfg
+
+
+def to_script(obj):
+    return json.dumps(obj, separators=(",", ":")).replace("</", "<\\/")
+
+
+def render_dashboard(payload, out, local, firebase=None):
     data = dict(payload, local=local)
     if not local:
+        for k in LOCAL_ONLY_KEYS:
+            data.pop(k, None)
+        data["counts"] = {k: v for k, v in payload["counts"].items() if k != "ours"}
         data["studies"] = [{k: v for k, v in s.items() if k not in LOCAL_ONLY_FIELDS} for s in payload["studies"]]
-    blob = json.dumps(data, separators=(",", ":")).replace("</", "<\\/")
+    html = (TEMPLATE.read_text()
+            .replace("/*__FIREBASE__*/null", to_script(firebase))
+            .replace("/*__DATA__*/null", to_script(data)))
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(TEMPLATE.read_text().replace("/*__DATA__*/null", blob))
+    out.write_text(html)
 
 
 def main():
@@ -405,7 +439,7 @@ def main():
         refreshed = refresh_ctgov(ncts, force=args.force_ctgov)
     payload = build(protocols, history, fetched_at, today)
     if save:
-        render_dashboard(payload, PUBLIC_SITE, local=False)
+        render_dashboard(payload, PUBLIC_SITE, local=False, firebase=firebase_config())
     if MANIFEST.exists():
         render_dashboard(payload, DASHBOARD, local=True)
     c = payload["counts"]

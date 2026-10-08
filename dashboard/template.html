@@ -10,13 +10,17 @@
   :root {
     --bg: #f5f7fa; --card: #ffffff; --ink: #1b2430; --muted: #5b6676; --line: #dfe4ea;
     --navy: #1f3a5f; --accent: #2b6cb0; --green: #2f855a; --amber: #b7791f; --red: #c53030;
-    --chip: #edf2f7; --rt: #2c5282; --rtc: #4a6fa5; --rp: #805ad5;
+    --chip: #edf2f7; --rt: #2c5282; --rtc: #4a6fa5; --rp: #805ad5; --star: #d69e2e;
   }
   * { box-sizing: border-box; }
   body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--ink); background: var(--bg); }
-  header { background: var(--navy); color: #fff; padding: 18px 28px; }
+  header { background: var(--navy); color: #fff; padding: 16px 28px; }
   header h1 { margin: 0; font-size: 22px; font-weight: 600; }
   header .sub { opacity: .85; font-size: 13px; margin-top: 4px; }
+  .head-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .account { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .gbtn { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: #1f1f1f; border: 1px solid #dadce0; border-radius: 999px; padding: 7px 14px 7px 10px; font: inherit; font-weight: 500; cursor: pointer; }
+  .gbtn:disabled { opacity: .6; cursor: progress; }
   main { max-width: 1400px; margin: 0 auto; padding: 20px 24px 40px; }
   h2 { font-size: 17px; margin: 28px 0 12px; color: var(--navy); }
   .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
@@ -25,10 +29,15 @@
   .kpi .l { color: var(--muted); font-size: 12.5px; }
   .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .card.missing { border-style: dashed; color: var(--muted); }
   .card .top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .card .top-right { display: flex; align-items: center; gap: 6px; }
   .card .name { font-weight: 650; font-size: 16px; }
   .card .proto { color: var(--muted); font-size: 12.5px; }
   .card .title { font-size: 13px; color: #333d4a; }
+  .card .x { all: unset; cursor: pointer; color: var(--muted); font-size: 19px; line-height: 1; padding: 0 4px; border-radius: 4px; }
+  .card .x:hover { color: var(--red); }
+  .card .x:focus-visible { outline: 2px solid var(--accent); }
   .metrics { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 14px; }
   .metric .mv { font-weight: 600; font-size: 15px; }
   .metric .ml { color: var(--muted); font-size: 11.5px; }
@@ -43,7 +52,23 @@
   .chip.rtc { background: #eef2f8; color: var(--rtc); }
   .chip.rp { background: #f1ebfb; color: var(--rp); }
   .chip.file { background: #e6f4ea; color: var(--green); }
+  .chip.mine { background: #fdf6e3; color: #975a16; }
   .panel { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+  .mine-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .combo { position: relative; flex: 1 1 380px; max-width: 640px; }
+  .combo input { width: 100%; font: inherit; font-size: 14px; padding: 9px 12px; border: 1px solid #c3ccd8; border-radius: 8px; }
+  .combo input:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+  #add-list { position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 4px); margin: 0; padding: 4px; list-style: none; background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px rgba(20, 30, 50, .14); max-height: 420px; overflow-y: auto; }
+  #add-list li { padding: 7px 9px; border-radius: 6px; cursor: pointer; }
+  #add-list li.act { background: #edf2f7; }
+  #add-list li.o-none { color: var(--muted); cursor: default; }
+  .o-title { font-size: 12.5px; color: #3d4756; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .save-state { color: var(--muted); font-size: 12.5px; margin: 8px 0 12px; }
+  .save-state.err { color: var(--red); }
+  .empty { grid-column: 1 / -1; color: var(--muted); border: 1px dashed #c9d2dd; border-radius: 10px; padding: 16px 18px; background: #fbfcfd; }
+  .empty p { margin: 0; }
+  .banner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center; background: #ebf4ff; border: 1px solid #bee3f8; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; font-size: 13px; }
+  .banner-actions { display: flex; gap: 6px; flex-wrap: wrap; }
   .chart-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
   @media (max-width: 1000px) { .chart-grid { grid-template-columns: 1fr; } }
   .chart-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
@@ -53,11 +78,23 @@
   .seg button.on { background: var(--navy); color: #fff; }
   .note { color: var(--muted); font-size: 12px; margin-top: 8px; }
   .canvas-wrap { position: relative; height: 330px; }
-  .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
-  .filters input, .filters select { font: inherit; font-size: 13px; padding: 6px 9px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
-  .filters input { min-width: 240px; }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+  .filters input[type=search], .filters select { font: inherit; font-size: 13px; padding: 6px 9px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
+  .filters input[type=search] { min-width: 260px; }
   .filters select { max-width: 220px; }
+  .check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 7px; background: #fff; cursor: pointer; user-select: none; }
+  .check:has(input:checked) { border-color: var(--accent); background: #ebf4ff; color: var(--navy); }
   .count { color: var(--muted); font-size: 12.5px; margin-left: auto; }
+  .pace { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; background: #fbfcfe; }
+  .pace-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+  @media (max-width: 900px) { .pace-grid { grid-template-columns: minmax(0, 1fr); } }
+  .pace h4 { margin: 2px 0 4px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .pace-list { list-style: none; margin: 0; padding: 0; }
+  .pace-list li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 8px 0; border-top: 1px solid var(--line); }
+  .pace-list li.none { display: block; color: var(--muted); font-size: 12.5px; }
+  .pi-title { font-size: 12.5px; color: #3d4756; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pi-meta { font-size: 11.5px; color: var(--muted); }
+  .pi-val { font-weight: 650; color: var(--navy); white-space: nowrap; font-size: 14px; }
   .table-wrap { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th { text-align: left; font-weight: 600; color: var(--muted); font-size: 12px; border-bottom: 2px solid var(--line); padding: 0; white-space: nowrap; }
@@ -65,70 +102,116 @@
   th button:focus-visible { outline: 2px solid var(--accent); }
   th .arrow { font-size: 10px; margin-left: 3px; }
   td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th.star-col, td.star-col { width: 30px; padding: 8px 0 8px 8px; }
   tr.row { cursor: pointer; }
   tr.row:hover td { background: #f8fafc; }
-  tr.ours td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+  tr.mine td:first-child { box-shadow: inset 3px 0 0 var(--star); }
   td.title-cell { min-width: 300px; max-width: 520px; }
   td.acc-cell { min-width: 150px; }
   tr.detail td { background: #fafbfd; font-size: 12.5px; }
   .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 6px 18px; }
   .detail-grid b { color: var(--muted); font-weight: 600; }
   a { color: var(--accent); }
-  .btn { font: inherit; font-size: 12px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--accent); background: #fff; color: var(--accent); cursor: pointer; }
+  .btn { font: inherit; font-size: 12.5px; padding: 5px 11px; border-radius: 6px; border: 1px solid var(--accent); background: #fff; color: var(--accent); cursor: pointer; }
   .btn.on { background: var(--accent); color: #fff; }
+  .btn.ghost { border-color: var(--line); color: var(--muted); }
+  .btn.light { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .7); }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .linkbtn { all: unset; cursor: pointer; color: var(--accent); font-size: 12.5px; }
+  .linkbtn:focus-visible { outline: 2px solid var(--accent); }
+  .linkbtn.strong { font-weight: 650; font-size: 13.5px; }
+  .star { all: unset; cursor: pointer; font-size: 17px; line-height: 1; color: #a0aec0; padding: 1px 3px; border-radius: 4px; }
+  .star.on, .star:hover { color: var(--star); }
+  .star:focus-visible { outline: 2px solid var(--accent); }
+  .muted { color: var(--muted); }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
   details.methods { margin-top: 26px; }
   details.methods summary { cursor: pointer; font-weight: 600; color: var(--navy); }
   details.methods li { margin: 4px 0; }
-  .warn { background: #fffaf0; border: 1px solid #f6e05e; border-radius: 8px; padding: 8px 12px; font-size: 12.5px; margin-top: 10px; }
 </style>
 </head>
 <body>
 <header>
-  <h1>CTSU Trials Dashboard</h1>
-  <div class="sub" id="sub"></div>
+  <div class="head-row">
+    <div>
+      <h1>CTSU Trials Dashboard</h1>
+      <div class="sub" id="sub"></div>
+    </div>
+    <div class="account" id="account"></div>
+  </div>
 </header>
 <main>
   <section class="kpis" id="kpis" aria-label="Summary"></section>
 
-  <h2 id="ours-h">Open at our institution</h2>
-  <section class="cards" id="ours" aria-labelledby="ours-h"></section>
-
-  <h2>Accrual over time</h2>
-  <section class="chart-grid">
-    <div class="panel">
-      <div class="chart-head">
-        <h3>Cumulative accrual</h3>
-        <div class="seg" role="group" aria-label="Y axis">
-          <button id="y-pct" class="on" aria-pressed="true">% of target</button>
-          <button id="y-n" aria-pressed="false">Patients</button>
-        </div>
+  <h2 id="mine-h">My trials</h2>
+  <section class="panel" aria-labelledby="mine-h">
+    <div id="shared"></div>
+    <div class="mine-tools">
+      <div class="combo">
+        <label for="add-q" class="sr-only">Add a trial to My trials</label>
+        <input id="add-q" type="search" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="add-list" aria-autocomplete="list"
+               placeholder="Add a trial: protocol number, NCT, acronym, or title words">
+        <ul id="add-list" role="listbox" aria-label="Matching CTSU studies" hidden></ul>
       </div>
-      <div class="canvas-wrap"><canvas id="trend" aria-label="Cumulative accrual over time"></canvas></div>
-      <div class="note" id="trend-note"></div>
+      <button class="btn" id="share" type="button">Copy share link</button>
+      <button class="btn ghost" id="clear" type="button">Clear list</button>
     </div>
-    <div class="panel">
-      <div class="chart-head"><h3>Accrual rate (patients per month)</h3></div>
-      <div class="canvas-wrap"><canvas id="rates" aria-label="Accrual rate comparison"></canvas></div>
-      <div class="note">Average since activation uses the ClinicalTrials.gov actual study start date. The recent rate appears once a week of daily CTSU snapshots exists.</div>
+    <div class="save-state" id="save-state"></div>
+    <div class="sr-only" id="announce" aria-live="polite"></div>
+    <div class="cards" id="mine"></div>
+  </section>
+
+  <section id="charts" hidden>
+    <h2>Accrual over time for My trials</h2>
+    <div class="chart-grid">
+      <div class="panel">
+        <div class="chart-head">
+          <h3>Cumulative accrual</h3>
+          <div class="seg" role="group" aria-label="Y axis">
+            <button id="y-pct" class="on" aria-pressed="true">% of target</button>
+            <button id="y-n" aria-pressed="false">Patients</button>
+          </div>
+        </div>
+        <div class="canvas-wrap"><canvas id="trend" aria-label="Cumulative accrual over time"></canvas></div>
+        <div class="note" id="trend-note"></div>
+      </div>
+      <div class="panel">
+        <div class="chart-head"><h3>Accrual rate (patients per month)</h3></div>
+        <div class="canvas-wrap" id="rates-wrap"><canvas id="rates" aria-label="Accrual rate comparison"></canvas></div>
+        <div class="note">Average since activation uses the ClinicalTrials.gov actual study start date. The recent rate appears once a week of daily CTSU snapshots exists.</div>
+      </div>
     </div>
   </section>
 
-  <h2>CTSU studies</h2>
-  <section class="panel">
+  <h2 id="explore-h">Explore CTSU studies</h2>
+  <section class="panel" aria-labelledby="explore-h">
     <div class="filters">
-      <div class="seg" role="group" aria-label="Scope" id="scope">
-        <button data-scope="rt_open" class="on">RT-related, open</button>
-        <button data-scope="rt">All RT-related</button>
-        <button data-scope="ours">Ours</button>
-        <button data-scope="all">All CTSU studies</button>
-      </div>
-      <input id="q" type="search" placeholder="Search protocol, title, NCT, disease" aria-label="Search">
-      <select id="f-lead" aria-label="Lead group"><option value="">All lead groups</option></select>
+      <input id="q" type="search" placeholder="Search protocol, title, NCT, acronym, disease" aria-label="Search studies">
+      <label class="check"><input type="checkbox" id="f-rt" checked> RT-related</label>
+      <label class="check"><input type="checkbox" id="f-open" checked> Open to accrual</label>
       <select id="f-disease" aria-label="Disease"><option value="">All diseases</option></select>
+      <select id="f-lead" aria-label="Lead group"><option value="">All lead groups</option></select>
       <select id="f-role" aria-label="RT role"><option value="">Any RT role</option></select>
       <select id="f-phase" aria-label="Phase"><option value="">Any phase</option></select>
+      <button class="linkbtn" id="reset" type="button">Reset filters</button>
       <span class="count" id="count"></span>
     </div>
+
+    <div class="pace">
+      <div class="chart-head">
+        <h3 id="pace-h">Accrual pace</h3>
+        <div class="seg" role="group" aria-label="Pace measure">
+          <button id="pace-n" class="on" aria-pressed="true">Patients per month</button>
+          <button id="pace-pct" aria-pressed="false">% of target per month</button>
+        </div>
+      </div>
+      <div class="pace-grid">
+        <div><h4>Fastest accruing</h4><ol class="pace-list" id="fast"></ol></div>
+        <div><h4>Slowest accruing</h4><ol class="pace-list" id="slow"></ol></div>
+      </div>
+      <div class="note" id="pace-note"></div>
+    </div>
+
     <div class="table-wrap">
       <table>
         <thead><tr id="thead"></tr></thead>
@@ -140,78 +223,360 @@
   <details class="methods">
     <summary>Data sources and methods</summary>
     <ul>
-      <li><b>Accrual</b> comes from the public CTSU Protocol List (<a href="https://ctsu.cancer.gov/protocol" target="_blank" rel="noopener">ctsu.cancer.gov/protocol</a>), which lists active and temporarily closed NCI trials open to cross-group participation and reports actual over planned intervention accrual. These are study-wide totals across all sites, not accrual at our institution.</li>
+      <li><b>Accrual</b> comes from the public CTSU Protocol List (<a href="https://ctsu.cancer.gov/protocol" target="_blank" rel="noopener">ctsu.cancer.gov/protocol</a>), which lists active and temporarily closed NCI trials open to cross-group participation and reports actual over planned intervention accrual. These are study-wide totals across all sites, not accrual at any one institution.</li>
       <li><b>History</b> is built from one CTSU snapshot per day, starting <span id="hist-start"></span>. CTSU does not publish past accrual, so the line from the study start date to the first snapshot is a straight-line interpolation (dashed), not observed data.</li>
       <li><b>Average rate</b> = current accrual divided by months since the actual study start date on ClinicalTrials.gov. Early ramp-up makes this lower than the current rate for most young trials. <b>Recent rate</b> = change over the last 30 days of snapshots, scaled to a month. <b>Projected target date</b> assumes the average rate continues.</li>
+      <li><b>Accrual pace</b> ranks open studies that match the explorer filters, have been open at least 6 months, and have not reached their target. <i>Patients per month</i> favors large trials; <i>% of target per month</i> adjusts for trial size.</li>
       <li><b>RT classification</b> uses ClinicalTrials.gov interventions and titles. <i>RT-focused</i>: RT named in the title. <i>RT component</i>: protocol-specified RT intervention (often part of the treatment backbone). <i>Radiopharmaceutical</i>: therapeutic isotope (for example Lu-177, Ac-225) without external-beam RT. Imaging tracers and MUGA scans are excluded. Manual overrides are listed in the evidence for each study.</li>
+      <li id="m-sync"></li>
     </ul>
   </details>
 </main>
 
 <script>
 const DATA = /*__DATA__*/null;
+const FIREBASE = /*__FIREBASE__*/null;
+const FIREBASE_SDK = "https://www.gstatic.com/firebasejs/13.0.0";
 const S = DATA.studies;
 const BY = Object.fromEntries(S.map(s => [s.protocol, s]));
-const OURS = DATA.institution.map(p => BY[p]).filter(Boolean);
 const PALETTE = ["#2b6cb0", "#c05621", "#2f855a", "#805ad5", "#b83280", "#2c7a7b", "#975a16", "#4a5568", "#e53e3e", "#319795"];
-const DAY = 86400000;
+const STORE_KEY = DATA.local ? "ctsu-dashboard:local:my-trials" : "ctsu-dashboard:my-trials";
+const PACE_MIN_MONTHS = 6, PACE_N = 5;
+const GOOGLE_G = '<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
 
+const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+const norm = v => String(v ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
 const toDate = iso => iso ? new Date(iso.length === 7 ? iso + "-01T00:00:00" : iso.length === 10 ? iso + "T00:00:00" : iso) : null;
 const fmtDate = iso => iso ? toDate(iso).toLocaleDateString("en-US", {year: "numeric", month: "short", day: "numeric"}) : "";
 const fmtMonth = iso => iso ? toDate(iso).toLocaleDateString("en-US", {year: "numeric", month: "short"}) : "";
 const num = (v, d = 1) => v == null ? "" : Number(v).toLocaleString("en-US", {maximumFractionDigits: d});
+const label = s => s.alias ? `${s.alias} (${s.protocol})` : s.protocol;
 const roleChip = r => !r ? "" : `<span class="chip ${r === "RT-focused" ? "rt" : r === "RT component" ? "rtc" : r === "Radiopharmaceutical" ? "rp" : ""}">${esc(r)}</span>`;
-const statusChip = st => `<span class="chip ${st === "Active" ? "active" : "closed"}">${esc(st === "Active" ? "Active" : st)}</span>`;
+const statusChip = st => `<span class="chip ${st === "Active" ? "active" : "closed"}">${esc(st === "Active" ? "Open" : st)}</span>`;
 const ctgov = nct => nct ? `https://clinicaltrials.gov/study/${nct}` : null;
 const accBar = (s, big) => s.target ? `<div class="bar${big ? " big" : ""}" title="${s.pct}% of target"><span style="width:${Math.min(100, s.pct || 0)}%"></span></div><div class="acc-text">${num(s.accrual, 0)} / ${num(s.target, 0)} (${num(s.pct)}%)</div>` : `<div class="acc-text">${num(s.accrual, 0)}</div>`;
+const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} };
 
-// Header and KPIs
-document.getElementById("sub").textContent =
-  `CTSU accrual snapshot ${new Date(DATA.snapshot_fetched_at).toLocaleString("en-US", {dateStyle: "medium", timeStyle: "short"})}. Study-wide accrual from the public CTSU Protocol List; trial details from ClinicalTrials.gov.${DATA.local ? " Local copy with protocol status." : ""}`;
-document.getElementById("hist-start").textContent = fmtDate(DATA.history_start);
-const c = DATA.counts;
-const oursAcc = OURS.reduce((a, s) => a + (s.accrual || 0), 0);
-document.getElementById("kpis").innerHTML = [
-  [c.all, "Studies on the CTSU list"],
-  [c.active, "Actively accruing"],
-  [c.rt_related, "RT-related studies"],
-  [c.rt_open, "RT-related and open"],
-  [c.ours, DATA.institution_label || "Open at our institution"],
-].map(([v, l]) => `<div class="kpi"><div class="v">${num(v, 0)}</div><div class="l">${esc(l)}</div></div>`).join("");
+// ------------------------------------------------------------ My trials store
+const sync = {available: !!FIREBASE && !DATA.local, api: null, user: null, resolved: false};
+let saveMsg = null, saveTimer = null, pushTimer = null;
 
-// Institution cards
-function rateText(s) {
-  return s.trailing30 ? `${num(s.trailing30.per_month)} /mo` : "Pending";
+const store = {
+  list: [], remote: null, dirty: false,
+  load() {
+    let saved = null;
+    try { saved = JSON.parse(lsGet(STORE_KEY)); } catch (e) {}
+    this.list = Array.isArray(saved) ? saved.filter(p => typeof p === "string") : DATA.local ? [...(DATA.institution || [])] : [];
+  },
+  has(p) { return this.list.includes(p); },
+  set(list, {push = true, user = true} = {}) {
+    this.list = [...new Set(list)];
+    lsSet(STORE_KEY, JSON.stringify(this.list));
+    if (user && sync.available && !sync.resolved) this.dirty = true;
+    if (push && this.remote) pushRemote();
+    refreshAll();
+  },
+  add(p) { if (!this.has(p)) this.set([...this.list, p]); },
+  remove(p) { this.set(this.list.filter(x => x !== p)); },
+  toggle(p) { this.has(p) ? this.remove(p) : this.add(p); },
+};
+
+function flash(text, {error = false, ms = 0} = {}) {
+  saveMsg = {text, error};
+  clearTimeout(saveTimer);
+  if (ms) saveTimer = setTimeout(() => { saveMsg = null; renderSaveState(); }, ms);
+  renderSaveState();
 }
-document.getElementById("ours").innerHTML = OURS.map(s => `
-  <article class="card">
+
+function renderSaveState() {
+  const el = $("save-state");
+  let text;
+  if (saveMsg) text = saveMsg.text;
+  else if (sync.user) text = `Synced to your Google account (${sync.user.email}).`;
+  else if (sync.available) text = "Saved in this browser. Sign in with Google to keep your list on other devices.";
+  else text = DATA.local ? "Saved in this browser (local copy)." : "Saved in this browser.";
+  el.textContent = text;
+  el.classList.toggle("err", !!(saveMsg && saveMsg.error));
+}
+
+function pushRemote() {
+  flash("Saving to your Google account...");
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(() => {
+    const save = store.remote;
+    if (!save) return;
+    save(store.list)
+      .then(() => { saveMsg = null; renderSaveState(); })
+      .catch(err => { console.warn(err); flash("Could not sync to your Google account. Your list is still saved in this browser.", {error: true}); });
+  }, 400);
+}
+
+function onSignedIn(user, cloud, save) {
+  sync.user = user;
+  sync.resolved = true;
+  const flag = `${STORE_KEY}:synced:${user.uid}`;
+  const merge = !lsGet(flag) || store.dirty;
+  lsSet(flag, "1");
+  store.dirty = false;
+  store.remote = save;
+  const next = [...new Set(cloud == null ? store.list : merge ? [...cloud, ...store.list] : cloud)];
+  const changed = cloud == null || next.join() !== cloud.join();
+  renderAccount();
+  store.set(next, {push: changed, user: false});
+}
+
+function onSignedOut() {
+  if (sync.user) lsSet(`${STORE_KEY}:synced:${sync.user.uid}`, null);
+  sync.user = null;
+  sync.resolved = true;
+  store.remote = null;
+  store.dirty = false;
+  renderAccount();
+  renderSaveState();
+}
+
+function renderAccount() {
+  const el = $("account");
+  if (!sync.available) { el.innerHTML = ""; return; }
+  if (sync.user) {
+    el.innerHTML = `<span>${esc(sync.user.email)}</span><button class="btn light" id="signout" type="button">Sign out</button>`;
+    $("signout").onclick = () => sync.api.signOut();
+  } else {
+    el.innerHTML = `<button class="gbtn" id="signin" type="button"${sync.api ? "" : " disabled"}>${GOOGLE_G}<span>Sign in with Google</span></button>`;
+    $("signin").onclick = () => sync.api.signIn().catch(err => {
+      if (!["auth/popup-closed-by-user", "auth/cancelled-popup-request"].includes(err.code)) {
+        console.warn(err);
+        flash(`Google sign-in failed (${err.code || err.message}).`, {error: true, ms: 8000});
+      }
+    });
+  }
+}
+
+async function initFirebase() {
+  try {
+    const [{initializeApp}, A, F] = await Promise.all(["app", "auth", "firestore"].map(m => import(`${FIREBASE_SDK}/firebase-${m}.js`)));
+    const app = initializeApp(FIREBASE);
+    const auth = A.getAuth(app), db = F.getFirestore(app);
+    sync.api = {
+      signIn: () => A.signInWithPopup(auth, new A.GoogleAuthProvider()),
+      signOut: () => A.signOut(auth),
+    };
+    renderAccount();
+    A.onAuthStateChanged(auth, async user => {
+      if (!user) { onSignedOut(); return; }
+      const ref = F.doc(db, "users", user.uid);
+      try {
+        const snap = await F.getDoc(ref);
+        const cloud = snap.exists() && Array.isArray(snap.data().trials) ? snap.data().trials : null;
+        onSignedIn({uid: user.uid, email: user.email || user.displayName || "signed in"}, cloud,
+          list => F.setDoc(ref, {trials: list, updated: F.serverTimestamp()}));
+      } catch (err) {
+        console.warn(err);
+        sync.user = {uid: user.uid, email: user.email || "signed in"};
+        sync.resolved = true;
+        renderAccount();
+        flash("Signed in, but your saved list could not be loaded. Changes stay in this browser.", {error: true});
+      }
+    });
+  } catch (err) {
+    console.warn("Google sign-in unavailable", err);
+    sync.available = false;
+    renderAccount();
+    renderSaveState();
+  }
+}
+
+// ---------------------------------------------------------------- Shared links
+let sharedList = null;
+
+function readSharedLink() {
+  const raw = new URLSearchParams(location.search).get("trials");
+  if (raw == null) return;
+  history.replaceState(null, "", location.pathname + location.hash);
+  const list = [...new Set(raw.split(",").map(x => x.trim()).filter(x => /^[A-Za-z0-9._-]{2,40}$/.test(x)))];
+  if (list.length) sharedList = list;
+}
+
+function shareUrl() {
+  return `${DATA.site_url}?trials=${store.list.map(encodeURIComponent).join(",")}`;
+}
+
+function renderShared() {
+  const el = $("shared");
+  const fresh = sharedList ? sharedList.filter(p => !store.has(p)) : [];
+  if (!fresh.length) { sharedList = null; el.innerHTML = ""; return; }
+  const names = sharedList.map(p => BY[p] ? label(BY[p]) : `${p} (not on the CTSU list)`);
+  el.innerHTML = `<div class="banner">
+      <div><b>Shared list (${sharedList.length} ${sharedList.length === 1 ? "trial" : "trials"}):</b> ${names.map(esc).join(", ")}</div>
+      <div class="banner-actions">
+        <button class="btn on" id="sh-add" type="button">${store.list.length ? `Add ${fresh.length} to My trials` : "Save as My trials"}</button>
+        ${store.list.length ? '<button class="btn" id="sh-replace" type="button">Replace My trials</button>' : ""}
+        <button class="btn ghost" id="sh-dismiss" type="button">Dismiss</button>
+      </div>
+    </div>`;
+  const done = list => { sharedList = null; store.set(list); };
+  $("sh-add").onclick = () => done([...store.list, ...sharedList]);
+  if ($("sh-replace")) $("sh-replace").onclick = () => done([...sharedList]);
+  $("sh-dismiss").onclick = () => { sharedList = null; renderShared(); };
+}
+
+// ------------------------------------------------------------- Add-trial search
+const addQ = $("add-q"), addList = $("add-list");
+let opts = [], active = -1;
+
+function searchStudies(q) {
+  const nq = norm(q);
+  const toks = q.toLowerCase().split(/\s+/).filter(Boolean);
+  if (!nq) return [];
+  return S.map(s => {
+    const np = norm(s.protocol), na = norm(s.alias), nn = norm(s.nct);
+    let score = 0;
+    if (np === nq || na === nq || nn === nq) score = 100;
+    else if (np.startsWith(nq) || np.endsWith(nq)) score = 85;
+    else if (np.includes(nq)) score = 75;
+    else if (na && na.includes(nq)) score = 70;
+    else if (nq.length >= 4 && nn.includes(nq)) score = 65;
+    else if (toks.every(t => [s.protocol, s.alias, s.nct, s.title, s.disease, s.lead].join(" ").toLowerCase().includes(t))) score = 20;
+    if (score) score += (s.rt_related ? 3 : 0) + (s.status === "Active" ? 2 : 0);
+    return [score, s];
+  }).filter(x => x[0] > 0)
+    .sort((a, b) => b[0] - a[0] || a[1].protocol.localeCompare(b[1].protocol, undefined, {numeric: true}))
+    .slice(0, 8).map(x => x[1]);
+}
+
+function renderOpts() {
+  const q = addQ.value.trim();
+  if (!q) { closeOpts(); return; }
+  opts = searchStudies(q);
+  active = opts.length ? 0 : -1;
+  addList.innerHTML = opts.length ? opts.map((s, i) => `
+    <li role="option" id="opt-${i}" data-i="${i}" aria-selected="${i === active}" class="${i === active ? "act" : ""}">
+      <div><b>${esc(s.protocol)}</b>${s.alias ? ` <span class="muted">${esc(s.alias)}</span>` : ""} ${statusChip(s.status)} ${roleChip(s.rt_role)}
+        ${store.has(s.protocol) ? '<span class="chip mine">In My trials</span>' : ""}</div>
+      <div class="o-title">${esc(s.lead)} · Phase ${esc(s.phase)} · ${esc(s.title)}</div>
+    </li>`).join("") : `<li class="o-none">No CTSU study matches "${esc(q)}"</li>`;
+  addList.hidden = false;
+  addQ.setAttribute("aria-expanded", "true");
+  if (active >= 0) addQ.setAttribute("aria-activedescendant", `opt-${active}`); else addQ.removeAttribute("aria-activedescendant");
+}
+
+function setActive(i) {
+  if (!opts.length) return;
+  active = Math.max(0, Math.min(opts.length - 1, i));
+  addList.querySelectorAll("li[data-i]").forEach(li => {
+    const on = +li.dataset.i === active;
+    li.classList.toggle("act", on);
+    li.setAttribute("aria-selected", on);
+    if (on) li.scrollIntoView({block: "nearest"});
+  });
+  addQ.setAttribute("aria-activedescendant", `opt-${active}`);
+}
+
+function closeOpts() {
+  addList.hidden = true;
+  addQ.setAttribute("aria-expanded", "false");
+  addQ.removeAttribute("aria-activedescendant");
+}
+
+function pick(i) {
+  const s = opts[i];
+  if (!s) return;
+  if (store.has(s.protocol)) $("announce").textContent = `${label(s)} is already in My trials.`;
+  else { store.add(s.protocol); $("announce").textContent = `Added ${label(s)} to My trials.`; }
+  addQ.value = "";
+  closeOpts();
+  addQ.focus();
+}
+
+addQ.addEventListener("input", renderOpts);
+addQ.addEventListener("focus", () => { if (addQ.value.trim()) renderOpts(); });
+addQ.addEventListener("blur", () => setTimeout(closeOpts, 150));
+addQ.addEventListener("keydown", e => {
+  if (e.key === "ArrowDown") { e.preventDefault(); addList.hidden ? renderOpts() : setActive(active + 1); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); setActive(active - 1); }
+  else if (e.key === "Enter" && !addList.hidden && active >= 0) { e.preventDefault(); pick(active); }
+  else if (e.key === "Escape") closeOpts();
+});
+addList.addEventListener("mousedown", e => {
+  const li = e.target.closest("li[data-i]");
+  e.preventDefault();
+  if (li) pick(+li.dataset.i);
+});
+
+$("share").onclick = async () => {
+  const url = shareUrl();
+  try { await navigator.clipboard.writeText(url); flash("Share link copied. It contains only the protocol numbers in your list.", {ms: 6000}); }
+  catch (e) { window.prompt("Copy this link:", url); }
+};
+$("clear").onclick = () => {
+  const n = store.list.length;
+  if (n && confirm(`Remove all ${n} ${n === 1 ? "trial" : "trials"} from My trials?`)) store.set([]);
+};
+
+// ------------------------------------------------------------ My trials cards
+function colors() {
+  const out = {};
+  store.list.filter(p => BY[p]).forEach((p, i) => { out[p] = PALETTE[i % PALETTE.length]; });
+  return out;
+}
+
+const starBtn = p => {
+  const on = store.has(p);
+  return `<button type="button" class="star${on ? " on" : ""}" data-star="${esc(p)}" aria-pressed="${on}" aria-label="${on ? `Remove ${esc(p)} from` : `Add ${esc(p)} to`} My trials" title="${on ? "In My trials (click to remove)" : "Add to My trials"}">${on ? "★" : "☆"}</button>`;
+};
+
+function card(s, color) {
+  const recent = s.trailing30 ? `${num(s.trailing30.per_month)} /mo` : "Pending";
+  return `
+  <article class="card" style="border-left: 4px solid ${color}">
     <div class="top">
       <div><div class="name">${esc(s.alias || s.protocol)}</div><div class="proto">${esc(s.protocol)} · ${esc(s.lead)} · Phase ${esc(s.phase)}</div></div>
-      ${statusChip(s.status)}
+      <div class="top-right">${statusChip(s.status)}<button class="x" type="button" data-remove="${esc(s.protocol)}" aria-label="Remove ${esc(s.protocol)} from My trials" title="Remove from My trials">×</button></div>
     </div>
     <div class="title">${esc(s.title)}</div>
     <div>${accBar(s, true)}</div>
     <div class="metrics">
       <div class="metric"><div class="mv">${s.avg_rate != null ? num(s.avg_rate) + " /mo" : "n/a"}</div><div class="ml">Average since activation</div></div>
-      <div class="metric"><div class="mv">${rateText(s)}</div><div class="ml">Recent rate (last 30 days)</div></div>
-      <div class="metric"><div class="mv">${s.months_open != null ? num(s.months_open) + " mo" : "n/a"}</div><div class="ml">Open since ${fmtMonth(s.start_date)}</div></div>
+      <div class="metric"><div class="mv">${recent}</div><div class="ml">Recent rate (last 30 days)</div></div>
+      <div class="metric"><div class="mv">${s.months_open != null ? num(s.months_open) + " mo" : "n/a"}</div><div class="ml">Open since ${fmtMonth(s.start_date) || "n/a"}</div></div>
       <div class="metric"><div class="mv">${s.projected_completion ? fmtMonth(s.projected_completion) : "n/a"}</div><div class="ml">Projected target date at average rate</div></div>
     </div>
     <div>${roleChip(s.rt_role)} ${DATA.local && s.protocol_on_file ? '<span class="chip file">Protocol on file</span>' : ""}
       ${s.nct ? `<a href="${ctgov(s.nct)}" target="_blank" rel="noopener" style="font-size:12.5px;margin-left:6px">${esc(s.nct)}</a>` : ""}</div>
-  </article>`).join("") || "<p>No institution trials configured.</p>";
-if (DATA.institution_missing.length) {
-  document.getElementById("ours").insertAdjacentHTML("afterend",
-    `<div class="warn">Not on the current CTSU list (closed or renamed): ${DATA.institution_missing.map(esc).join(", ")}</div>`);
+  </article>`;
 }
 
-// Charts
-let yMode = "pct";
-const plotted = new Set(OURS.map(s => s.protocol));
-let trendChart = null, rateChart = null;
+function renderMine() {
+  $("share").disabled = $("clear").disabled = !store.list.length;
+  if (!store.list.length) {
+    $("mine").innerHTML = `<div class="empty"><p><b>No trials selected.</b> Search above to add trials one at a time, for example the trials open at your institution, or click ☆ next to any study below. The fastest and slowest accruing open studies are shown in the explorer as examples.</p></div>`;
+    return;
+  }
+  const col = colors();
+  $("mine").innerHTML = store.list.map(p => BY[p] ? card(BY[p], col[p]) : `
+    <article class="card missing">
+      <div class="top"><div class="name">${esc(p)}</div><div class="top-right"><button class="x" type="button" data-remove="${esc(p)}" aria-label="Remove ${esc(p)} from My trials">×</button></div></div>
+      <div>Not on the current CTSU list (closed to accrual, renamed, or not a CTSU study).</div>
+    </article>`).join("");
+}
 
-function seriesFor(s, i) {
+function renderKpis() {
+  const c = DATA.counts;
+  $("kpis").innerHTML = [
+    [c.all, "Studies on the CTSU list"],
+    [c.active, "Open to accrual"],
+    [c.rt_related, "RT-related studies"],
+    [c.rt_open, "RT-related and open"],
+    [store.list.length, "In My trials"],
+  ].map(([v, l]) => `<div class="kpi"><div class="v">${num(v, 0)}</div><div class="l">${esc(l)}</div></div>`).join("");
+}
+
+// ------------------------------------------------------------------- Charts
+let yMode = "pct", trendChart = null, rateChart = null;
+
+function seriesFor(s, color) {
   const pts = (DATA.history[s.protocol] || []).filter(p => p[1] != null);
   const val = (acc, tgt) => yMode === "pct" ? (tgt ? +(100 * acc / tgt).toFixed(2) : null) : acc;
   const data = [];
@@ -221,26 +586,28 @@ function seriesFor(s, i) {
     anchored = true;
   }
   pts.forEach(p => data.push({x: toDate(p[0]).getTime(), y: val(p[1], p[2])}));
-  const color = PALETTE[i % PALETTE.length];
   return {
-    label: s.alias ? `${s.alias} (${s.protocol})` : s.protocol,
-    data, borderColor: color, backgroundColor: color, borderWidth: 2, tension: 0,
+    label: label(s), data, borderColor: color, backgroundColor: color, borderWidth: 2, tension: 0,
     pointRadius: ctx => (anchored && ctx.dataIndex === 0) ? 3 : 2.5,
     segment: {borderDash: ctx => (anchored && ctx.p0DataIndex === 0) ? [6, 5] : undefined},
   };
 }
 
-function drawTrend() {
+function drawCharts() {
+  const list = store.list.map(p => BY[p]).filter(Boolean);
+  $("charts").hidden = !list.length;
+  if (trendChart) trendChart.destroy();
+  if (rateChart) rateChart.destroy();
+  trendChart = rateChart = null;
+  if (!list.length) return;
   if (typeof Chart === "undefined") {
-    document.getElementById("trend-note").textContent = "Charts need an internet connection to load the Chart.js library.";
+    $("trend-note").textContent = "Charts need an internet connection to load the Chart.js library.";
     return;
   }
-  const list = [...plotted].map(p => BY[p]).filter(Boolean);
-  const datasets = list.map(seriesFor);
-  if (trendChart) trendChart.destroy();
-  trendChart = new Chart(document.getElementById("trend"), {
+  const col = colors();
+  trendChart = new Chart($("trend"), {
     type: "line",
-    data: {datasets},
+    data: {datasets: list.map(s => seriesFor(s, col[s.protocol]))},
     options: {
       maintainAspectRatio: false, animation: false, parsing: false,
       interaction: {mode: "nearest", intersect: false},
@@ -258,15 +625,11 @@ function drawTrend() {
     },
   });
   const n = DATA.snapshot_days;
-  document.getElementById("trend-note").textContent =
-    `Solid lines: daily CTSU snapshots (${n === 1 ? "first snapshot taken " + fmtDate(DATA.history_start) : n + " snapshots since " + fmtDate(DATA.history_start)}). Dashed: straight line from study start to first snapshot. Add other studies from the table below.`;
-}
+  $("trend-note").textContent =
+    `Solid lines: daily CTSU snapshots (${n === 1 ? "first snapshot taken " + fmtDate(DATA.history_start) : n + " snapshots since " + fmtDate(DATA.history_start)}). Dashed: straight line from study start to first snapshot.`;
 
-function drawRates() {
-  if (typeof Chart === "undefined") return;
-  const list = OURS;
-  if (rateChart) rateChart.destroy();
-  rateChart = new Chart(document.getElementById("rates"), {
+  $("rates-wrap").style.height = Math.max(330, 80 + 34 * list.length) + "px";
+  rateChart = new Chart($("rates"), {
     type: "bar",
     data: {
       labels: list.map(s => s.alias || s.protocol),
@@ -285,16 +648,13 @@ function drawRates() {
 
 function setY(mode) {
   yMode = mode;
-  document.getElementById("y-pct").classList.toggle("on", mode === "pct");
-  document.getElementById("y-n").classList.toggle("on", mode === "n");
-  document.getElementById("y-pct").setAttribute("aria-pressed", mode === "pct");
-  document.getElementById("y-n").setAttribute("aria-pressed", mode === "n");
-  drawTrend();
+  [["y-pct", "pct"], ["y-n", "n"]].forEach(([id, m]) => { $(id).classList.toggle("on", mode === m); $(id).setAttribute("aria-pressed", mode === m); });
+  drawCharts();
 }
-document.getElementById("y-pct").onclick = () => setY("pct");
-document.getElementById("y-n").onclick = () => setY("n");
+$("y-pct").onclick = () => setY("pct");
+$("y-n").onclick = () => setY("n");
 
-// Table
+// ------------------------------------------------------------------ Explorer
 const COLS = [
   {k: "protocol", l: "Protocol"},
   {k: "lead", l: "Lead"},
@@ -307,10 +667,12 @@ const COLS = [
   {k: "start_date", l: "Start"},
   {k: "projected_completion", l: "Projected"},
 ];
-const state = {scope: "rt_open", q: "", lead: "", disease: "", role: "", phase: "", sort: "pct", dir: -1, open: new Set()};
+const DEFAULTS = {q: "", rt: true, openOnly: true, disease: "", lead: "", role: "", phase: ""};
+const state = {...DEFAULTS, sort: "pct", dir: -1, expanded: new Set()};
+let paceMode = "n";
 
 function fillSelect(id, values) {
-  const el = document.getElementById(id);
+  const el = $(id);
   [...new Set(values)].filter(Boolean).sort().forEach(v => el.insertAdjacentHTML("beforeend", `<option>${esc(v)}</option>`));
 }
 fillSelect("f-lead", S.map(s => s.lead));
@@ -318,31 +680,66 @@ fillSelect("f-disease", S.flatMap(s => (s.disease || "").split(";").map(x => x.t
 fillSelect("f-role", S.map(s => s.rt_role));
 fillSelect("f-phase", S.map(s => s.phase));
 
-function rows() {
+function matches(s, ignoreStatus = false) {
   const q = state.q.toLowerCase();
-  let r = S.filter(s =>
-    (state.scope === "all" ||
-     (state.scope === "rt" && s.rt_related) ||
-     (state.scope === "rt_open" && s.rt_related && s.status === "Active") ||
-     (state.scope === "ours" && s.ours)) &&
+  return (!state.rt || s.rt_related) &&
+    (ignoreStatus || !state.openOnly || s.status === "Active") &&
     (!state.lead || s.lead === state.lead) &&
     (!state.disease || (s.disease || "").split(";").map(x => x.trim()).includes(state.disease)) &&
     (!state.role || s.rt_role === state.role) &&
     (!state.phase || s.phase === state.phase) &&
-    (!q || [s.protocol, s.title, s.nct, s.disease, s.lead, s.alias].join(" ").toLowerCase().includes(q)));
+    (!q || [s.protocol, s.title, s.nct, s.disease, s.lead, s.alias].join(" ").toLowerCase().includes(q));
+}
+
+function rows() {
   const k = state.sort, d = state.dir;
-  r.sort((a, b) => {
+  return S.filter(s => matches(s)).sort((a, b) => {
     const x = a[k], y = b[k];
     if (x == null && y == null) return 0;
     if (x == null) return 1;
     if (y == null) return -1;
     return (typeof x === "number" ? x - y : String(x).localeCompare(String(y), undefined, {numeric: true})) * d;
   });
-  return r;
+}
+
+function scopeText() {
+  const custom = state.q || state.disease || state.lead || state.role || state.phase;
+  const kind = state.rt ? "RT-related studies" : "studies";
+  return custom ? `open ${kind} matching your filters` : `open ${kind}`;
+}
+
+const paceValue = s => paceMode === "n" ? s.avg_rate : s.pct / s.months_open;
+
+function paceItem(s) {
+  const v = paceMode === "n" ? `${num(s.avg_rate)} /mo` : `${num(paceValue(s), 2)}% /mo`;
+  return `<li>
+    ${starBtn(s.protocol)}
+    <div>
+      <button class="linkbtn strong" type="button" data-show="${esc(s.protocol)}">${esc(s.protocol)}</button>${s.alias ? ` <span class="muted">${esc(s.alias)}</span>` : ""} ${roleChip(s.rt_role)}
+      <div class="pi-title" title="${esc(s.title)}">${esc(s.title)}</div>
+      <div class="pi-meta">${esc(s.lead)} · Phase ${esc(s.phase)} · ${num(s.accrual, 0)}${s.target ? ` of ${num(s.target, 0)} (${num(s.pct)}%)` : ""} in ${num(s.months_open)} months</div>
+    </div>
+    <div class="pi-val">${v}</div>
+  </li>`;
+}
+
+function renderPace() {
+  const elig = S.filter(s => matches(s, true) && s.status === "Active" && s.avg_rate != null &&
+    s.months_open >= PACE_MIN_MONTHS && !(s.target && s.accrual >= s.target) && (paceMode === "n" || s.pct != null));
+  elig.sort((a, b) => paceValue(b) - paceValue(a));
+  const nFast = Math.min(PACE_N, Math.ceil(elig.length / 2));
+  const fast = elig.slice(0, nFast);
+  const slow = elig.slice(nFast).slice(-PACE_N).reverse();
+  const none = '<li class="none">No eligible studies for these filters.</li>';
+  $("fast").innerHTML = fast.map(paceItem).join("") || none;
+  $("slow").innerHTML = slow.map(paceItem).join("") || none;
+  const t = scopeText();
+  $("pace-h").textContent = `Accrual pace: ${t}`;
+  $("pace-note").textContent = `Average accrual since activation, ranked among ${elig.length} ${t} that have been accruing at least ${PACE_MIN_MONTHS} months and are below target. Click ☆ to add a study to My trials.`;
 }
 
 function renderHead() {
-  document.getElementById("thead").innerHTML = COLS.map(col =>
+  $("thead").innerHTML = `<th class="star-col"><span class="sr-only">In My trials</span></th>` + COLS.map(col =>
     `<th aria-sort="${state.sort === col.k ? (state.dir > 0 ? "ascending" : "descending") : "none"}"><button data-k="${col.k}">${col.l}<span class="arrow">${state.sort === col.k ? (state.dir > 0 ? "▲" : "▼") : ""}</span></button></th>`).join("");
   document.querySelectorAll("#thead button").forEach(b => b.onclick = () => {
     const k = b.dataset.k;
@@ -354,7 +751,8 @@ function renderHead() {
 function detailRow(s) {
   const ev = (s.rt_evidence || []).map(esc).join("<br>") || "None";
   const t30 = s.trailing30 ? `${num(s.trailing30.per_month)} /mo (+${s.trailing30.delta} over ${s.trailing30.days} days)` : "Pending (needs 7+ days of snapshots)";
-  return `<tr class="detail"><td colspan="${COLS.length}">
+  const on = store.has(s.protocol);
+  return `<tr class="detail"><td colspan="${COLS.length + 1}">
     <div class="detail-grid">
       <div><b>NCT</b><br>${s.nct ? `<a href="${ctgov(s.nct)}" target="_blank" rel="noopener">${esc(s.nct)}</a>` : "n/a"}</div>
       <div><b>Disease</b><br>${esc(s.disease)}</div>
@@ -366,17 +764,18 @@ function detailRow(s) {
       ${DATA.local ? `<div><b>Protocol document</b><br>${s.protocol_on_file ? "On file locally" + (s.protocol_version ? ", version " + esc(s.protocol_version) : "") : "Not downloaded"}</div>` : ""}
       <div style="grid-column: 1 / -1"><b>RT evidence</b><br>${ev}</div>
     </div>
-    <div style="margin-top:8px"><button class="btn${plotted.has(s.protocol) ? " on" : ""}" data-plot="${esc(s.protocol)}">${plotted.has(s.protocol) ? "Remove from chart" : "Add to accrual chart"}</button></div>
+    <div style="margin-top:8px"><button class="btn${on ? " on" : ""}" type="button" data-star="${esc(s.protocol)}">${on ? "Remove from My trials" : "Add to My trials"}</button></div>
   </td></tr>`;
 }
 
 function render() {
   renderHead();
   const r = rows();
-  document.getElementById("count").textContent = `${r.length} ${r.length === 1 ? "study" : "studies"}`;
-  document.getElementById("tbody").innerHTML = r.map(s => `
-    <tr class="row${s.ours ? " ours" : ""}" data-p="${esc(s.protocol)}" tabindex="0" aria-expanded="${state.open.has(s.protocol)}">
-      <td><b>${esc(s.protocol)}</b>${s.alias ? `<div class="proto">${esc(s.alias)}</div>` : ""}</td>
+  $("count").textContent = `${r.length} ${r.length === 1 ? "study" : "studies"}`;
+  $("tbody").innerHTML = r.map(s => `
+    <tr class="row${store.has(s.protocol) ? " mine" : ""}" data-p="${esc(s.protocol)}" tabindex="0" aria-expanded="${state.expanded.has(s.protocol)}">
+      <td class="star-col">${starBtn(s.protocol)}</td>
+      <td><b>${esc(s.protocol)}</b>${s.alias ? `<div class="muted" style="font-size:12px">${esc(s.alias)}</div>` : ""}</td>
       <td>${esc(s.lead)}</td>
       <td>${esc(s.phase)}</td>
       <td class="title-cell">${esc(s.title)}</td>
@@ -386,32 +785,86 @@ function render() {
       <td>${s.avg_rate != null ? num(s.avg_rate) : ""}</td>
       <td>${fmtMonth(s.start_date)}</td>
       <td>${fmtMonth(s.projected_completion)}</td>
-    </tr>${state.open.has(s.protocol) ? detailRow(s) : ""}`).join("");
+    </tr>${state.expanded.has(s.protocol) ? detailRow(s) : ""}`).join("") ||
+    `<tr><td colspan="${COLS.length + 1}" class="muted">No studies match these filters.</td></tr>`;
   document.querySelectorAll("tr.row").forEach(tr => {
-    const toggle = () => { const p = tr.dataset.p; state.open.has(p) ? state.open.delete(p) : state.open.add(p); render(); };
-    tr.onclick = toggle;
-    tr.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } };
+    const toggle = () => { const p = tr.dataset.p; state.expanded.has(p) ? state.expanded.delete(p) : state.expanded.add(p); render(); };
+    tr.onclick = e => { if (!e.target.closest("button, a")) toggle(); };
+    tr.onkeydown = e => { if (e.target === tr && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); toggle(); } };
   });
-  document.querySelectorAll("[data-plot]").forEach(b => b.onclick = e => {
-    e.stopPropagation();
-    const p = b.dataset.plot;
-    plotted.has(p) ? plotted.delete(p) : plotted.add(p);
-    drawTrend(); render();
-  });
+  renderPace();
 }
 
-document.querySelectorAll("#scope button").forEach(b => b.onclick = () => {
-  state.scope = b.dataset.scope;
-  document.querySelectorAll("#scope button").forEach(x => x.classList.toggle("on", x === b));
+function showInTable(p) {
+  if (!S.some(s => s.protocol === p && matches(s))) {
+    Object.assign(state, DEFAULTS, {rt: false, openOnly: false, q: p});
+    syncFilterInputs();
+  }
+  state.expanded.add(p);
   render();
-});
-document.getElementById("q").oninput = e => { state.q = e.target.value; render(); };
-[["f-lead", "lead"], ["f-disease", "disease"], ["f-role", "role"], ["f-phase", "phase"]].forEach(([id, k]) =>
-  document.getElementById(id).onchange = e => { state[k] = e.target.value; render(); });
+  const tr = document.querySelector(`tr.row[data-p="${CSS.escape(p)}"]`);
+  if (tr) { tr.scrollIntoView({block: "center", behavior: "smooth"}); tr.focus({preventScroll: true}); }
+}
 
-drawTrend();
-drawRates();
-render();
+function syncFilterInputs() {
+  $("q").value = state.q;
+  $("f-rt").checked = state.rt;
+  $("f-open").checked = state.openOnly;
+  [["f-disease", "disease"], ["f-lead", "lead"], ["f-role", "role"], ["f-phase", "phase"]].forEach(([id, k]) => { $(id).value = state[k]; });
+}
+
+$("q").oninput = e => { state.q = e.target.value; render(); };
+$("f-rt").onchange = e => { state.rt = e.target.checked; render(); };
+$("f-open").onchange = e => { state.openOnly = e.target.checked; render(); };
+[["f-disease", "disease"], ["f-lead", "lead"], ["f-role", "role"], ["f-phase", "phase"]].forEach(([id, k]) =>
+  $(id).onchange = e => { state[k] = e.target.value; render(); });
+$("reset").onclick = () => { Object.assign(state, DEFAULTS); syncFilterInputs(); render(); };
+
+function setPace(mode) {
+  paceMode = mode;
+  [["pace-n", "n"], ["pace-pct", "pct"]].forEach(([id, m]) => { $(id).classList.toggle("on", mode === m); $(id).setAttribute("aria-pressed", mode === m); });
+  renderPace();
+}
+$("pace-n").onclick = () => setPace("n");
+$("pace-pct").onclick = () => setPace("pct");
+
+document.addEventListener("click", e => {
+  const star = e.target.closest("[data-star]");
+  if (star) {
+    const p = star.dataset.star, box = star.closest("[id]");
+    store.toggle(p);
+    const again = box && document.querySelector(`#${box.id} [data-star="${CSS.escape(p)}"]`);
+    if (again) again.focus();
+    return;
+  }
+  const rm = e.target.closest("[data-remove]");
+  if (rm) { store.remove(rm.dataset.remove); return; }
+  const show = e.target.closest("[data-show]");
+  if (show) showInTable(show.dataset.show);
+});
+
+// --------------------------------------------------------------------- Start
+function refreshAll() {
+  renderKpis();
+  renderShared();
+  renderMine();
+  drawCharts();
+  render();
+  renderSaveState();
+}
+
+$("sub").textContent =
+  `CTSU accrual snapshot ${new Date(DATA.snapshot_fetched_at).toLocaleString("en-US", {dateStyle: "medium", timeStyle: "short"})}. Study-wide accrual from the public CTSU Protocol List; trial details from ClinicalTrials.gov.${DATA.local ? " Local copy with protocol status." : ""}`;
+$("hist-start").textContent = fmtDate(DATA.history_start);
+$("m-sync").innerHTML = sync.available
+  ? "<b>My trials</b> is saved in your browser. If you sign in with Google, the list is also saved to this dashboard's Firebase project so it follows you to other devices: Firebase Authentication keeps your Google name and email, and the database keeps only your list of protocol numbers. Share links contain only protocol numbers."
+  : "<b>My trials</b> is saved in your browser only. Share links contain only protocol numbers.";
+
+store.load();
+readSharedLink();
+renderAccount();
+refreshAll();
+if (sync.available) initFirebase();
 </script>
 </body>
 </html>
