@@ -1,0 +1,11 @@
+{
+  "institution_label": "Open at our institution",
+  "updated": "2026-10-07",
+  "trials": [
+    {"protocol": "NRG-GU013", "alias": "High Five"},
+    {"protocol": "NRG-GI011", "alias": "LAP100"},
+    {"protocol": "NRG-GI012", "alias": "HELIO-RT"},
+    {"protocol": "S2427", "alias": "BRIGHT"},
+    {"protocol": "NRG-GU015", "alias": "ARCHER"}
+  ]
+}

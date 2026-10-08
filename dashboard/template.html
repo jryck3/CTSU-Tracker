@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>CTSU Trials Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f7fa; --card: #ffffff; --ink: #1b2430; --muted: #5b6676; --line: #dfe4ea;
+    --navy: #1f3a5f; --accent: #2b6cb0; --green: #2f855a; --amber: #b7791f; --red: #c53030;
+    --chip: #edf2f7; --rt: #2c5282; --rtc: #4a6fa5; --rp: #805ad5;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--ink); background: var(--bg); }
+  header { background: var(--navy); color: #fff; padding: 18px 28px; }
+  header h1 { margin: 0; font-size: 22px; font-weight: 600; }
+  header .sub { opacity: .85; font-size: 13px; margin-top: 4px; }
+  main { max-width: 1400px; margin: 0 auto; padding: 20px 24px 40px; }
+  h2 { font-size: 17px; margin: 28px 0 12px; color: var(--navy); }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+  .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .kpi .v { font-size: 26px; font-weight: 650; color: var(--navy); }
+  .kpi .l { color: var(--muted); font-size: 12.5px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .card .top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .card .name { font-weight: 650; font-size: 16px; }
+  .card .proto { color: var(--muted); font-size: 12.5px; }
+  .card .title { font-size: 13px; color: #333d4a; }
+  .metrics { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 14px; }
+  .metric .mv { font-weight: 600; font-size: 15px; }
+  .metric .ml { color: var(--muted); font-size: 11.5px; }
+  .bar { position: relative; height: 10px; background: #e6ebf1; border-radius: 6px; overflow: hidden; }
+  .bar > span { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 6px; }
+  .bar.big { height: 14px; }
+  .acc-text { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+  .chip { display: inline-block; padding: 1px 8px; border-radius: 999px; background: var(--chip); font-size: 11.5px; white-space: nowrap; }
+  .chip.active { background: #e6f4ea; color: var(--green); }
+  .chip.closed { background: #fdf3e1; color: var(--amber); }
+  .chip.rt { background: #e3ecf7; color: var(--rt); }
+  .chip.rtc { background: #eef2f8; color: var(--rtc); }
+  .chip.rp { background: #f1ebfb; color: var(--rp); }
+  .chip.file { background: #e6f4ea; color: var(--green); }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+  .chart-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
+  @media (max-width: 1000px) { .chart-grid { grid-template-columns: 1fr; } }
+  .chart-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .chart-head h3 { margin: 0; font-size: 14.5px; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .seg button { border: 0; background: #fff; padding: 5px 11px; cursor: pointer; font: inherit; font-size: 12.5px; color: var(--muted); }
+  .seg button.on { background: var(--navy); color: #fff; }
+  .note { color: var(--muted); font-size: 12px; margin-top: 8px; }
+  .canvas-wrap { position: relative; height: 330px; }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .filters input, .filters select { font: inherit; font-size: 13px; padding: 6px 9px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
+  .filters input { min-width: 240px; }
+  .filters select { max-width: 220px; }
+  .count { color: var(--muted); font-size: 12.5px; margin-left: auto; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; font-weight: 600; color: var(--muted); font-size: 12px; border-bottom: 2px solid var(--line); padding: 0; white-space: nowrap; }
+  th button { all: unset; cursor: pointer; padding: 8px 8px; display: block; }
+  th button:focus-visible { outline: 2px solid var(--accent); }
+  th .arrow { font-size: 10px; margin-left: 3px; }
+  td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr.row { cursor: pointer; }
+  tr.row:hover td { background: #f8fafc; }
+  tr.ours td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+  td.title-cell { min-width: 300px; max-width: 520px; }
+  td.acc-cell { min-width: 150px; }
+  tr.detail td { background: #fafbfd; font-size: 12.5px; }
+  .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 6px 18px; }
+  .detail-grid b { color: var(--muted); font-weight: 600; }
+  a { color: var(--accent); }
+  .btn { font: inherit; font-size: 12px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--accent); background: #fff; color: var(--accent); cursor: pointer; }
+  .btn.on { background: var(--accent); color: #fff; }
+  details.methods { margin-top: 26px; }
+  details.methods summary { cursor: pointer; font-weight: 600; color: var(--navy); }
+  details.methods li { margin: 4px 0; }
+  .warn { background: #fffaf0; border: 1px solid #f6e05e; border-radius: 8px; padding: 8px 12px; font-size: 12.5px; margin-top: 10px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>CTSU Trials Dashboard</h1>
+  <div class="sub" id="sub"></div>
+</header>
+<main>
+  <section class="kpis" id="kpis" aria-label="Summary"></section>
+
+  <h2 id="ours-h">Open at our institution</h2>
+  <section class="cards" id="ours" aria-labelledby="ours-h"></section>
+
+  <h2>Accrual over time</h2>
+  <section class="chart-grid">
+    <div class="panel">
+      <div class="chart-head">
+        <h3>Cumulative accrual</h3>
+        <div class="seg" role="group" aria-label="Y axis">
+          <button id="y-pct" class="on" aria-pressed="true">% of target</button>
+          <button id="y-n" aria-pressed="false">Patients</button>
+        </div>
+      </div>
+      <div class="canvas-wrap"><canvas id="trend" aria-label="Cumulative accrual over time"></canvas></div>
+      <div class="note" id="trend-note"></div>
+    </div>
+    <div class="panel">
+      <div class="chart-head"><h3>Accrual rate (patients per month)</h3></div>
+      <div class="canvas-wrap"><canvas id="rates" aria-label="Accrual rate comparison"></canvas></div>
+      <div class="note">Average since activation uses the ClinicalTrials.gov actual study start date. The recent rate appears once a week of daily CTSU snapshots exists.</div>
+    </div>
+  </section>
+
+  <h2>CTSU studies</h2>
+  <section class="panel">
+    <div class="filters">
+      <div class="seg" role="group" aria-label="Scope" id="scope">
+        <button data-scope="rt_open" class="on">RT-related, open</button>
+        <button data-scope="rt">All RT-related</button>
+        <button data-scope="ours">Ours</button>
+        <button data-scope="all">All CTSU studies</button>
+      </div>
+      <input id="q" type="search" placeholder="Search protocol, title, NCT, disease" aria-label="Search">
+      <select id="f-lead" aria-label="Lead group"><option value="">All lead groups</option></select>
+      <select id="f-disease" aria-label="Disease"><option value="">All diseases</option></select>
+      <select id="f-role" aria-label="RT role"><option value="">Any RT role</option></select>
+      <select id="f-phase" aria-label="Phase"><option value="">Any phase</option></select>
+      <span class="count" id="count"></span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr id="thead"></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <details class="methods">
+    <summary>Data sources and methods</summary>
+    <ul>
+      <li><b>Accrual</b> comes from the public CTSU Protocol List (<a href="https://ctsu.cancer.gov/protocol" target="_blank" rel="noopener">ctsu.cancer.gov/protocol</a>), which lists active and temporarily closed NCI trials open to cross-group participation and reports actual over planned intervention accrual. These are study-wide totals across all sites, not accrual at our institution.</li>
+      <li><b>History</b> is built from one CTSU snapshot per day, starting <span id="hist-start"></span>. CTSU does not publish past accrual, so the line from the study start date to the first snapshot is a straight-line interpolation (dashed), not observed data.</li>
+      <li><b>Average rate</b> = current accrual divided by months since the actual study start date on ClinicalTrials.gov. Early ramp-up makes this lower than the current rate for most young trials. <b>Recent rate</b> = change over the last 30 days of snapshots, scaled to a month. <b>Projected target date</b> assumes the average rate continues.</li>
+      <li><b>RT classification</b> uses ClinicalTrials.gov interventions and titles. <i>RT-focused</i>: RT named in the title. <i>RT component</i>: protocol-specified RT intervention (often part of the treatment backbone). <i>Radiopharmaceutical</i>: therapeutic isotope (for example Lu-177, Ac-225) without external-beam RT. Imaging tracers and MUGA scans are excluded. Manual overrides are listed in the evidence for each study.</li>
+    </ul>
+  </details>
+</main>
+
+<script>
+const DATA = /*__DATA__*/null;
+const S = DATA.studies;
+const BY = Object.fromEntries(S.map(s => [s.protocol, s]));
+const OURS = DATA.institution.map(p => BY[p]).filter(Boolean);
+const PALETTE = ["#2b6cb0", "#c05621", "#2f855a", "#805ad5", "#b83280", "#2c7a7b", "#975a16", "#4a5568", "#e53e3e", "#319795"];
+const DAY = 86400000;
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+const toDate = iso => iso ? new Date(iso.length === 7 ? iso + "-01T00:00:00" : iso.length === 10 ? iso + "T00:00:00" : iso) : null;
+const fmtDate = iso => iso ? toDate(iso).toLocaleDateString("en-US", {year: "numeric", month: "short", day: "numeric"}) : "";
+const fmtMonth = iso => iso ? toDate(iso).toLocaleDateString("en-US", {year: "numeric", month: "short"}) : "";
+const num = (v, d = 1) => v == null ? "" : Number(v).toLocaleString("en-US", {maximumFractionDigits: d});
+const roleChip = r => !r ? "" : `<span class="chip ${r === "RT-focused" ? "rt" : r === "RT component" ? "rtc" : r === "Radiopharmaceutical" ? "rp" : ""}">${esc(r)}</span>`;
+const statusChip = st => `<span class="chip ${st === "Active" ? "active" : "closed"}">${esc(st === "Active" ? "Active" : st)}</span>`;
+const ctgov = nct => nct ? `https://clinicaltrials.gov/study/${nct}` : null;
+const accBar = (s, big) => s.target ? `<div class="bar${big ? " big" : ""}" title="${s.pct}% of target"><span style="width:${Math.min(100, s.pct || 0)}%"></span></div><div class="acc-text">${num(s.accrual, 0)} / ${num(s.target, 0)} (${num(s.pct)}%)</div>` : `<div class="acc-text">${num(s.accrual, 0)}</div>`;
+
+// Header and KPIs
+document.getElementById("sub").textContent =
+  `CTSU accrual snapshot ${new Date(DATA.snapshot_fetched_at).toLocaleString("en-US", {dateStyle: "medium", timeStyle: "short"})}. Study-wide accrual from the public CTSU Protocol List; trial details from ClinicalTrials.gov.${DATA.local ? " Local copy with protocol status." : ""}`;
+document.getElementById("hist-start").textContent = fmtDate(DATA.history_start);
+const c = DATA.counts;
+const oursAcc = OURS.reduce((a, s) => a + (s.accrual || 0), 0);
+document.getElementById("kpis").innerHTML = [
+  [c.all, "Studies on the CTSU list"],
+  [c.active, "Actively accruing"],
+  [c.rt_related, "RT-related studies"],
+  [c.rt_open, "RT-related and open"],
+  [c.ours, DATA.institution_label || "Open at our institution"],
+].map(([v, l]) => `<div class="kpi"><div class="v">${num(v, 0)}</div><div class="l">${esc(l)}</div></div>`).join("");
+
+// Institution cards
+function rateText(s) {
+  return s.trailing30 ? `${num(s.trailing30.per_month)} /mo` : "Pending";
+}
+document.getElementById("ours").innerHTML = OURS.map(s => `
+  <article class="card">
+    <div class="top">
+      <div><div class="name">${esc(s.alias || s.protocol)}</div><div class="proto">${esc(s.protocol)} · ${esc(s.lead)} · Phase ${esc(s.phase)}</div></div>
+      ${statusChip(s.status)}
+    </div>
+    <div class="title">${esc(s.title)}</div>
+    <div>${accBar(s, true)}</div>
+    <div class="metrics">
+      <div class="metric"><div class="mv">${s.avg_rate != null ? num(s.avg_rate) + " /mo" : "n/a"}</div><div class="ml">Average since activation</div></div>
+      <div class="metric"><div class="mv">${rateText(s)}</div><div class="ml">Recent rate (last 30 days)</div></div>
+      <div class="metric"><div class="mv">${s.months_open != null ? num(s.months_open) + " mo" : "n/a"}</div><div class="ml">Open since ${fmtMonth(s.start_date)}</div></div>
+      <div class="metric"><div class="mv">${s.projected_completion ? fmtMonth(s.projected_completion) : "n/a"}</div><div class="ml">Projected target date at average rate</div></div>
+    </div>
+    <div>${roleChip(s.rt_role)} ${DATA.local && s.protocol_on_file ? '<span class="chip file">Protocol on file</span>' : ""}
+      ${s.nct ? `<a href="${ctgov(s.nct)}" target="_blank" rel="noopener" style="font-size:12.5px;margin-left:6px">${esc(s.nct)}</a>` : ""}</div>
+  </article>`).join("") || "<p>No institution trials configured.</p>";
+if (DATA.institution_missing.length) {
+  document.getElementById("ours").insertAdjacentHTML("afterend",
+    `<div class="warn">Not on the current CTSU list (closed or renamed): ${DATA.institution_missing.map(esc).join(", ")}</div>`);
+}
+
+// Charts
+let yMode = "pct";
+const plotted = new Set(OURS.map(s => s.protocol));
+let trendChart = null, rateChart = null;
+
+function seriesFor(s, i) {
+  const pts = (DATA.history[s.protocol] || []).filter(p => p[1] != null);
+  const val = (acc, tgt) => yMode === "pct" ? (tgt ? +(100 * acc / tgt).toFixed(2) : null) : acc;
+  const data = [];
+  let anchored = false;
+  if (s.start_date && pts.length && toDate(s.start_date) < toDate(pts[0][0])) {
+    data.push({x: toDate(s.start_date).getTime(), y: 0});
+    anchored = true;
+  }
+  pts.forEach(p => data.push({x: toDate(p[0]).getTime(), y: val(p[1], p[2])}));
+  const color = PALETTE[i % PALETTE.length];
+  return {
+    label: s.alias ? `${s.alias} (${s.protocol})` : s.protocol,
+    data, borderColor: color, backgroundColor: color, borderWidth: 2, tension: 0,
+    pointRadius: ctx => (anchored && ctx.dataIndex === 0) ? 3 : 2.5,
+    segment: {borderDash: ctx => (anchored && ctx.p0DataIndex === 0) ? [6, 5] : undefined},
+  };
+}
+
+function drawTrend() {
+  if (typeof Chart === "undefined") {
+    document.getElementById("trend-note").textContent = "Charts need an internet connection to load the Chart.js library.";
+    return;
+  }
+  const list = [...plotted].map(p => BY[p]).filter(Boolean);
+  const datasets = list.map(seriesFor);
+  if (trendChart) trendChart.destroy();
+  trendChart = new Chart(document.getElementById("trend"), {
+    type: "line",
+    data: {datasets},
+    options: {
+      maintainAspectRatio: false, animation: false, parsing: false,
+      interaction: {mode: "nearest", intersect: false},
+      scales: {
+        x: {type: "linear", ticks: {maxTicksLimit: 8, callback: v => new Date(v).toLocaleDateString("en-US", {month: "short", year: "2-digit"})}},
+        y: {beginAtZero: true, max: yMode === "pct" ? 100 : undefined, title: {display: true, text: yMode === "pct" ? "% of accrual target" : "Patients accrued"}},
+      },
+      plugins: {
+        legend: {position: "bottom", labels: {boxWidth: 12}},
+        tooltip: {callbacks: {
+          title: items => new Date(items[0].parsed.x).toLocaleDateString("en-US", {dateStyle: "medium"}),
+          label: it => `${it.dataset.label}: ${num(it.parsed.y)}${yMode === "pct" ? "%" : ""}`,
+        }},
+      },
+    },
+  });
+  const n = DATA.snapshot_days;
+  document.getElementById("trend-note").textContent =
+    `Solid lines: daily CTSU snapshots (${n === 1 ? "first snapshot taken " + fmtDate(DATA.history_start) : n + " snapshots since " + fmtDate(DATA.history_start)}). Dashed: straight line from study start to first snapshot. Add other studies from the table below.`;
+}
+
+function drawRates() {
+  if (typeof Chart === "undefined") return;
+  const list = OURS;
+  if (rateChart) rateChart.destroy();
+  rateChart = new Chart(document.getElementById("rates"), {
+    type: "bar",
+    data: {
+      labels: list.map(s => s.alias || s.protocol),
+      datasets: [
+        {label: "Average since activation", data: list.map(s => s.avg_rate), backgroundColor: "#2b6cb0"},
+        {label: "Last 30 days", data: list.map(s => s.trailing30 ? s.trailing30.per_month : null), backgroundColor: "#ed8936"},
+      ],
+    },
+    options: {
+      indexAxis: "y", maintainAspectRatio: false, animation: false,
+      scales: {x: {beginAtZero: true, title: {display: true, text: "Patients per month"}}},
+      plugins: {legend: {position: "bottom", labels: {boxWidth: 12}}},
+    },
+  });
+}
+
+function setY(mode) {
+  yMode = mode;
+  document.getElementById("y-pct").classList.toggle("on", mode === "pct");
+  document.getElementById("y-n").classList.toggle("on", mode === "n");
+  document.getElementById("y-pct").setAttribute("aria-pressed", mode === "pct");
+  document.getElementById("y-n").setAttribute("aria-pressed", mode === "n");
+  drawTrend();
+}
+document.getElementById("y-pct").onclick = () => setY("pct");
+document.getElementById("y-n").onclick = () => setY("n");
+
+// Table
+const COLS = [
+  {k: "protocol", l: "Protocol"},
+  {k: "lead", l: "Lead"},
+  {k: "phase", l: "Phase"},
+  {k: "title", l: "Title"},
+  {k: "rt_role", l: "RT role"},
+  {k: "status", l: "Status"},
+  {k: "pct", l: "Accrual"},
+  {k: "avg_rate", l: "Avg /mo"},
+  {k: "start_date", l: "Start"},
+  {k: "projected_completion", l: "Projected"},
+];
+const state = {scope: "rt_open", q: "", lead: "", disease: "", role: "", phase: "", sort: "pct", dir: -1, open: new Set()};
+
+function fillSelect(id, values) {
+  const el = document.getElementById(id);
+  [...new Set(values)].filter(Boolean).sort().forEach(v => el.insertAdjacentHTML("beforeend", `<option>${esc(v)}</option>`));
+}
+fillSelect("f-lead", S.map(s => s.lead));
+fillSelect("f-disease", S.flatMap(s => (s.disease || "").split(";").map(x => x.trim())));
+fillSelect("f-role", S.map(s => s.rt_role));
+fillSelect("f-phase", S.map(s => s.phase));
+
+function rows() {
+  const q = state.q.toLowerCase();
+  let r = S.filter(s =>
+    (state.scope === "all" ||
+     (state.scope === "rt" && s.rt_related) ||
+     (state.scope === "rt_open" && s.rt_related && s.status === "Active") ||
+     (state.scope === "ours" && s.ours)) &&
+    (!state.lead || s.lead === state.lead) &&
+    (!state.disease || (s.disease || "").split(";").map(x => x.trim()).includes(state.disease)) &&
+    (!state.role || s.rt_role === state.role) &&
+    (!state.phase || s.phase === state.phase) &&
+    (!q || [s.protocol, s.title, s.nct, s.disease, s.lead, s.alias].join(" ").toLowerCase().includes(q)));
+  const k = state.sort, d = state.dir;
+  r.sort((a, b) => {
+    const x = a[k], y = b[k];
+    if (x == null && y == null) return 0;
+    if (x == null) return 1;
+    if (y == null) return -1;
+    return (typeof x === "number" ? x - y : String(x).localeCompare(String(y), undefined, {numeric: true})) * d;
+  });
+  return r;
+}
+
+function renderHead() {
+  document.getElementById("thead").innerHTML = COLS.map(col =>
+    `<th aria-sort="${state.sort === col.k ? (state.dir > 0 ? "ascending" : "descending") : "none"}"><button data-k="${col.k}">${col.l}<span class="arrow">${state.sort === col.k ? (state.dir > 0 ? "▲" : "▼") : ""}</span></button></th>`).join("");
+  document.querySelectorAll("#thead button").forEach(b => b.onclick = () => {
+    const k = b.dataset.k;
+    if (state.sort === k) state.dir *= -1; else { state.sort = k; state.dir = ["pct", "avg_rate", "accrual"].includes(k) ? -1 : 1; }
+    render();
+  });
+}
+
+function detailRow(s) {
+  const ev = (s.rt_evidence || []).map(esc).join("<br>") || "None";
+  const t30 = s.trailing30 ? `${num(s.trailing30.per_month)} /mo (+${s.trailing30.delta} over ${s.trailing30.days} days)` : "Pending (needs 7+ days of snapshots)";
+  return `<tr class="detail"><td colspan="${COLS.length}">
+    <div class="detail-grid">
+      <div><b>NCT</b><br>${s.nct ? `<a href="${ctgov(s.nct)}" target="_blank" rel="noopener">${esc(s.nct)}</a>` : "n/a"}</div>
+      <div><b>Disease</b><br>${esc(s.disease)}</div>
+      <div><b>NCI program</b><br>${esc(s.program)}</div>
+      <div><b>Start (ClinicalTrials.gov)</b><br>${fmtDate(s.start_date)} ${s.start_type ? "(" + esc(s.start_type.toLowerCase()) + ")" : ""}</div>
+      <div><b>Primary completion (CT.gov)</b><br>${fmtMonth(s.primary_completion) || "n/a"}</div>
+      <div><b>Recent rate</b><br>${t30}</div>
+      <div><b>Screening accrual</b><br>${esc(s.screening ?? "n/a")}</div>
+      ${DATA.local ? `<div><b>Protocol document</b><br>${s.protocol_on_file ? "On file locally" + (s.protocol_version ? ", version " + esc(s.protocol_version) : "") : "Not downloaded"}</div>` : ""}
+      <div style="grid-column: 1 / -1"><b>RT evidence</b><br>${ev}</div>
+    </div>
+    <div style="margin-top:8px"><button class="btn${plotted.has(s.protocol) ? " on" : ""}" data-plot="${esc(s.protocol)}">${plotted.has(s.protocol) ? "Remove from chart" : "Add to accrual chart"}</button></div>
+  </td></tr>`;
+}
+
+function render() {
+  renderHead();
+  const r = rows();
+  document.getElementById("count").textContent = `${r.length} ${r.length === 1 ? "study" : "studies"}`;
+  document.getElementById("tbody").innerHTML = r.map(s => `
+    <tr class="row${s.ours ? " ours" : ""}" data-p="${esc(s.protocol)}" tabindex="0" aria-expanded="${state.open.has(s.protocol)}">
+      <td><b>${esc(s.protocol)}</b>${s.alias ? `<div class="proto">${esc(s.alias)}</div>` : ""}</td>
+      <td>${esc(s.lead)}</td>
+      <td>${esc(s.phase)}</td>
+      <td class="title-cell">${esc(s.title)}</td>
+      <td>${roleChip(s.rt_role)}</td>
+      <td>${statusChip(s.status)}</td>
+      <td class="acc-cell">${accBar(s)}</td>
+      <td>${s.avg_rate != null ? num(s.avg_rate) : ""}</td>
+      <td>${fmtMonth(s.start_date)}</td>
+      <td>${fmtMonth(s.projected_completion)}</td>
+    </tr>${state.open.has(s.protocol) ? detailRow(s) : ""}`).join("");
+  document.querySelectorAll("tr.row").forEach(tr => {
+    const toggle = () => { const p = tr.dataset.p; state.open.has(p) ? state.open.delete(p) : state.open.add(p); render(); };
+    tr.onclick = toggle;
+    tr.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } };
+  });
+  document.querySelectorAll("[data-plot]").forEach(b => b.onclick = e => {
+    e.stopPropagation();
+    const p = b.dataset.plot;
+    plotted.has(p) ? plotted.delete(p) : plotted.add(p);
+    drawTrend(); render();
+  });
+}
+
+document.querySelectorAll("#scope button").forEach(b => b.onclick = () => {
+  state.scope = b.dataset.scope;
+  document.querySelectorAll("#scope button").forEach(x => x.classList.toggle("on", x === b));
+  render();
+});
+document.getElementById("q").oninput = e => { state.q = e.target.value; render(); };
+[["f-lead", "lead"], ["f-disease", "disease"], ["f-role", "role"], ["f-phase", "phase"]].forEach(([id, k]) =>
+  document.getElementById(id).onchange = e => { state[k] = e.target.value; render(); });
+
+drawTrend();
+drawRates();
+render();
+</script>
+</body>
+</html>

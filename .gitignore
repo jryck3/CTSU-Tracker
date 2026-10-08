@@ -1,0 +1,12 @@
+# Protocol documents and anything from the CTSU member site stay on this Mac
+protocols/
+logs/
+
+# Regenerable caches and local builds
+data/snapshots/
+data/ctgov/
+data/studies.json
+dashboard/index.html
+
+.DS_Store
+__pycache__/

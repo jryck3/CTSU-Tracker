@@ -1,0 +1,4 @@
+{
+  "PBTC-060": {"role": null, "reason": "SurVaxM vaccine after prior RT; no protocol-directed RT"},
+  "CCTG-HN11": {"role": "RT-focused", "reason": "SELECT: SPECT-CT guided elective contralateral neck RT (CT.gov intervention named 'Ipsilateral and Contralateral Neck')"}
+}
