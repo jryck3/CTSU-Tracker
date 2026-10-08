@@ -1,0 +1,722 @@
+{
+ "A021901": {
+  "version_date": "2025-02-05",
+  "posted": "15-Apr-2025"
+ },
+ "A022101": {
+  "version_date": "2026-02-25",
+  "posted": "16-Mar-2026"
+ },
+ "A032102": {
+  "version_date": "2025-03-21",
+  "posted": "02-Jun-2025"
+ },
+ "A032304": {
+  "version_date": "2025-09-26",
+  "posted": "08-Jan-2026"
+ },
+ "A072301": {
+  "version_date": "2025-12-15",
+  "posted": "06-Mar-2026"
+ },
+ "A082402": {
+  "version_date": "2025-10-14",
+  "posted": "01-May-2026"
+ },
+ "A222301": {
+  "version_date": "2026-06-26",
+  "posted": "14-Aug-2026"
+ },
+ "AALL1821": {
+  "version_date": "2026-07-13",
+  "posted": "10-Aug-2026"
+ },
+ "AALL2131": {
+  "version_date": "2026-07-13",
+  "posted": "10-Aug-2026"
+ },
+ "ACNS2021": {
+  "version_date": "2024-03-29",
+  "posted": "20-May-2024"
+ },
+ "ACNS2321": {
+  "version_date": "2025-05-22",
+  "posted": "14-Jul-2025"
+ },
+ "AHOD2131": {
+  "version_date": "2025-10-16",
+  "posted": "10-Nov-2025"
+ },
+ "ANBL2131": {
+  "version_date": "2025-06-25",
+  "posted": "29-Sep-2025"
+ },
+ "ARAR2221": {
+  "version_date": "2025-07-24",
+  "posted": "19-Aug-2025"
+ },
+ "ARST2531": {
+  "version_date": "2026-03-06",
+  "posted": "22-Jun-2026"
+ },
+ "CCTG CE.7": {
+  "version_date": "2022-04-01",
+  "posted": "10-Jun-2022"
+ },
+ "CCTG-BR38": {
+  "version_date": "2026-01-07",
+  "posted": "02-Mar-2026"
+ },
+ "CCTG-CO32": {
+  "version_date": "2025-11-25",
+  "posted": "12-Dec-2025"
+ },
+ "CCTG-HN11": {
+  "version_date": "2022-08-22",
+  "posted": "29-Sep-2022"
+ },
+ "CCTG-NE1": {
+  "version_date": "2026-04-08",
+  "posted": "17-Apr-2026"
+ },
+ "CCTG-PR24": {
+  "version_date": "2025-06-27",
+  "posted": "09-Sep-2025"
+ },
+ "EA2174": {
+  "version_date": "2023-08-15",
+  "posted": "13-Sep-2023"
+ },
+ "EA3132": {
+  "version_date": "2025-08-14",
+  "posted": "24-Sep-2025"
+ },
+ "EA3191": {
+  "version_date": "2026-08-21",
+  "posted": "09-Sep-2026"
+ },
+ "EA8191": {
+  "version_date": "2026-03-18",
+  "posted": "14-Apr-2026"
+ },
+ "MYELOMATCH": {
+  "version_date": "2025-07-14",
+  "posted": "15-Sep-2025"
+ },
+ "NRG-BN014": {
+  "version_date": "2025-07-02",
+  "posted": "08-Sep-2025"
+ },
+ "NRG-CC017": {
+  "version_date": "2026-03-16",
+  "posted": "01-Apr-2026",
+  "amendments": [
+   {
+    "date": "January 29, 2026",
+    "text": "Initial protocol."
+   },
+   {
+    "date": "March 16, 2026",
+    "text": "Pre-activation revision, the latest date in the document history. The opening pages do not summarize what changed."
+   }
+  ]
+ },
+ "NRG-GI011": {
+  "version_date": "2026-07-01",
+  "posted": "10-Aug-2026",
+  "amendments": [
+   {
+    "date": "May 14, 2025",
+    "text": "Initial protocol."
+   },
+   {
+    "date": "December 9, 2025",
+    "text": "Amendment 1. Baseline pre-chemotherapy requirements are dated this day."
+   },
+   {
+    "date": "July 1, 2026",
+    "text": "Amendment 2, the current version. The schema, required chemotherapy before entry, post-chemotherapy requirements, pretreatment table, and treatment-arm descriptions are dated this day."
+   }
+  ],
+  "schema": [
+   {
+    "label": "Entry",
+    "text": "Locally advanced unresectable pancreatic ductal adenocarcinoma after 4 to 8 months of active chemotherapy, with no radiographic progression and a qualifying CA19-9 response."
+   },
+   {
+    "label": "Stratify",
+    "text": "Chemotherapy received: mFOLFIRINOX, FOLFIRINOX, or NALIRIFOX versus gemcitabine/nab-paclitaxel. If both were used, stratify by the longer regimen, or by the first regimen if the durations were equal."
+   },
+   {
+    "label": "Randomize 1:1",
+    "arms": [
+     {
+      "label": "Arm 1, standard of care",
+      "text": "Continue chemotherapy, or 50.4 Gy or 54 Gy in 1.8 Gy fractions with fluoropyrimidine, or observation. Observation is suggested only after 6 months of chemotherapy."
+     },
+     {
+      "label": "Arm 2, dose-escalated RT",
+      "text": "Default 10 Gy x 5 (BED10 100 Gy). Alternative 3 Gy x 25 (BED10 97.5 Gy). If 5 fractions are not feasible, contact the principal investigator before using 25 fractions."
+     }
+    ],
+    "note": "Tumor treating fields are allowed with induction chemotherapy before randomization."
+   },
+   {
+    "label": "Primary endpoint",
+    "text": "3-year overall survival from randomization."
+   }
+  ],
+  "eligibility": [
+   "Pathologically proven pancreatic ductal adenocarcinoma, locally advanced and unresectable by NCCN criteria and institutional tumor board review.",
+   "4 to 8 months of active chemotherapy with FOLFIRINOX, NALIRIFOX, or gemcitabine/nab-paclitaxel. Breaks do not count. A regimen may be switched for toxicity or a CA19-9 that is not declining, not for RECIST progression.",
+   "Registration within 45 days of the last day of pre-study chemotherapy.",
+   "Restaging after month 4 and before entry shows no progression. If baseline CA19-9 was above 37, the later value is under 200 or has fallen by at least 70%. If baseline CA19-9 was 37 or lower, it must remain 37 or lower.",
+   "No overlapping prior radiotherapy. No active duodenal or gastric ulcer and no direct tumor invasion of bowel or stomach. Age 18 or older. ECOG 0-2."
+  ],
+  "pretreatment": [
+   {
+    "item": "ECOG, before chemotherapy",
+    "window": "Before enrollment",
+    "note": "The table marks this required and does not give a day count."
+   },
+   {
+    "item": "AST, ALT, and bilirubin",
+    "window": "Any time before chemotherapy through 30 days after it starts",
+    "note": "AST and ALT at most 3 times the upper limit of normal. If baseline CA19-9 is above 37, concurrent bilirubin is at most 1.5 times the upper limit."
+   },
+   {
+    "item": "CA19-9, before and after chemotherapy",
+    "window": "After month 4 and before entry",
+    "note": "Response rule is in the eligibility criteria."
+   },
+   {
+    "item": "Baseline and restaging scans",
+    "window": "Baseline before chemotherapy. Restaging after month 4, before entry.",
+    "note": "CT chest/abdomen/pelvis, CT plus MRI, or PET/CT. Restaging must show at least stable disease."
+   },
+   {
+    "item": "FACT-Hep",
+    "window": "Before treatment",
+    "note": "Marked required, without a day window."
+   }
+  ]
+ },
+ "NRG-GI012": {
+  "version_date": "2025-09-10",
+  "posted": "07-Oct-2025",
+  "amendments": [
+   {
+    "date": "September 10, 2025",
+    "text": "Initial protocol. The document history lists no later amendment."
+   }
+  ],
+  "schema": [
+   {
+    "label": "Step 1 registration",
+    "text": "Register and confirm payment coverage for treatment."
+   },
+   {
+    "label": "Step 2, stratify and randomize 1:1",
+    "text": "Child-Pugh A vs B7. Extrahepatic disease yes vs no. Macrovascular invasion VP1/VP2/VV1 vs VP3/VP4/VV2/IVC. Systemic therapy IO/IO vs IO plus a VEGF inhibitor."
+   },
+   {
+    "label": "Treatment",
+    "text": "Protocol treatment starts within 21 days after randomization. If SBRT and immunotherapy start on different days, both start by day 35.",
+    "arms": [
+     {
+      "label": "Arm 1",
+      "text": "IO-based systemic therapy alone."
+     },
+     {
+      "label": "Arm 2",
+      "text": "Liver SBRT plus IO-based systemic therapy."
+     }
+    ],
+    "note": "Physician's choice of atezolizumab plus bevacizumab, durvalumab plus one dose of tremelimumab, or nivolumab plus ipilimumab followed by nivolumab. For atezolizumab/bevacizumab, holding bevacizumab from 2 weeks before SBRT until 2 weeks after is recommended."
+   },
+   {
+    "label": "Primary endpoint",
+    "text": "Overall survival, liver SBRT plus immunotherapy versus immunotherapy alone."
+   }
+  ],
+  "eligibility": [
+   "HCC with macrovascular invasion: enhancing thrombus with arterial enhancement and washout. Extrahepatic disease is allowed.",
+   "At most 5 discrete intrahepatic foci. Sum of diameters under 20 cm. No direct extension into stomach, duodenum, small bowel, or large bowel.",
+   "No fibrolamellar, sarcomatoid, or biphenotypic HCC. Child-Pugh A or B7. ECOG 0-2. Age 18 or older.",
+   "Pathologic confirmation is strongly recommended. A radiographic AASLD diagnosis is allowed, except when there is a prior or concurrent malignancy, in which case pathology is required.",
+   "Prior resection, TACE, or ablation is allowed. No prior systemic therapy or radioembolization for HCC, and no prior liver transplant. No prior radiotherapy that would overlap enough to cause excessive cumulative toxicity.",
+   "Step 2 requires confirmation that payment coverage exists for both arms."
+  ],
+  "pretreatment": [
+   {
+    "item": "Diagnosis of HCC, history and physical, liver-disease history",
+    "window": "Before step 1",
+    "note": "The table marks these required and does not give a day count."
+   },
+   {
+    "item": "ECOG, Child-Pugh, albumin, bilirubin, INR, mALBI",
+    "window": "At most 14 days before step 1",
+    "note": ""
+   },
+   {
+    "item": "ANC, platelets, hemoglobin, creatinine clearance, ALT, AST, AFP",
+    "window": "At most 30 days before step 1",
+    "note": ""
+   },
+   {
+    "item": "Degree of macrovascular invasion",
+    "window": "At most 30 days before step 1",
+    "note": "VP1/VP2/VV1 versus VP3/VP4/VV2/IVC."
+   },
+   {
+    "item": "Multiphasic liver CT or MRI",
+    "window": "At most 30 days before step 1",
+    "note": ""
+   },
+   {
+    "item": "CT chest plus CT or MRI pelvis, or PET/CT of chest, abdomen, and pelvis",
+    "window": "At most 30 days before step 1",
+    "note": ""
+   },
+   {
+    "item": "Pregnancy test",
+    "window": "At most 30 days before step 1",
+    "note": "Persons of childbearing potential."
+   },
+   {
+    "item": "FACT-Hep and EQ-5D-5L",
+    "window": "Before treatment",
+    "note": "Marked required, without a day window."
+   }
+  ]
+ },
+ "NRG-GU012": {
+  "version_date": "2026-08-20",
+  "posted": "09-Sep-2026",
+  "amendments": [
+   {
+    "date": "April 25, 2022",
+    "text": "Initial protocol."
+   },
+   {
+    "date": "February 20, 2023",
+    "text": "Amendment 1. The opening pages do not summarize what changed."
+   },
+   {
+    "date": "August 21, 2023",
+    "text": "Amendment 2. The opening pages do not summarize what changed."
+   },
+   {
+    "date": "October 09, 2023",
+    "text": "Amendment 3. The opening pages do not summarize what changed."
+   },
+   {
+    "date": "January 03, 2024",
+    "text": "Amendment 4. The opening pages do not summarize what changed."
+   },
+   {
+    "date": "October 29, 2024",
+    "text": "Amendment 5. The opening pages do not summarize what changed."
+   },
+   {
+    "date": "April 22, 2025",
+    "text": "Amendment 6. The opening pages do not summarize what changed."
+   },
+   {
+    "date": "July 28, 2025",
+    "text": "Amendment 7. The opening pages do not summarize what changed."
+   },
+   {
+    "date": "August 20, 2026",
+    "text": "Amendment 8, the latest date in the document history. The opening pages do not summarize what changed."
+   }
+  ]
+ },
+ "NRG-GU013": {
+  "version_date": "2026-08-31",
+  "posted": "21-Sep-2026",
+  "amendments": [
+   {
+    "date": "July 7, 2023",
+    "text": "Initial protocol."
+   },
+   {
+    "date": "July 24, 2025",
+    "text": "Amendment 1. Eligibility and the pretreatment table are dated this day."
+   },
+   {
+    "date": "December 10, 2025",
+    "text": "Amendment 2. Secondary and exploratory objectives are dated this day."
+   },
+   {
+    "date": "August 31, 2026",
+    "text": "Amendment 3, the current version. Follow-up assessments are dated this day. The file does not include a section-level list of other changes."
+   }
+  ],
+  "schema": [
+   {
+    "label": "Disease",
+    "text": "Pathologically proven adenocarcinoma of the prostate, meeting the high-risk definition in eligibility."
+   },
+   {
+    "label": "Stratify",
+    "text": "Pelvic nodal radiotherapy yes vs no. ADT duration under 18 months vs over 18 months. Second-generation antiandrogen yes vs no. Intraprostatic microboost yes vs no."
+   },
+   {
+    "label": "Randomize 1:1",
+    "text": "ADT of 6 to 36 months is required. Intended duration, type, and use of a second-generation antiandrogen are declared at registration.",
+    "arms": [
+     {
+      "label": "Arm 1",
+      "text": "Ultrahypofractionated SBRT in 5 fractions."
+     },
+     {
+      "label": "Arm 2",
+      "text": "Conventional or moderate hypofractionation in 20 to 45 fractions."
+     }
+    ]
+   },
+   {
+    "label": "Primary endpoint",
+    "text": "Metastasis-free survival on conventional imaging."
+   }
+  ],
+  "eligibility": [
+   "High-risk prostate adenocarcinoma: at least one of cT3a-T3b (cT4 is not allowed), PSA above 20 ng/mL before ADT, Gleason 8-10, or a pelvic node of at least 1.0 cm in short axis on conventional imaging. PSA taken on a 5-alpha reductase inhibitor is doubled.",
+   "Prostate volume under 100 cc before ADT. No M1 disease on conventional imaging. A negative PSMA PET may substitute for that staging.",
+   "No prior prostate radiotherapy that would overlap, no prior prostatectomy, and no prior focal or ablative prostate therapy.",
+   "Prior ADT is allowed only if it started at most 185 days before registration. The pre-ADT PSA defines the risk group.",
+   "No contraindication to prostate MRI, which is required for radiotherapy planning on both arms. Age 18 or older. ECOG 0-2."
+  ],
+  "pretreatment": [
+   {
+    "item": "History and physical",
+    "window": "At most 120 days before registration",
+    "note": "Includes height and weight."
+   },
+   {
+    "item": "ECOG performance status",
+    "window": "At most 120 days before registration",
+    "note": ""
+   },
+   {
+    "item": "PSA before ADT",
+    "window": "At most 185 days before registration",
+    "note": "This is the value used to define high-risk disease."
+   },
+   {
+    "item": "Pelvic imaging",
+    "window": "At most 365 days before registration",
+    "note": "CT, MRI, or an approved PET. A pelvic MRI is not required for this row. PSMA PET/CT fulfills it."
+   },
+   {
+    "item": "Whole-body bone imaging",
+    "window": "At most 365 days before registration",
+    "note": "Bone scan or PSMA, fluciclovine, or NaF PET/CT."
+   },
+   {
+    "item": "EPIC-26, PROMIS-Fatigue, FACIT-COST, EQ-5D-5L",
+    "window": "Before radiotherapy",
+    "note": "Marked in the prior-to-radiation column, without a day window."
+   }
+  ]
+ },
+ "NRG-GU014": {
+  "version_date": "2026-08-20",
+  "posted": "09-Sep-2026",
+  "amendments": [
+   {
+    "date": "March 7, 2025",
+    "text": "Initial protocol."
+   },
+   {
+    "date": "April 22, 2025",
+    "text": "Amendment 1. The opening pages do not summarize what changed."
+   },
+   {
+    "date": "August 20, 2026",
+    "text": "Amendment 2, the latest date in the document history. The opening pages do not summarize what changed."
+   }
+  ]
+ },
+ "NRG-GU015": {
+  "version_date": "2026-08-06",
+  "posted": "28-Sep-2026",
+  "amendments": [
+   {
+    "date": "July 16, 2025",
+    "text": "Initial protocol."
+   },
+   {
+    "date": "May 14, 2026",
+    "text": "Amendment 1. The schema, eligibility criteria, pretreatment table, and systemic-therapy section are dated this day."
+   },
+   {
+    "date": "August 6, 2026",
+    "text": "Amendment 2, the current version. The radiation therapy section is dated this day. The file does not include a section-level list of other changes."
+   }
+  ],
+  "schema": [
+   {
+    "label": "Disease",
+    "text": "cT2-cT3N0 muscle-invasive urothelial carcinoma of the bladder."
+   },
+   {
+    "label": "Stratify",
+    "text": "Clinical stage T2 vs T3. Planned radiosensitizer: cisplatin, gemcitabine, or mitomycin-C/5-FU. Neoadjuvant therapy yes vs no."
+   },
+   {
+    "label": "Randomize 1:1",
+    "text": "Protocol treatment starts within 28 days after randomization. Arm 2 must use plan-of-the-day or online adaptive radiotherapy.",
+    "arms": [
+     {
+      "label": "Arm 1",
+      "text": "4 weeks of radiosensitizing chemotherapy plus hypofractionated radiotherapy, 55 Gy in 20 fractions."
+     },
+     {
+      "label": "Arm 2",
+      "text": "4 weeks of radiosensitizing chemotherapy plus SBRT, 32.5 Gy in 5 fractions."
+     }
+    ],
+    "note": "Radiosensitizing chemotherapy is limited to the 4-week window. Missed or held doses are not made up."
+   },
+   {
+    "label": "Primary question",
+    "text": "Non-inferiority of ultra-hypofractionation versus hypofractionation for 3-year bladder-intact event-free survival. The margin is 10% (50% to 40%), corresponding to a hazard ratio below 1.32."
+   }
+  ],
+  "eligibility": [
+   "Histologic cT2-T3N0M0 urothelial carcinoma. Mixed urothelial carcinoma is allowed. Small cell carcinoma is not.",
+   "One TURBT before randomization. Maximal resection is attempted. Complete or partial resection are both allowed. A repeat TURBT after the initial TURBT is not required.",
+   "The window from TURBT pathology to randomization is 180 days. It extends to 240 days only when the patient has completed at least 3 cycles of neoadjuvant chemotherapy.",
+   "Staging of chest, abdomen, and pelvis with CT or MRI, or FDG PET, before randomization. No T4, node-positive, or metastatic disease. A node of 1.0 cm or larger in short axis requires a biopsy showing no tumor.",
+   "No diffuse CIS on cystoscopy and biopsy. No prior pelvic radiation. No urothelial carcinoma outside the bladder within 24 months, except upper-tract Ta, T1, or CIS after complete nephroureterectomy.",
+   "Age 18 or older. Zubrod performance status 0-2."
+  ],
+  "pretreatment": [
+   {
+    "item": "Performance status",
+    "window": "At most 90 days before registration",
+    "note": ""
+   },
+   {
+    "item": "TURBT",
+    "window": "At most 180 days before registration",
+    "note": "Extended to at most 240 days before randomization only after at least 3 cycles of neoadjuvant chemotherapy. A repeat TURBT is not required."
+   },
+   {
+    "item": "Urine cytology",
+    "window": "At most 90 days before registration",
+    "note": ""
+   },
+   {
+    "item": "Staging imaging",
+    "window": "At most 90 days before registration",
+    "note": "CT of chest, abdomen, and pelvis, or CT of chest and abdomen plus MRI of the pelvis, or FDG PET-CT."
+   },
+   {
+    "item": "Total bilirubin, AST, ALT, creatinine",
+    "window": "At most 90 days before registration",
+    "note": ""
+   },
+   {
+    "item": "ANC, platelets, hemoglobin",
+    "window": "At most 90 days before registration",
+    "note": ""
+   },
+   {
+    "item": "Pregnancy test",
+    "window": "At most 14 days before registration",
+    "note": "Persons of childbearing potential."
+   },
+   {
+    "item": "PRO-CTCAE and FACT-BL",
+    "window": "Before treatment, cycle 1 day 1",
+    "note": "The pretreatment table does not give these a day window."
+   }
+  ]
+ },
+ "NRG-GY032": {
+  "version_date": "2025-07-31",
+  "posted": "29-Sep-2025"
+ },
+ "NRG-GY037": {
+  "version_date": "2026-08-04",
+  "posted": "09-Sep-2026",
+  "amendments": [
+   {
+    "date": "August 13, 2025",
+    "text": "Initial protocol."
+   },
+   {
+    "date": "August 04, 2026",
+    "text": "Amendment 1, the latest date in the document history. The opening pages do not summarize what changed."
+   }
+  ]
+ },
+ "NRG-HN014": {
+  "version_date": "2025-09-12",
+  "posted": "08-Dec-2025",
+  "amendments": [
+   {
+    "date": "September 23, 2024",
+    "text": "Initial protocol."
+   },
+   {
+    "date": "September 12, 2025",
+    "text": "Amendment 1, the latest date in the document history. The opening pages do not summarize what changed."
+   }
+  ]
+ },
+ "NRG-HN015": {
+  "version_date": "2025-10-10",
+  "posted": "12-Jan-2026",
+  "amendments": [
+   {
+    "date": "October 10, 2025",
+    "text": "Initial protocol. The document history lists no later amendment."
+   }
+  ]
+ },
+ "NRG-HN016": {
+  "version_date": "2026-04-20",
+  "posted": "10-Jun-2026",
+  "amendments": [
+   {
+    "date": "April 20, 2026",
+    "text": "Initial protocol. The document history lists no later amendment."
+   }
+  ]
+ },
+ "NRG-LU007": {
+  "version_date": "2025-03-13",
+  "posted": "02-Apr-2025"
+ },
+ "NRG-LU008": {
+  "version_date": "2025-08-05",
+  "posted": "22-Sep-2025",
+  "amendments": [
+   {
+    "date": "March 30, 2023",
+    "text": "Initial protocol."
+   },
+   {
+    "date": "May 28, 2024",
+    "text": "Amendment 1. The opening pages do not summarize what changed."
+   },
+   {
+    "date": "October 17, 2024",
+    "text": "Amendment 2. The opening pages do not summarize what changed."
+   },
+   {
+    "date": "August 5, 2025",
+    "text": "Amendment 3, the latest date in the document history. The opening pages do not summarize what changed."
+   }
+  ]
+ },
+ "RTOG-1216": {
+  "version_date": "2026-02-24",
+  "posted": "23-Mar-2026"
+ },
+ "S1802": {
+  "version_date": "2024-06-07",
+  "posted": "16-Aug-2024"
+ },
+ "S2409": {
+  "version_date": "2026-03-03",
+  "posted": "15-May-2026"
+ },
+ "S2427": {
+  "version_date": "2026-08-07",
+  "posted": "08-Sep-2026",
+  "amendments": [
+   {
+    "date": "August 7, 2026",
+    "text": "Protocol version date on the file. CTSU posted this version on September 8, 2026. The PDF has no document history and no section-level summary of what changed."
+   }
+  ],
+  "schema": [
+   {
+    "label": "Muscle-invasive disease",
+    "text": "Histologic cT2-T4aN0 urothelial carcinoma of the bladder."
+   },
+   {
+    "label": "Neoadjuvant therapy",
+    "text": "Physician's choice, limited to the FDA-approved regimens in the eligibility criteria."
+   },
+   {
+    "label": "Response assessment",
+    "text": "cT0 or cT1 on a repeat TURBT with systematic biopsies. That TURBT is within 90 days before registration."
+   },
+   {
+    "label": "Registration",
+    "text": "Within 90 days after the last neoadjuvant dose."
+   },
+   {
+    "label": "Treatment",
+    "text": "Bladder radiotherapy plus pembrolizumab for 1 year. Central radiation-plan approval is required before treatment starts. Radiotherapy is whole bladder only, 55 Gy in 20 fractions of 2.75 Gy, with no pelvic nodes and no tumor boost."
+   },
+   {
+    "label": "On-study assessment",
+    "text": "Cystoscopy, cytology, and imaging."
+   },
+   {
+    "label": "Endpoint",
+    "text": "3-year bladder-intact event-free survival. Follow-up continues for 5 years after registration."
+   }
+  ],
+  "eligibility": [
+   "Histologic cT2-T4aN0M0 muscle-invasive urothelial carcinoma of the bladder within 180 days before neoadjuvant therapy starts. Staging CT, MRI, or PET of the chest, abdomen, and pelvis within 60 days before neoadjuvant therapy.",
+   "After neoadjuvant therapy, a repeat TURBT must show cT0 or cT1. It biopsies the prior disease and systematic sites (left and right lateral walls, dome, posterior wall, and trigone), with at least 4 of 5 systematic biopsies. The TURBT is within 60 days after the last neoadjuvant dose and within 90 days before registration.",
+   "No cT2 or higher, N1-3, or M1 disease after neoadjuvant therapy. A node of 1.0 cm or larger in short axis after neoadjuvant therapy needs PET-CT within 70 days before registration. A PET-positive node is ineligible unless biopsy shows no tumor.",
+   "At least 3 and no more than 6 cycles of FDA-approved neoadjuvant therapy: cisplatin-based combination chemotherapy, with or without a PD-1/L1 inhibitor; dose-dense or accelerated MVAC; or enfortumab vedotin with a PD-1/L1 inhibitor.",
+   "No small cell, neuroendocrine, or plasmacytoid histology. Mixed histology is allowed when more than half of the tumor is urothelial carcinoma. No prior pelvic radiotherapy.",
+   "The primary objective is written for clinically T0 or T1 disease without multifocal CIS. That CIS phrase is not an eligibility criterion."
+  ],
+  "pretreatment": [
+   {
+    "item": "Histologic cT2-T4aN0M0",
+    "window": "Within 180 days before neoadjuvant therapy starts",
+    "note": "Confirms muscle-invasive disease before systemic therapy."
+   },
+   {
+    "item": "Staging CT, MRI, or PET of chest, abdomen, and pelvis",
+    "window": "Within 60 days before neoadjuvant therapy",
+    "note": "Sets the pre-treatment stage."
+   },
+   {
+    "item": "Repeat TURBT with systematic biopsies",
+    "window": "Within 60 days after the last neoadjuvant dose, and within 90 days before registration",
+    "note": "Must show cT0 or cT1. At least 4 of 5 systematic sites, plus the areas of prior disease."
+   },
+   {
+    "item": "Restaging chest, abdomen, and pelvis imaging",
+    "window": "Within 60 days after the last neoadjuvant dose",
+    "note": "CT or MRI, contrast preferred, or FDG PET-CT."
+   },
+   {
+    "item": "PET-CT for a node 1.0 cm or larger after neoadjuvant therapy",
+    "window": "Within 70 days before registration",
+    "note": "A PET-positive node requires a biopsy showing no tumor."
+   },
+   {
+    "item": "History and physical, CBC, chemistry, creatinine",
+    "window": "Within 28 days before registration",
+    "note": "The study calendar places these in the pre-registration column."
+   },
+   {
+    "item": "Registration",
+    "window": "Within 90 days after the last neoadjuvant dose",
+    "note": "Pembrolizumab is planned within 28 days after registration. Radiotherapy starts within 7 days of pembrolizumab and within 35 days after registration."
+   }
+  ]
+ },
+ "S2505": {
+  "version_date": "2026-05-20",
+  "posted": "06-Jul-2026"
+ },
+ "S2511": {
+  "version_date": "2026-06-25",
+  "posted": "18-Aug-2026"
+ }
+}

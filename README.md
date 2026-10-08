@@ -15,7 +15,7 @@ Set up October 7, 2026. Accrual history starts that day. GitHub Actions takes on
 - **My trials** starts empty. Users add trials one at a time from a search box (protocol number, NCT number, acronym, or title words) or with the star next to any study. The list drives the trial cards and the accrual charts.
 - The list is saved in the browser. **Copy share link** produces a URL with the protocol numbers (`?trials=NRG-GU013,S2427`); opening it offers to save that list.
 - **Sign in with Google** (optional) saves the list to Firestore so it follows the user across devices. The button appears only after the Firebase setup below.
-- **Explore CTSU studies** defaults to RT-related and open studies. The accrual pace panel lists the fastest and slowest accruing open studies that match the current filters (open at least 6 months, below target), by patients per month or % of target per month.
+- **Explore CTSU studies** defaults to RT-related and open studies, with phase I hidden. The accrual pace panel lists the fastest accruing open studies that match the current filters (open at least 6 months, below target), by patients per month or % of target per month. The study table is alphabetical by protocol. Column headings sort by protocol, lead group, disease site, or phase, and the filters narrow the same list. Opening a study shows a protocol brief when one is on file: version date, CTSU update date, amendment dates, schema, eligibility, and pre-treatment windows. Briefs are renditions, not copies of the protocol.
 
 ## How it works
 
@@ -45,7 +45,13 @@ CTSU publishes study-wide actual and planned intervention accrual (all sites, no
 
 Protocol PDFs live only in `protocols/` on Jeff's Mac (excluded from git, per the CTSU terms of use). `protocols/manifest.json` records version, CTSU document ID, and status for each study. ETCTN and PEP-CTN documents are restricted to member sites and are not available to this account.
 
-To refresh protocols, sign in to CTSU (ID.me) in the automation Chrome window, then run `scripts/update_local.sh --protocols`. The CTSU session expires, so expect to sign in again for each protocol check.
+The public protocol list (`ctsu.cancer.gov/protocol` and its browse feed) does not need a login. Anything on the CTSU member site (`www.ctsu.org`), including protocol PDFs and amendment checks, does.
+
+Before opening the member site, prompt Jeff to sign in with ID.me in the automation Chrome window and wait until that sign-in is finished. Do not try the member site while logged out, and do not ask for or type the ID.me password. Skip the prompt when the public feed is enough.
+
+To refresh protocols, have Jeff complete that sign-in, then run `scripts/update_local.sh --protocols`. The CTSU session expires, so expect a new sign-in for each protocol check.
+
+`scripts/check_protocol_updates.sh` refreshes the public study list, then checks the current protocol document for every active RT study. It appends `logs/protocol_changes.md` (local only, with the PDFs). A new protocol version is downloaded beside the previous file, and the log quotes the amendment memorandum or the summary-of-changes text from the opening pages. The launchd definition for a Sunday 7:00 PM local check is `launchd/com.jeffryckman.ctsuProtocolCheck.plist`. It runs only after it is copied into `~/Library/LaunchAgents` and loaded. If the Mac is asleep at that hour, that week is skipped. If the CTSU session is signed out, the script writes that in the log and opens the login page so Jeff can use ID.me.
 
 ## Google sign-in setup (one time)
 

@@ -44,6 +44,7 @@ STUDIES_JSON = DATA / "studies.json"
 CONFIG = ROOT / "config" / "institution_trials.json"
 OVERRIDES = ROOT / "config" / "rt_overrides.json"
 MANIFEST = ROOT / "protocols" / "manifest.json"
+BRIEFS = DATA / "protocol_briefs.json"
 TEMPLATE = ROOT / "dashboard" / "template.html"
 DASHBOARD = ROOT / "dashboard" / "index.html"
 PUBLIC_SITE = ROOT / "docs" / "index.html"
@@ -302,6 +303,32 @@ def compress_history(points):
     return out
 
 
+def attach_briefs(studies, manifest):
+    """Clinical renditions live in data/protocol_briefs.json. A local manifest fills a
+    missing version date, and a newer file on disk replaces the displayed date."""
+    briefs = load_json(BRIEFS, {})
+    for study in studies:
+        proto = study["protocol"]
+        brief = dict(briefs.get(proto) or {})
+        doc = manifest.get(proto) or {}
+        file_version = doc.get("version")
+        if file_version and not brief.get("version_date"):
+            brief["version_date"] = file_version
+            brief["version_label"] = doc.get("label")
+            brief["posted"] = doc.get("posted")
+        elif file_version and brief.get("version_date") and brief["version_date"] != file_version:
+            brief["amendments"] = list(brief.get("amendments") or []) + [{
+                "date": file_version,
+                "text": "The protocol file on disk is newer than this brief. What changed has not been reviewed.",
+            }]
+            brief["version_date"] = file_version
+            brief.pop("version_label", None)
+            if doc.get("posted"):
+                brief["posted"] = doc["posted"]
+        if brief:
+            study["brief"] = brief
+
+
 # ------------------------------------------------------------------- Build
 
 def build(protocols, history, fetched_at, today):
@@ -362,6 +389,8 @@ def build(protocols, history, fetched_at, today):
             "protocol_on_file": bool(doc.get("files")),
             "protocol_version": doc.get("version"),
         })
+
+    attach_briefs(studies, manifest)
 
     missing = sorted(set(ours) - {s["protocol"] for s in studies})
     rt = [s for s in studies if s["rt_related"]]

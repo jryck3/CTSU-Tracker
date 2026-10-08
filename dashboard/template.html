@@ -86,8 +86,6 @@
   .check:has(input:checked) { border-color: var(--accent); background: #ebf4ff; color: var(--navy); }
   .count { color: var(--muted); font-size: 12.5px; margin-left: auto; }
   .pace { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; background: #fbfcfe; }
-  .pace-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
-  @media (max-width: 900px) { .pace-grid { grid-template-columns: minmax(0, 1fr); } }
   .pace h4 { margin: 2px 0 4px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
   .pace-list { list-style: none; margin: 0; padding: 0; }
   .pace-list li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 8px 0; border-top: 1px solid var(--line); }
@@ -111,6 +109,25 @@
   tr.detail td { background: #fafbfd; font-size: 12.5px; }
   .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 6px 18px; }
   .detail-grid b { color: var(--muted); font-weight: 600; }
+  .brief { margin-top: 14px; display: grid; gap: 14px; }
+  .brief h4 { margin: 0 0 6px; font-size: 13px; color: var(--navy); }
+  .brief .caveat { margin: 0; color: var(--muted); font-size: 12px; }
+  .flow { list-style: none; margin: 0; padding: 0; }
+  .flow li { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 10px; }
+  .flow li + li { margin-top: 0; }
+  .flow .rail { display: flex; flex-direction: column; align-items: center; }
+  .flow .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); margin-top: 4px; flex: none; }
+  .flow .line { width: 2px; flex: 1; background: #c5d4e8; min-height: 12px; }
+  .flow .step-body { padding-bottom: 10px; }
+  .flow .step-body b { display: block; color: var(--navy); }
+  .arms { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin: 8px 0 0; }
+  .arm { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; background: #fff; }
+  .arm b { color: var(--navy); }
+  .brief ul { margin: 0; padding-left: 18px; }
+  .brief li { margin: 3px 0; }
+  .pre { width: 100%; border-collapse: collapse; font-size: 12.5px; background: #fff; }
+  .pre th, .pre td { border: 1px solid var(--line); padding: 5px 8px; text-align: left; vertical-align: top; }
+  .pre th { background: #f4f7fb; color: var(--muted); font-weight: 600; }
   a { color: var(--accent); }
   .btn { font: inherit; font-size: 12.5px; padding: 5px 11px; border-radius: 6px; border: 1px solid var(--accent); background: #fff; color: var(--accent); cursor: pointer; }
   .btn.on { background: var(--accent); color: #fff; }
@@ -191,7 +208,8 @@
       <input id="q" type="search" placeholder="Search protocol, title, NCT, acronym, disease" aria-label="Search studies">
       <label class="check"><input type="checkbox" id="f-rt" checked> RT-related</label>
       <label class="check"><input type="checkbox" id="f-open" checked> Open to accrual</label>
-      <select id="f-disease" aria-label="Disease"><option value="">All diseases</option></select>
+      <label class="check"><input type="checkbox" id="f-phase1"> Show phase I</label>
+      <select id="f-disease" aria-label="Site"><option value="">All sites</option></select>
       <select id="f-lead" aria-label="Lead group"><option value="">All lead groups</option></select>
       <select id="f-role" aria-label="RT role"><option value="">Any RT role</option></select>
       <select id="f-phase" aria-label="Phase"><option value="">Any phase</option></select>
@@ -199,7 +217,7 @@
       <span class="count" id="count"></span>
     </div>
 
-    <div class="pace">
+      <div class="pace">
       <div class="chart-head">
         <h3 id="pace-h">Accrual pace</h3>
         <div class="seg" role="group" aria-label="Pace measure">
@@ -207,10 +225,8 @@
           <button id="pace-pct" aria-pressed="false">% of target per month</button>
         </div>
       </div>
-      <div class="pace-grid">
-        <div><h4>Fastest accruing</h4><ol class="pace-list" id="fast"></ol></div>
-        <div><h4>Slowest accruing</h4><ol class="pace-list" id="slow"></ol></div>
-      </div>
+      <h4>Fastest accruing</h4>
+      <ol class="pace-list" id="fast"></ol>
       <div class="note" id="pace-note"></div>
     </div>
 
@@ -228,7 +244,8 @@
       <li><b>Accrual</b> comes from the public CTSU Protocol List (<a href="https://ctsu.cancer.gov/protocol" target="_blank" rel="noopener">ctsu.cancer.gov/protocol</a>), which lists active and temporarily closed NCI trials open to cross-group participation and reports actual over planned intervention accrual. These are study-wide totals across all sites, not accrual at any one institution.</li>
       <li><b>History</b> is built from one CTSU snapshot per day, starting <span id="hist-start"></span>. CTSU does not publish past accrual, so the line from the study start date to the first snapshot is a straight-line interpolation (dashed), not observed data.</li>
       <li><b>Average rate</b> = current accrual divided by months since the actual study start date on ClinicalTrials.gov. Early ramp-up makes this lower than the current rate for most young trials. <b>Recent rate</b> = change over the last 30 days of snapshots, scaled to a month. <b>Projected target date</b> assumes the average rate continues.</li>
-      <li><b>Accrual pace</b> ranks open studies that match the explorer filters, have been open at least 6 months, and have not reached their target. <i>Patients per month</i> favors large trials; <i>% of target per month</i> adjusts for trial size.</li>
+      <li><b>Accrual pace</b> lists the fastest open studies that match the explorer filters, have been open at least 6 months, and have not reached their target. <i>Patients per month</i> favors large trials; <i>% of target per month</i> adjusts for trial size. The study table under that list is alphabetical by protocol until a column heading is used to sort it.</li>
+      <li><b>Protocol brief</b> on an opened study is a rendition of the current protocol on file: schema, eligibility points that change who can enroll, pre-registration assessments, and amendment dates. It is not a copy of the protocol page. Confirm the current protocol before enrollment.</li>
       <li><b>RT classification</b> uses ClinicalTrials.gov interventions and titles. <i>RT-focused</i>: RT named in the title. <i>RT component</i>: protocol-specified RT intervention (often part of the treatment backbone). <i>Radiopharmaceutical</i>: therapeutic isotope (for example Lu-177, Ac-225) without external-beam RT. Imaging tracers and MUGA scans are excluded. Manual overrides are listed in the evidence for each study.</li>
       <li id="m-sync"></li>
     </ul>
@@ -559,7 +576,7 @@ function card(s, color) {
 function renderMine() {
   $("share").disabled = $("clear").disabled = !store.list.length;
   if (!store.list.length) {
-    $("mine").innerHTML = `<div class="empty"><p><b>No trials selected.</b> Search above to add trials one at a time, for example the trials open at your institution, or click ☆ next to any study below. The fastest and slowest accruing open studies are shown in the explorer as examples.</p></div>`;
+    $("mine").innerHTML = `<div class="empty"><p><b>No trials selected.</b> Search above to add trials one at a time, for example the trials open at your institution, or click ☆ next to any study below. The fastest accruing open studies are shown in the explorer as examples.</p></div>`;
     return;
   }
   const col = colors();
@@ -666,6 +683,7 @@ $("y-n").onclick = () => setY("n");
 const COLS = [
   {k: "protocol", l: "Protocol"},
   {k: "lead", l: "Lead"},
+  {k: "disease", l: "Site"},
   {k: "phase", l: "Phase"},
   {k: "title", l: "Title"},
   {k: "rt_role", l: "RT role"},
@@ -675,8 +693,8 @@ const COLS = [
   {k: "start_date", l: "Start"},
   {k: "projected_completion", l: "Projected"},
 ];
-const DEFAULTS = {q: "", rt: true, openOnly: true, disease: "", lead: "", role: "", phase: ""};
-const state = {...DEFAULTS, sort: "pct", dir: -1, expanded: new Set()};
+const DEFAULTS = {q: "", rt: true, openOnly: true, showPhase1: false, disease: "", lead: "", role: "", phase: ""};
+const state = {...DEFAULTS, sort: "protocol", dir: 1, expanded: new Set()};
 let paceMode = "n";
 
 function fillSelect(id, values) {
@@ -688,10 +706,15 @@ fillSelect("f-disease", S.flatMap(s => (s.disease || "").split(";").map(x => x.t
 fillSelect("f-role", S.map(s => s.rt_role));
 fillSelect("f-phase", S.map(s => s.phase));
 
+function isPhase1(s) {
+  return String(s.phase) === "1";
+}
+
 function matches(s, ignoreStatus = false) {
   const q = state.q.toLowerCase();
   return (!state.rt || s.rt_related) &&
     (ignoreStatus || !state.openOnly || s.status === "Active") &&
+    (state.showPhase1 || state.phase === "1" || !isPhase1(s)) &&
     (!state.lead || s.lead === state.lead) &&
     (!state.disease || (s.disease || "").split(";").map(x => x.trim()).includes(state.disease)) &&
     (!state.role || s.rt_role === state.role) &&
@@ -735,15 +758,12 @@ function renderPace() {
   const elig = S.filter(s => matches(s, true) && s.status === "Active" && s.avg_rate != null &&
     s.months_open >= PACE_MIN_MONTHS && !(s.target && s.accrual >= s.target) && (paceMode === "n" || s.pct != null));
   elig.sort((a, b) => paceValue(b) - paceValue(a));
-  const nFast = Math.min(PACE_N, Math.ceil(elig.length / 2));
-  const fast = elig.slice(0, nFast);
-  const slow = elig.slice(nFast).slice(-PACE_N).reverse();
+  const fast = elig.slice(0, Math.min(PACE_N, elig.length));
   const none = '<li class="none">No eligible studies for these filters.</li>';
   $("fast").innerHTML = fast.map(paceItem).join("") || none;
-  $("slow").innerHTML = slow.map(paceItem).join("") || none;
   const t = scopeText();
   $("pace-h").textContent = `Accrual pace: ${t}`;
-  $("pace-note").textContent = `Average accrual since activation, ranked among ${elig.length} ${t} that have been accruing at least ${PACE_MIN_MONTHS} months and are below target. Click ☆ to add a study to My trials.`;
+  $("pace-note").textContent = `Fastest accrual since activation among ${elig.length} ${t} that have been accruing at least ${PACE_MIN_MONTHS} months and are below target. The table below is alphabetical by protocol. Click a column heading to sort, or use the filters for lead group, disease site, and phase. Click ☆ to add a study to My trials.`;
 }
 
 function renderHead() {
@@ -754,6 +774,44 @@ function renderHead() {
     if (state.sort === k) state.dir *= -1; else { state.sort = k; state.dir = ["pct", "avg_rate", "accrual"].includes(k) ? -1 : 1; }
     render();
   });
+}
+
+function postedLabel(v) {
+  if (!v) return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return fmtDate(v);
+  const m = /^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/.exec(v);
+  if (!m) return v;
+  const months = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+  const d = new Date(Number(m[3]), months[m[2]], Number(m[1]));
+  return Number.isNaN(d.getTime()) ? v : d.toLocaleDateString("en-US", {year: "numeric", month: "short", day: "numeric"});
+}
+
+function briefHtml(s) {
+  const b = s.brief;
+  if (!b) return "";
+  const version = b.version_label || (b.version_date ? postedLabel(b.version_date) : "");
+  const posted = postedLabel(b.posted);
+  const steps = (b.schema || []).map((step, i) => {
+    const arms = (step.arms || []).map(arm => `<div class="arm"><b>${esc(arm.label)}</b><div>${esc(arm.text)}</div></div>`).join("");
+    return `<li>
+      <div class="rail"><span class="dot"></span>${i < b.schema.length - 1 ? `<span class="line"></span>` : ""}</div>
+      <div class="step-body"><b>${esc(step.label)}</b>${step.text ? `<div>${esc(step.text)}</div>` : ""}${arms ? `<div class="arms">${arms}</div>` : ""}${step.note ? `<p class="caveat">${esc(step.note)}</p>` : ""}</div>
+    </li>`;
+  }).join("");
+  const eligibility = (b.eligibility || []).map(item => `<li>${esc(item)}</li>`).join("");
+  const preRows = (b.pretreatment || []).map(row => `<tr><td>${esc(row.item)}</td><td>${esc(row.window)}</td><td>${esc(row.note || "")}</td></tr>`).join("");
+  const amendments = (b.amendments || []).map(item => `<li><b>${esc(item.date)}</b> ${esc(item.text)}</li>`).join("");
+  return `<div class="brief">
+    <p class="caveat">Rendition of the current protocol on file, not a copy of the protocol page. Confirm the protocol before enrollment.</p>
+    ${(version || posted) ? `<div class="detail-grid">
+      ${version ? `<div><b>Protocol version date</b><br>${esc(version)}</div>` : ""}
+      ${posted ? `<div><b>Last updated on CTSU</b><br>${esc(posted)}</div>` : ""}
+    </div>` : ""}
+    ${amendments ? `<div><h4>Amendments</h4><ul>${amendments}</ul></div>` : ""}
+    ${steps ? `<div><h4>Schema</h4><ol class="flow">${steps}</ol></div>` : ""}
+    ${eligibility ? `<div><h4>Eligibility</h4><ul>${eligibility}</ul></div>` : ""}
+    ${preRows ? `<div><h4>Pre-treatment assessments</h4><table class="pre"><thead><tr><th>Assessment</th><th>Window</th><th>Note</th></tr></thead><tbody>${preRows}</tbody></table></div>` : ""}
+  </div>`;
 }
 
 function detailRow(s) {
@@ -772,6 +830,7 @@ function detailRow(s) {
       ${DATA.local ? `<div><b>Protocol document</b><br>${s.protocol_on_file ? "On file locally" + (s.protocol_version ? ", version " + esc(s.protocol_version) : "") : "Not downloaded"}</div>` : ""}
       <div style="grid-column: 1 / -1"><b>RT evidence</b><br>${ev}</div>
     </div>
+    ${briefHtml(s)}
     <div style="margin-top:8px"><button class="btn${on ? " on" : ""}" type="button" data-star="${esc(s.protocol)}">${on ? "Remove from My trials" : "Add to My trials"}</button></div>
   </td></tr>`;
 }
@@ -785,6 +844,7 @@ function render() {
       <td class="star-col">${starBtn(s.protocol)}</td>
       <td><b>${esc(s.protocol)}</b>${s.alias ? `<div class="muted" style="font-size:12px">${esc(s.alias)}</div>` : ""}</td>
       <td>${esc(s.lead)}</td>
+      <td>${esc(s.disease)}</td>
       <td>${esc(s.phase)}</td>
       <td class="title-cell">${esc(s.title)}</td>
       <td>${roleChip(s.rt_role)}</td>
@@ -818,12 +878,14 @@ function syncFilterInputs() {
   $("q").value = state.q;
   $("f-rt").checked = state.rt;
   $("f-open").checked = state.openOnly;
+  $("f-phase1").checked = state.showPhase1;
   [["f-disease", "disease"], ["f-lead", "lead"], ["f-role", "role"], ["f-phase", "phase"]].forEach(([id, k]) => { $(id).value = state[k]; });
 }
 
 $("q").oninput = e => { state.q = e.target.value; render(); };
 $("f-rt").onchange = e => { state.rt = e.target.checked; render(); };
 $("f-open").onchange = e => { state.openOnly = e.target.checked; render(); };
+$("f-phase1").onchange = e => { state.showPhase1 = e.target.checked; render(); };
 [["f-disease", "disease"], ["f-lead", "lead"], ["f-role", "role"], ["f-phase", "phase"]].forEach(([id, k]) =>
   $(id).onchange = e => { state[k] = e.target.value; render(); });
 $("reset").onclick = () => { Object.assign(state, DEFAULTS); syncFilterInputs(); render(); };
