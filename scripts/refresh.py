@@ -325,6 +325,7 @@ def attach_briefs(studies, manifest):
             brief.pop("version_label", None)
             if doc.get("posted"):
                 brief["posted"] = doc["posted"]
+        brief.pop("locked", None)
         if brief:
             study["brief"] = brief
 

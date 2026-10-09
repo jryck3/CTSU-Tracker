@@ -1,5 +1,5 @@
 #!/bin/bash
-# Weekly check of the current CTSU protocol document for open RT studies.
+# Weekly check of the current CTSU protocol document for every study on the list.
 # Needs the automation Chrome signed in with ID.me. If the session is signed
 # out, this records that in logs/protocol_changes.md and opens the CTSU login.
 set -u
@@ -13,7 +13,7 @@ mkdir -p logs
 PORT=$(bash "$WORKSPACE/tools/launch_chrome_debug.sh" "${CTSU_SESSION_KEY:-ctsu-9fa22944}" | tail -1)
 err=$(mktemp)
 set +e
-"$PY" scripts/download_protocols.py --port "$PORT" --open-only 2>"$err"
+"$PY" scripts/download_protocols.py --port "$PORT" 2>"$err"
 code=$?
 set -e
 if [ -s "$err" ]; then

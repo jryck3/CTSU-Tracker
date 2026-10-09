@@ -9,15 +9,15 @@ Do not call it while logged out. Requests go through that browser's session
 cookies. Protocol documents are for site use under the CTSU terms of use and
 stay on this machine.
 
-Target list: every RT-related study in data/studies.json plus the institution
-trials in config/institution_trials.json (run scripts/refresh.py first).
+Target list: every study in data/studies.json (run scripts/refresh.py first).
 --open-only limits the check to RT studies whose CTSU status is Active.
+--rt-only limits it to RT-related studies plus institution trials.
 Re-running is safe: a protocol whose current document ID is already on file is
 skipped, and an amended protocol is downloaded alongside the older version.
 Each run appends logs/protocol_changes.md.
 
 Usage:
-    python3 scripts/download_protocols.py --port 9223 [--open-only] [--only NRG-GU013 S2427] [--dry-run]
+    python3 scripts/download_protocols.py --port 9223 [--only NRG-GU013 S2427] [--open-only] [--rt-only] [--dry-run]
 """
 import argparse
 import html
@@ -186,16 +186,18 @@ def annotate_pdf(path):
     return snippet
 
 
-def targets(only, open_only):
+def targets(only, open_only, rt_only):
     data = json.loads(STUDIES.read_text())
     if only:
         wanted = set(only)
         rows = [s for s in data["studies"] if s["protocol"] in wanted]
     elif open_only:
         rows = [s for s in data["studies"] if s["rt_related"] and s.get("status") == "Active"]
-    else:
+    elif rt_only:
         rows = [s for s in data["studies"] if s["rt_related"] or s["ours"]]
-    return [(s["protocol"], s["lead"], s["rt_role"]) for s in rows]
+    else:
+        rows = list(data["studies"])
+    return [(s["protocol"], s["lead"], s.get("rt_role")) for s in rows]
 
 
 def append_log(checked, summary, notes, baseline):
@@ -263,13 +265,14 @@ def main():
     ap.add_argument("--port", type=int, required=True, help="CDP port of the signed-in automation Chrome")
     ap.add_argument("--only", nargs="*", help="Limit to these protocol numbers")
     ap.add_argument("--open-only", action="store_true", help="Active RT-related studies only")
+    ap.add_argument("--rt-only", action="store_true", help="RT-related studies and institution trials only")
     ap.add_argument("--dry-run", action="store_true", help="Find documents without downloading")
     args = ap.parse_args()
 
     manifest = json.loads(MANIFEST.read_text()) if MANIFEST.exists() else {}
     summary = {"downloaded": [], "unchanged": [], "memos": [], "unavailable": [], "errors": []}
     notes = []
-    rows = targets(args.only, args.open_only)
+    rows = targets(args.only, args.open_only, args.rt_only)
     baseline = None
     if not args.dry_run and not CHANGELOG.exists():
         baseline = [(proto, dict(manifest.get(proto, {}))) for proto, _lead, _role in rows]

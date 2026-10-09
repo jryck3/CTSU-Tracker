@@ -289,7 +289,7 @@
       <li><b>History</b> is built from one CTSU snapshot per day, starting <span id="hist-start"></span>. CTSU does not publish past accrual, so the line from the study start date to the first snapshot is a straight-line interpolation (dashed), not observed data.</li>
       <li><b>Average rate</b> = current accrual divided by months since the actual study start date on ClinicalTrials.gov. Early ramp-up makes this lower than the current rate for most young trials. <b>Recent rate</b> = change over the last 30 days of snapshots, scaled to a month. <b>Projected target date</b> assumes the average rate continues.</li>
       <li><b>Accrual pace</b> lists the fastest open studies that match the explorer filters, have been open at least 6 months, and have not reached their target. <i>Patients per month</i> favors large trials; <i>% of target per month</i> adjusts for trial size. The studies under that list start in protocol order. Column headings sort the table. On a phone, the same list is cards, with a Sort menu, and an opened study wraps to the screen.</li>
-      <li><b>Protocol brief</b> on an opened study is a rendition of the current protocol on file: schema, eligibility points that change who can enroll, pre-registration assessments, and amendment dates. It is not a copy of the protocol page. Confirm the current protocol before enrollment.</li>
+      <li><b>Protocol brief</b> on an opened study is a rendition of the current protocol on file: amendments, schema, eligibility, pre-treatment assessments, assessments during treatment, assessments in follow-up, the study calendar, specimen collection, and data submission, including TRIAD when the protocol requires it. A section is omitted when that protocol does not contain it. It is not a copy of the protocol page. Confirm the current protocol before enrollment.</li>
       <li><b>RT classification</b> uses ClinicalTrials.gov interventions and titles. <i>RT-focused</i>: RT named in the title. <i>RT component</i>: protocol-specified RT intervention (often part of the treatment backbone). <i>Radiopharmaceutical</i>: therapeutic isotope (for example Lu-177, Ac-225) without external-beam RT. Imaging tracers and MUGA scans are excluded. Manual overrides are listed in the evidence for each study.</li>
       <li id="m-sync"></li>
     </ul>
@@ -843,8 +843,14 @@ function briefHtml(s) {
     </li>`;
   }).join("");
   const eligibility = (b.eligibility || []).map(item => `<li>${esc(item)}</li>`).join("");
-  const preRows = (b.pretreatment || []).map(row => `<tr><td>${esc(row.item)}</td><td>${esc(row.window)}</td><td>${esc(row.note || "")}</td></tr>`).join("");
+  const assessRows = (rows) => (rows || []).map(row => `<tr><td>${esc(row.item)}</td><td>${esc(row.window)}</td><td>${esc(row.note || "")}</td></tr>`).join("");
+  const preRows = assessRows(b.pretreatment);
+  const duringRows = assessRows(b.during);
+  const followRows = assessRows(b.followup);
+  const calendarRows = assessRows(b.calendar);
+  const specimenRows = assessRows(b.specimens);
   const amendments = (b.amendments || []).map(item => `<li><b>${esc(item.date)}</b> ${esc(item.text)}</li>`).join("");
+  const submission = (b.submission || []).map(item => `<li><b>${esc(item.label)}</b> ${esc(item.text)}</li>`).join("");
   return `<div class="brief">
     <p class="caveat">Rendition of the current protocol on file, not a copy of the protocol page. Confirm the protocol before enrollment.</p>
     ${(version || posted) ? `<div class="detail-grid">
@@ -855,6 +861,11 @@ function briefHtml(s) {
     ${steps ? `<div><h4>Schema</h4><ol class="flow">${steps}</ol></div>` : ""}
     ${eligibility ? `<div><h4>Eligibility</h4><ul>${eligibility}</ul></div>` : ""}
     ${preRows ? `<div><h4>Pre-treatment assessments</h4><table class="pre"><thead><tr><th>Assessment</th><th>Window</th><th>Note</th></tr></thead><tbody>${preRows}</tbody></table></div>` : ""}
+    ${duringRows ? `<div><h4>Assessments during treatment</h4><table class="pre"><thead><tr><th>Assessment</th><th>Timing</th><th>Note</th></tr></thead><tbody>${duringRows}</tbody></table></div>` : ""}
+    ${followRows ? `<div><h4>Assessments in follow-up</h4><table class="pre"><thead><tr><th>Assessment</th><th>Timing</th><th>Note</th></tr></thead><tbody>${followRows}</tbody></table></div>` : ""}
+    ${calendarRows ? `<div><h4>Study calendar</h4><table class="pre"><thead><tr><th>Assessment</th><th>Timing</th><th>Note</th></tr></thead><tbody>${calendarRows}</tbody></table></div>` : ""}
+    ${specimenRows ? `<div><h4>Specimen collection</h4><table class="pre"><thead><tr><th>Specimen</th><th>Timing</th><th>Note</th></tr></thead><tbody>${specimenRows}</tbody></table></div>` : ""}
+    ${submission ? `<div><h4>Data submission</h4><ul>${submission}</ul></div>` : ""}
   </div>`;
 }
 
