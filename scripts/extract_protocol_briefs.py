@@ -135,6 +135,11 @@ def page_lines(page):
             if parts:
                 prev = parts[-1]
                 gap = x - prev["x"]
+                # A wide gap is the next column, not the next word. Joining it
+                # splices a lab box into the eligibility line.
+                if gap > 40:
+                    parts.append({"x": x, "text": token, "size": size})
+                    continue
                 expected = max(len(prev["text"]) * prev["size"] * 0.42, prev["size"])
                 hyphen = token in {"-", "/"} or prev["text"].endswith("-")
                 if hyphen or gap <= expected * 0.72:
@@ -147,6 +152,9 @@ def page_lines(page):
             parts.append({"x": x, "text": token, "size": size})
         line["parts"] = parts
         line["text"] = clean(" ".join(part["text"] for part in parts))
+        xs = [part["x"] for part in parts]
+        if xs and max(xs) - min(xs) > 160 and any(part["x"] >= 300 for part in parts):
+            line["text"] = clean(" ".join(part["text"] for part in parts if part["x"] < 300))
     return lines
 
 
@@ -423,9 +431,10 @@ def eligibility_from(lines, protocol):
     def push(text):
         text = clean(text)
         text = re.sub(r"^(?:\d+(?:\.\d+){1,3}|[A-Z]\.|[\u2022\u25cf\-])\s*", "", text)
-        text = re.sub(r"\b(Yes|No)\b", "", text)
         text = clean(text.strip(" _:-"))
-        if len(text) < 25 or BOILER.search(text):
+        # Keep "No" and short lines such as "Age ≥ 18 years". The old cutoff
+        # deleted both, and exclusions then read as inclusions.
+        if len(text) < 8 or BOILER.search(text):
             return
         if len(text) > 420:
             text = text[:420].rsplit(" ", 1)[0]

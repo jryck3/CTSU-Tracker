@@ -8,6 +8,7 @@ data/ctgov/
 data/studies.json
 dashboard/index.html
 .tmp/
+.tools/
 
 .DS_Store
 __pycache__/
