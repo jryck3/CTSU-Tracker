@@ -85,8 +85,11 @@
   .filters input[type=search] { min-width: min(100%, 260px); flex: 1 1 220px; }
   .filters select { max-width: 220px; min-width: 0; width: 160px; }
   .phase-wrap { position: relative; }
-  .phase-btn { font: inherit; font-size: 13px; padding: 6px 9px; border: 1px solid var(--line); border-radius: 7px; background: #fff; cursor: pointer; min-width: 180px; text-align: left; }
-  .phase-panel { position: absolute; z-index: 6; top: calc(100% + 4px); left: 0; min-width: 210px; background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px rgba(20, 30, 50, .12); padding: 8px; display: grid; gap: 4px; }
+  .phase-btn { font: inherit; font-size: 13px; padding: 6px 28px 6px 9px; border: 1px solid var(--line); border-radius: 7px; background: #fff; cursor: pointer; min-width: 250px; text-align: left; position: relative; }
+  .phase-btn::after { content: "▾"; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 11px; }
+  .phase-btn[aria-expanded="true"]::after { content: "▴"; }
+  .phase-panel { position: absolute; z-index: 6; top: calc(100% + 4px); left: 0; min-width: 210px; background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px rgba(20, 30, 50, .12); padding: 8px; gap: 4px; }
+  .phase-panel:not([hidden]) { display: grid; }
   .phase-panel .check { width: 100%; }
   .m-sort { display: none; align-items: center; gap: 6px; font-size: 13px; }
   .check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 7px; background: #fff; cursor: pointer; user-select: none; }
@@ -255,7 +258,7 @@
       <select id="f-lead" aria-label="Lead group"><option value="">All lead groups</option></select>
       <select id="f-role" aria-label="RT role"><option value="">Any RT role</option></select>
       <div class="phase-wrap">
-        <button type="button" class="phase-btn" id="phase-btn" aria-expanded="false" aria-controls="phase-panel">All phases except I</button>
+        <button type="button" class="phase-btn" id="phase-btn" aria-expanded="false" aria-controls="phase-panel">All phases except Phase 0 and Phase 1</button>
         <div class="phase-panel" id="phase-panel" hidden></div>
       </div>
       <label class="m-sort">Sort
@@ -782,8 +785,10 @@ const COLS = [
 ];
 const DEFAULTS = {q: "", rt: true, status: "active", disease: "", lead: "", role: ""};
 const PHASE_LABELS = {"0": "0", "1": "1", "1/2": "Seamless 1/2", "2": "2", "2/3": "Seamless 2/3", "3": "3", "4": "4", "Other": "Other"};
+const PHASE_MENU = {"0": "Phase 0", "1": "Phase 1", "1/2": "Seamless 1/2", "2": "Phase 2", "2/3": "Seamless 2/3", "3": "Phase 3", "4": "Phase 4", "Other": "Other"};
 const PHASE_ORDER = ["0", "1", "1/2", "2", "2/3", "3", "4", "Other"];
 function phaseLabel(code) { return PHASE_LABELS[code] || code || ""; }
+function phaseMenuLabel(code) { return PHASE_MENU[code] || phaseLabel(code); }
 function phaseCodes() {
   const present = [...new Set(S.map(s => s.phase).filter(v => v != null && v !== ""))];
   const known = PHASE_ORDER.filter(code => present.includes(code));
@@ -791,7 +796,7 @@ function phaseCodes() {
   return [...known, ...extra];
 }
 const PHASE_CODES = phaseCodes();
-function defaultPhases() { return new Set(PHASE_CODES.filter(code => code !== "1")); }
+function defaultPhases() { return new Set(PHASE_CODES.filter(code => code !== "0" && code !== "1")); }
 const state = {...DEFAULTS, phases: defaultPhases(), sort: "protocol", dir: 1, expanded: new Set()};
 let paceMode = "n";
 
@@ -803,7 +808,7 @@ fillSelect("f-lead", S.map(s => s.lead));
 fillSelect("f-disease", S.flatMap(s => (s.disease || "").split(";").map(x => x.trim())));
 fillSelect("f-role", S.map(s => s.rt_role));
 $("phase-panel").innerHTML = `<label class="check"><input type="checkbox" id="phase-all"> All</label>` +
-  PHASE_CODES.map(code => `<label class="check"><input type="checkbox" name="phase" value="${esc(code)}"> ${esc(phaseLabel(code))}</label>`).join("");
+  PHASE_CODES.map(code => `<label class="check"><input type="checkbox" name="phase" value="${esc(code)}"> ${esc(phaseMenuLabel(code))}</label>`).join("");
 
 function statusSelected(s) {
   if (state.status === "all") return true;
@@ -1046,8 +1051,8 @@ function phaseButtonLabel() {
   if (!state.phases.size) return "No phase";
   const all = state.phases.size === PHASE_CODES.length;
   if (all) return "All phases";
-  if (phasesAreDefault()) return "All phases except I";
-  return PHASE_CODES.filter(code => state.phases.has(code)).map(phaseLabel).join(", ");
+  if (phasesAreDefault()) return "All phases except Phase 0 and Phase 1";
+  return PHASE_CODES.filter(code => state.phases.has(code)).map(phaseMenuLabel).join(", ");
 }
 
 function syncPhaseInputs() {
