@@ -15,7 +15,7 @@ Set up October 7, 2026. Accrual history starts that day. GitHub Actions takes on
 - **My trials** starts empty. Users add trials one at a time from a search box (protocol number, NCT number, acronym, or title words) or with the star next to any study. The list drives the trial cards and the accrual charts.
 - The list is saved in the browser. **Copy share link** produces a URL with the protocol numbers (`?trials=NRG-GU013,S2427`); opening it offers to save that list.
 - **Sign in with Google** (optional) saves the list to Firestore so it follows the user across devices. The button appears only after the Firebase setup below.
-- **Explore CTSU studies** defaults to RT-related and open studies, with phase I hidden. The accrual pace panel lists the fastest accruing open studies that match the current filters (open at least 6 months, below target), by patients per month or % of target per month. The study table is alphabetical by protocol. Column headings sort by protocol, lead group, disease site, or phase, and the filters narrow the same list. Opening a study shows a protocol brief when one is on file: version date, CTSU update date, amendments, schema, eligibility, pre-treatment assessments, assessments during treatment, assessments in follow-up, the study calendar, specimen collection, and data submission, including TRIAD when the protocol requires it. A section is omitted when that protocol does not contain it. Briefs are renditions, not copies of the protocol.
+- **Explore CTSU studies** defaults to RT-related and open studies. Phase is a checkbox menu. Phase I starts unchecked. Seamless 1/2 and Seamless 2/3 are the single-protocol phase codes. The status menu also selects Approved, not yet open (ClinicalTrials.gov Not yet recruiting, no CTSU accrual), temporarily closed studies, or every status on the list. Open means CTSU Active. The usual ClinicalTrials.gov pair is Recruiting, and the usual pair for either temporarily closed status is Suspended. An opened study shows the registry status, and the status cell names it when the pair differs. Trials that are closed to accrual, complete, or administratively complete are not on this list. The accrual pace panel lists the fastest accruing open studies that match the current filters (open at least 6 months, below target), by patients per month or % of target per month. The study table is alphabetical by protocol. Column headings sort by protocol, lead group, disease site, or phase, and the filters narrow the same list. Opening a study shows a protocol brief when one is on file: version date, CTSU update date, amendments, schema, eligibility, pre-treatment assessments, assessments during treatment, assessments in follow-up, the study calendar, specimen collection, and data submission, including TRIAD when the protocol requires it. A section is omitted when that protocol does not contain it. Briefs are renditions, not copies of the protocol.
 
 ## How it works
 
@@ -43,7 +43,17 @@ CTSU publishes study-wide actual and planned intervention accrual (all sites, no
 
 ## Protocol documents
 
-Protocol PDFs live only in `protocols/` on Jeff's Mac (excluded from git, per the CTSU terms of use). `protocols/manifest.json` records version, CTSU document ID, and status for each study. ETCTN and PEP-CTN documents are restricted to member sites and are not available to this account.
+`protocols/` on Jeff's Mac is the only CTSU protocol library. The PDFs are excluded from git, per the CTSU terms of use. Do not copy them into another project. `protocols/manifest.json` records version, CTSU document ID, and status for each study. A changed protocol is a new CIRB document id, or a new amendment memorandum id, on the signed-in Documents page. The PDF is saved only when that id changes. `checked_at` is the day that page was opened, not the day the protocol was amended. ETCTN and PEP-CTN documents are restricted to member sites and are not available to this account.
+
+Downloaders use `scripts/download_protocols.py` after an ID.me session on the CTSU automation Chrome. They do not download while logged out, and they do not type the password.
+
+- This project: `scripts/check_protocol_updates.sh` and `scripts/update_local.sh --protocols`.
+- WVU Trial Tracker: the protocol button and the Monday job, for the list in `Projects/WVU Trials Demo/data/ctsu_protocols.json`. The ClinicalTrials.gov ingest button does not download PDFs.
+- Patient Trial Matching: `download_queue.py` writes into this folder, not into that project.
+
+Readers do not log into CTSU. This dashboard reads `data/protocol_briefs.json` and the manifest. Worldwide RT Trials reads the public export, those briefs, and a local PDF when a schema is still missing. It does not take the Chrome lock.
+
+`scripts/ctsu_chrome_lock.py` is the one lock for the CTSU Chrome profile on this Mac. The WVU poller, the Monday job, a full-catalog check, and the Patient Trial Matching queue all honor it. The lock file is under `~/Library/Application Support/wvu-trial-tracker/` so it is not synced between computers.
 
 The public protocol list (`ctsu.cancer.gov/protocol` and its browse feed) does not need a login. Anything on the CTSU member site (`www.ctsu.org`), including protocol PDFs and amendment checks, does.
 

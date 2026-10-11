@@ -61,6 +61,7 @@ CTGOV_FIELDS = ",".join([
     "protocolSection.designModule",
     "protocolSection.armsInterventionsModule",
     "protocolSection.conditionsModule",
+    "protocolSection.sponsorCollaboratorsModule",
     "protocolSection.descriptionModule.briefSummary",
 ])
 CTGOV_MAX_AGE_DAYS = 7
@@ -211,6 +212,133 @@ def ctgov_record(nct):
     return cached.get("protocolSection", {}) if cached else {}
 
 
+def phase_code(phases):
+    nums = []
+    for item in phases or []:
+        item = str(item).upper().replace("PHASE", "")
+        if item in {"0", "1", "2", "3", "4"} and item not in nums:
+            nums.append(item)
+    if nums == ["1", "2"]:
+        return "1/2"
+    if nums == ["2", "3"]:
+        return "2/3"
+    if len(nums) == 1:
+        return nums[0]
+    if not nums:
+        return "Other"
+    return "/".join(nums)
+
+
+def short_lead(name):
+    name = name or ""
+    for needle, short in (
+        ("NRG Oncology", "NRG"),
+        ("ECOG-ACRIN", "ECOG-ACRIN"),
+        ("Alliance for Clinical Trials", "ALLIANCE"),
+        ("Children's Oncology Group", "COG"),
+        ("Canadian Cancer Trials Group", "CCTG"),
+        ("Radiation Therapy Oncology Group", "RTOG"),
+        ("NSABP", "NSABP"),
+        ("National Cancer Institute (NCI)", "NCI"),
+        ("SWOG", "SWOG"),
+    ):
+        if needle in name:
+            return short
+    return name
+
+
+def disease_label(text, conditions):
+    blob = " ".join([text or ""] + list(conditions or []))
+    for label, pattern in DISEASE_RULES:
+        if pattern.search(blob):
+            return label
+    return (conditions or [""])[0] or ""
+
+
+def not_yet_recruiting_ncts():
+    """NCTs whose registry status is the pair for CTEP Approved, not yet open."""
+    found = []
+    seen = set()
+    for query in APPROVED_SPONSORS:
+        token = None
+        while True:
+            params = {
+                "query.term": query,
+                "filter.overallStatus": "NOT_YET_RECRUITING",
+                "pageSize": "100",
+                "fields": "protocolSection.identificationModule.nctId",
+            }
+            if token:
+                params["pageToken"] = token
+            data = fetch_json(f"{CTGOV_URL}?{urllib.parse.urlencode(params)}")
+            for study in data.get("studies") or []:
+                nct = ((study.get("protocolSection") or {}).get("identificationModule") or {}).get("nctId")
+                if nct and nct not in seen:
+                    seen.add(nct)
+                    found.append(nct)
+            token = data.get("nextPageToken")
+            if not token:
+                break
+    return found
+
+
+def approved_studies(ncts, taken_protocols, taken_ncts, overrides, manifest):
+    """Interventional trials not already on the CTSU feed."""
+    studies = []
+    for nct in ncts:
+        ps = ctgov_record(nct)
+        ident = ps.get("identificationModule") or {}
+        status_mod = ps.get("statusModule") or {}
+        design = ps.get("designModule") or {}
+        if status_mod.get("overallStatus") != "NOT_YET_RECRUITING":
+            continue
+        if (design.get("studyType") or "").upper() != "INTERVENTIONAL":
+            continue
+        proto = ((ident.get("orgStudyIdInfo") or {}).get("id") or "").strip() or nct
+        if proto in taken_protocols or nct in taken_ncts:
+            continue
+        taken_protocols.add(proto)
+        sponsor = ((ps.get("sponsorCollaboratorsModule") or {}).get("leadSponsor") or {}).get("name") or ""
+        conditions = [c for c in (ps.get("conditionsModule") or {}).get("conditions") or [] if c]
+        title = ident.get("officialTitle") or ident.get("briefTitle") or ""
+        role, evidence = classify_rt({"protocolTitle": title, "protocolNumber": proto}, ps, overrides)
+        enrollment = (design.get("enrollmentInfo") or {}).get("count")
+        doc = manifest.get(proto) or {}
+        studies.append({
+            "protocol": proto,
+            "nct": nct,
+            "lead": short_lead(sponsor) or sponsor,
+            "program": "",
+            "phase": phase_code(design.get("phases")),
+            "status": APPROVED_STATUS,
+            "disease": disease_label(title, conditions),
+            "title": title,
+            "accrual": None,
+            "target": enrollment,
+            "screening": None,
+            "accrual_type": None,
+            "pct": None,
+            "rt_role": role,
+            "rt_related": role in RT_RELATED_ROLES,
+            "rt_evidence": evidence,
+            "start_date": None,
+            "start_type": None,
+            "primary_completion": (status_mod.get("primaryCompletionDateStruct") or {}).get("date"),
+            "ctgov_status": "NOT_YET_RECRUITING",
+            "months_open": None,
+            "avg_rate": None,
+            "projected_completion": None,
+            "trailing30": None,
+            "trailing90": None,
+            "ours": False,
+            "alias": ident.get("acronym"),
+            "protocol_on_file": bool(doc.get("files")),
+            "protocol_version": doc.get("version"),
+            "listed_on": "clinicaltrials.gov",
+        })
+    return studies
+
+
 # ------------------------------------------------------------- Classification
 
 def classify_rt(ctsu, ps, overrides):
@@ -262,6 +390,36 @@ def classify_rt(ctsu, ps, overrides):
 
 
 RT_RELATED_ROLES = {"RT-focused", "RT component", "Radiopharmaceutical"}
+APPROVED_STATUS = "Approved"
+# Lead-sponsor queries for trials CTEP would call Approved. The public CTSU
+# feed does not list them. Not yet recruiting is the ClinicalTrials.gov pair.
+APPROVED_SPONSORS = [
+    'AREA[LeadSponsorName]("NRG Oncology")',
+    'AREA[LeadSponsorName]("SWOG")',
+    'AREA[LeadSponsorName]("ECOG-ACRIN Cancer Research Group")',
+    'AREA[LeadSponsorName]("Alliance for Clinical Trials in Oncology")',
+    'AREA[LeadSponsorName]("Children\'s Oncology Group")',
+    'AREA[LeadSponsorName]("Canadian Cancer Trials Group")',
+    'AREA[LeadSponsorName]("National Cancer Institute (NCI)")',
+    'AREA[LeadSponsorName]("Radiation Therapy Oncology Group")',
+    'AREA[LeadSponsorName]("NSABP Foundation")',
+]
+DISEASE_RULES = [
+    ("Lung, Mediastinal, and Pleural Cancer", re.compile(r"lung|nsclc|sclc|mesothelioma|thymoma", re.I)),
+    ("Breast Cancer", re.compile(r"breast", re.I)),
+    ("Head and Neck Cancer", re.compile(r"head and neck|oropharyn|laryn|nasopharyn|oral cavity|hypopharyn", re.I)),
+    ("Gastrointestinal Cancer", re.compile(r"esophag|gastric|pancrea|hepat|liver|colon|rectal|colorectal|anal|biliary|cholangi", re.I)),
+    ("CNS Cancer (Primary tumor)", re.compile(r"glioma|glioblastoma|brain tumor|meningioma|medulloblastoma", re.I)),
+    ("Female Reproductive System Cancer", re.compile(r"ovarian|endometr|cervical|uterine|vulvar", re.I)),
+    ("Male Reproductive System Cancer", re.compile(r"prostate|testicular", re.I)),
+    ("Urothelial/ Bladder Cancer", re.compile(r"bladder|urothelial", re.I)),
+    ("Kidney Cancer", re.compile(r"renal cell|kidney cancer", re.I)),
+    ("Skin Cancer", re.compile(r"melanoma|merkel", re.I)),
+    ("Soft Tissue Cancer/Sarcoma", re.compile(r"sarcoma|\bgist\b", re.I)),
+    ("Lymphoma", re.compile(r"lymphoma", re.I)),
+    ("Leukemia", re.compile(r"leukemia|leukaemia", re.I)),
+    ("Myeloma", re.compile(r"myeloma", re.I)),
+]
 
 
 # ------------------------------------------------------------------- Rates
@@ -332,7 +490,7 @@ def attach_briefs(studies, manifest):
 
 # ------------------------------------------------------------------- Build
 
-def build(protocols, history, fetched_at, today):
+def build(protocols, history, fetched_at, today, approved_ncts=None):
     config = load_json(CONFIG, {"trials": []})
     ours = {t["protocol"]: t for t in config["trials"]}
     overrides = load_json(OVERRIDES, {})
@@ -393,6 +551,17 @@ def build(protocols, history, fetched_at, today):
 
     attach_briefs(studies, manifest)
 
+    ctsu_count = len(studies)
+    taken_protocols = {s["protocol"] for s in studies}
+    taken_ncts = {s["nct"] for s in studies if s.get("nct")}
+    extra_ncts = [nct for nct in (approved_ncts or []) if nct not in taken_ncts]
+    approved = approved_studies(extra_ncts, taken_protocols, taken_ncts, overrides, manifest)
+    for study in approved:
+        if study["protocol"] in ours:
+            study["ours"] = True
+            study["alias"] = ours[study["protocol"]].get("alias") or study.get("alias")
+    studies.extend(approved)
+
     missing = sorted(set(ours) - {s["protocol"] for s in studies})
     rt = [s for s in studies if s["rt_related"]]
     payload = {
@@ -406,8 +575,9 @@ def build(protocols, history, fetched_at, today):
         "institution": [t["protocol"] for t in config["trials"]],
         "institution_missing": missing,
         "counts": {
-            "all": len(studies),
+            "all": ctsu_count,
             "active": sum(s["status"] == "Active" for s in studies),
+            "approved": len(approved),
             "rt_related": len(rt),
             "rt_open": sum(s["status"] == "Active" for s in rt),
             "ours": sum(s["ours"] for s in studies),
@@ -463,11 +633,12 @@ def main():
     save = not args.no_save
     protocols, fetched_at = snapshot_ctsu(today, save=save)
     history = update_history(protocols, today, save=save)
+    approved_ncts = not_yet_recruiting_ncts()
     refreshed = 0
     if not args.skip_ctgov:
-        ncts = sorted({p["nctNumber"] for p in protocols if p.get("nctNumber")})
+        ncts = sorted({p["nctNumber"] for p in protocols if p.get("nctNumber")} | set(approved_ncts))
         refreshed = refresh_ctgov(ncts, force=args.force_ctgov)
-    payload = build(protocols, history, fetched_at, today)
+    payload = build(protocols, history, fetched_at, today, approved_ncts)
     if save:
         render_dashboard(payload, PUBLIC_SITE, local=False, firebase=firebase_config())
     if MANIFEST.exists():

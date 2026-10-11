@@ -48,6 +48,7 @@
   .chip { display: inline-block; padding: 1px 8px; border-radius: 999px; background: var(--chip); font-size: 11.5px; white-space: nowrap; }
   .chip.active { background: #e6f4ea; color: var(--green); }
   .chip.closed { background: #fdf3e1; color: var(--amber); }
+  .chip.approved { background: #edf2f7; color: #2a4365; }
   .chip.rt { background: #e3ecf7; color: var(--rt); }
   .chip.rtc { background: #eef2f8; color: var(--rtc); }
   .chip.rp { background: #f1ebfb; color: var(--rp); }
@@ -83,6 +84,10 @@
   .filters input[type=search], .filters select { font: inherit; font-size: 13px; padding: 6px 9px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
   .filters input[type=search] { min-width: min(100%, 260px); flex: 1 1 220px; }
   .filters select { max-width: 220px; min-width: 0; width: 160px; }
+  .phase-wrap { position: relative; }
+  .phase-btn { font: inherit; font-size: 13px; padding: 6px 9px; border: 1px solid var(--line); border-radius: 7px; background: #fff; cursor: pointer; min-width: 180px; text-align: left; }
+  .phase-panel { position: absolute; z-index: 6; top: calc(100% + 4px); left: 0; min-width: 210px; background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px rgba(20, 30, 50, .12); padding: 8px; display: grid; gap: 4px; }
+  .phase-panel .check { width: 100%; }
   .m-sort { display: none; align-items: center; gap: 6px; font-size: 13px; }
   .check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 7px; background: #fff; cursor: pointer; user-select: none; }
   .check:has(input:checked) { border-color: var(--accent); background: #ebf4ff; color: var(--navy); }
@@ -148,7 +153,7 @@
     main { padding: 12px 12px 28px; }
     .cards { grid-template-columns: 1fr; }
     .filters input[type=search] { flex-basis: 100%; }
-    .filters select { width: 100%; max-width: 100%; flex: 1 1 calc(50% - 8px); }
+    .filters select, .phase-btn { width: 100%; max-width: 100%; flex: 1 1 calc(50% - 8px); }
     .combo { flex-basis: 100%; max-width: none; }
     .canvas-wrap { height: 240px; }
     .count { margin-left: 0; }
@@ -240,12 +245,19 @@
     <div class="filters">
       <input id="q" type="search" placeholder="Search protocol, title, NCT, acronym, disease" aria-label="Search studies">
       <label class="check"><input type="checkbox" id="f-rt" checked> RT-related</label>
-      <label class="check"><input type="checkbox" id="f-open" checked> Open to accrual</label>
-      <label class="check"><input type="checkbox" id="f-phase1"> Show phase I</label>
+      <select id="f-status" aria-label="Status">
+        <option value="active">Open to accrual</option>
+        <option value="approved">Approved, not yet open</option>
+        <option value="temporary">Temporarily closed</option>
+        <option value="all">Any status on this list</option>
+      </select>
       <select id="f-disease" aria-label="Site"><option value="">All sites</option></select>
       <select id="f-lead" aria-label="Lead group"><option value="">All lead groups</option></select>
       <select id="f-role" aria-label="RT role"><option value="">Any RT role</option></select>
-      <select id="f-phase" aria-label="Phase"><option value="">Any phase</option></select>
+      <div class="phase-wrap">
+        <button type="button" class="phase-btn" id="phase-btn" aria-expanded="false" aria-controls="phase-panel">All phases except I</button>
+        <div class="phase-panel" id="phase-panel" hidden></div>
+      </div>
       <label class="m-sort">Sort
         <select id="m-sort" aria-label="Sort studies">
           <option value="protocol">Protocol</option>
@@ -286,6 +298,7 @@
     <summary>Data sources and methods</summary>
     <ul>
       <li><b>Accrual</b> comes from the public CTSU Protocol List (<a href="https://ctsu.cancer.gov/protocol" target="_blank" rel="noopener">ctsu.cancer.gov/protocol</a>), which lists active and temporarily closed NCI trials open to cross-group participation and reports actual over planned intervention accrual. These are study-wide totals across all sites, not accrual at any one institution.</li>
+      <li><b>Status</b> in the table is the CTSU protocol status when the trial is on the public protocol list. Open means Active, and the usual ClinicalTrials.gov pair is Recruiting. Temporarily Closed to Accrual, and Temporarily Closed to Accrual and Treatment, usually pair with Suspended. Approved, not yet open, is included from ClinicalTrials.gov as Not yet recruiting. Those trials are not on the public accrual feed, so they have no CTSU accrual number. An opened study shows the registry status. The status cell names that registry status when the pair is different. Closed to accrual, Complete, and Administratively complete are not on this list. Those usually appear on ClinicalTrials.gov as Active, not recruiting, Completed, or Terminated.</li>
       <li><b>History</b> is built from one CTSU snapshot per day, starting <span id="hist-start"></span>. CTSU does not publish past accrual, so the line from the study start date to the first snapshot is a straight-line interpolation (dashed), not observed data.</li>
       <li><b>Average rate</b> = current accrual divided by months since the actual study start date on ClinicalTrials.gov. Early ramp-up makes this lower than the current rate for most young trials. <b>Recent rate</b> = change over the last 30 days of snapshots, scaled to a month. <b>Projected target date</b> assumes the average rate continues.</li>
       <li><b>Accrual pace</b> lists the fastest open studies that match the explorer filters, have been open at least 6 months, and have not reached their target. <i>Patients per month</i> favors large trials; <i>% of target per month</i> adjusts for trial size. The studies under that list start in protocol order. Column headings sort the table. On a phone, the same list is cards, with a Sort menu, and an opened study wraps to the screen.</li>
@@ -320,9 +333,38 @@ const fmtMonth = iso => iso ? toDate(iso).toLocaleDateString("en-US", {year: "nu
 const num = (v, d = 1) => v == null ? "" : Number(v).toLocaleString("en-US", {maximumFractionDigits: d});
 const label = s => s.alias ? `${s.alias} (${s.protocol})` : s.protocol;
 const roleChip = r => !r ? "" : `<span class="chip ${r === "RT-focused" ? "rt" : r === "RT component" ? "rtc" : r === "Radiopharmaceutical" ? "rp" : ""}">${esc(r)}</span>`;
-const statusChip = st => `<span class="chip ${st === "Active" ? "active" : "closed"}">${esc(st === "Active" ? "Open" : st)}</span>`;
+const statusChip = st => {
+  const kind = st === "Active" ? "active" : st === "Approved" ? "approved" : "closed";
+  const text = st === "Active" ? "Open" : st === "Approved" ? "Approved" : st;
+  return `<span class="chip ${kind}">${esc(text)}</span>`;
+};
+const CTGOV_LABEL = {
+  NOT_YET_RECRUITING: "Not yet recruiting",
+  RECRUITING: "Recruiting",
+  ENROLLING_BY_INVITATION: "Enrolling by invitation",
+  ACTIVE_NOT_RECRUITING: "Active, not recruiting",
+  SUSPENDED: "Suspended",
+  COMPLETED: "Completed",
+  TERMINATED: "Terminated",
+  WITHDRAWN: "Withdrawn",
+};
+function registryStatus(s) {
+  const code = s.ctgov_status || "";
+  const label = CTGOV_LABEL[code] || code.replaceAll("_", " ").toLowerCase();
+  const expected = s.status === "Active" ? ["RECRUITING", "ENROLLING_BY_INVITATION"]
+    : s.status === "Approved" ? ["NOT_YET_RECRUITING"]
+    : (String(s.status || "").startsWith("Temporarily Closed") ? ["SUSPENDED"] : []);
+  return {code, label, mismatch: Boolean(code) && expected.length > 0 && !expected.includes(code)};
+}
+function statusCell(s) {
+  const reg = registryStatus(s);
+  return statusChip(s.status) + (reg.mismatch ? `<span class="muted" style="display:block;font-size:12px">Registry: ${esc(reg.label)}</span>` : "");
+}
 const ctgov = nct => nct ? `https://clinicaltrials.gov/study/${nct}` : null;
-const accBar = (s, big) => s.target ? `<div class="bar${big ? " big" : ""}" title="${s.pct}% of target"><span style="width:${Math.min(100, s.pct || 0)}%"></span></div><div class="acc-text">${num(s.accrual, 0)} / ${num(s.target, 0)} (${num(s.pct)}%)</div>` : `<div class="acc-text">${num(s.accrual, 0)}</div>`;
+const accBar = (s, big) => {
+  if (s.accrual == null) return `<div class="acc-text">${s.target ? num(s.target, 0) + " planned" : "No CTSU accrual"}</div>`;
+  return s.target ? `<div class="bar${big ? " big" : ""}" title="${s.pct}% of target"><span style="width:${Math.min(100, s.pct || 0)}%"></span></div><div class="acc-text">${num(s.accrual, 0)} / ${num(s.target, 0)} (${num(s.pct)}%)</div>` : `<div class="acc-text">${num(s.accrual, 0)}</div>`;
+};
 const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 const lsSet = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} };
 
@@ -522,9 +564,9 @@ function renderOpts() {
   active = opts.length ? 0 : -1;
   addList.innerHTML = opts.length ? opts.map((s, i) => `
     <li role="option" id="opt-${i}" data-i="${i}" aria-selected="${i === active}" class="${i === active ? "act" : ""}">
-      <div><b>${esc(s.protocol)}</b>${s.alias ? ` <span class="muted">${esc(s.alias)}</span>` : ""} ${statusChip(s.status)} ${roleChip(s.rt_role)}
+      <div><b>${esc(s.protocol)}</b>${s.alias ? ` <span class="muted">${esc(s.alias)}</span>` : ""} ${statusCell(s)} ${roleChip(s.rt_role)}
         ${store.has(s.protocol) ? '<span class="chip mine">In My trials</span>' : ""}</div>
-      <div class="o-title">${esc(s.lead)} · Phase ${esc(s.phase)} · ${esc(s.title)}</div>
+      <div class="o-title">${esc(s.lead)} · Phase ${esc(phaseLabel(s.phase))} · ${esc(s.title)}</div>
     </li>`).join("") : `<li class="o-none">No CTSU study matches "${esc(q)}"</li>`;
   addList.hidden = false;
   addQ.setAttribute("aria-expanded", "true");
@@ -601,8 +643,8 @@ function card(s, color) {
   return `
   <article class="card" style="border-left: 4px solid ${color}">
     <div class="top">
-      <div><div class="name">${esc(s.alias || s.protocol)}</div><div class="proto">${esc(s.protocol)} · ${esc(s.lead)} · Phase ${esc(s.phase)}</div></div>
-      <div class="top-right">${statusChip(s.status)}<button class="x" type="button" data-remove="${esc(s.protocol)}" aria-label="Remove ${esc(s.protocol)} from My trials" title="Remove from My trials">×</button></div>
+      <div><div class="name">${esc(s.alias || s.protocol)}</div><div class="proto">${esc(s.protocol)} · ${esc(s.lead)} · Phase ${esc(phaseLabel(s.phase))}</div></div>
+      <div class="top-right">${statusCell(s)}<button class="x" type="button" data-remove="${esc(s.protocol)}" aria-label="Remove ${esc(s.protocol)} from My trials" title="Remove from My trials">×</button></div>
     </div>
     <div class="title">${esc(s.title)}</div>
     <div>${accBar(s, true)}</div>
@@ -636,6 +678,7 @@ function renderKpis() {
   $("kpis").innerHTML = [
     [c.all, "Studies on the CTSU list"],
     [c.active, "Open to accrual"],
+    [c.approved || 0, "Approved, not yet open"],
     [c.rt_related, "RT-related studies"],
     [c.rt_open, "RT-related and open"],
     [store.list.length, "In My trials"],
@@ -737,8 +780,19 @@ const COLS = [
   {k: "start_date", l: "Start"},
   {k: "projected_completion", l: "Projected"},
 ];
-const DEFAULTS = {q: "", rt: true, openOnly: true, showPhase1: false, disease: "", lead: "", role: "", phase: ""};
-const state = {...DEFAULTS, sort: "protocol", dir: 1, expanded: new Set()};
+const DEFAULTS = {q: "", rt: true, status: "active", disease: "", lead: "", role: ""};
+const PHASE_LABELS = {"0": "0", "1": "1", "1/2": "Seamless 1/2", "2": "2", "2/3": "Seamless 2/3", "3": "3", "4": "4", "Other": "Other"};
+const PHASE_ORDER = ["0", "1", "1/2", "2", "2/3", "3", "4", "Other"];
+function phaseLabel(code) { return PHASE_LABELS[code] || code || ""; }
+function phaseCodes() {
+  const present = [...new Set(S.map(s => s.phase).filter(v => v != null && v !== ""))];
+  const known = PHASE_ORDER.filter(code => present.includes(code));
+  const extra = present.filter(code => !PHASE_ORDER.includes(code)).sort();
+  return [...known, ...extra];
+}
+const PHASE_CODES = phaseCodes();
+function defaultPhases() { return new Set(PHASE_CODES.filter(code => code !== "1")); }
+const state = {...DEFAULTS, phases: defaultPhases(), sort: "protocol", dir: 1, expanded: new Set()};
 let paceMode = "n";
 
 function fillSelect(id, values) {
@@ -748,21 +802,24 @@ function fillSelect(id, values) {
 fillSelect("f-lead", S.map(s => s.lead));
 fillSelect("f-disease", S.flatMap(s => (s.disease || "").split(";").map(x => x.trim())));
 fillSelect("f-role", S.map(s => s.rt_role));
-fillSelect("f-phase", S.map(s => s.phase));
+$("phase-panel").innerHTML = `<label class="check"><input type="checkbox" id="phase-all"> All</label>` +
+  PHASE_CODES.map(code => `<label class="check"><input type="checkbox" name="phase" value="${esc(code)}"> ${esc(phaseLabel(code))}</label>`).join("");
 
-function isPhase1(s) {
-  return String(s.phase) === "1";
+function statusSelected(s) {
+  if (state.status === "all") return true;
+  if (state.status === "approved") return s.status === "Approved";
+  if (state.status === "temporary") return String(s.status || "").startsWith("Temporarily Closed");
+  return s.status === "Active";
 }
 
 function matches(s, ignoreStatus = false) {
   const q = state.q.toLowerCase();
   return (!state.rt || s.rt_related) &&
-    (ignoreStatus || !state.openOnly || s.status === "Active") &&
-    (state.showPhase1 || state.phase === "1" || !isPhase1(s)) &&
+    (ignoreStatus || statusSelected(s)) &&
+    state.phases.has(String(s.phase || "Other")) &&
     (!state.lead || s.lead === state.lead) &&
     (!state.disease || (s.disease || "").split(";").map(x => x.trim()).includes(state.disease)) &&
     (!state.role || s.rt_role === state.role) &&
-    (!state.phase || s.phase === state.phase) &&
     (!q || [s.protocol, s.title, s.nct, s.disease, s.lead, s.alias].join(" ").toLowerCase().includes(q));
 }
 
@@ -777,8 +834,13 @@ function rows() {
   });
 }
 
+function phasesAreDefault() {
+  const want = defaultPhases();
+  return state.phases.size === want.size && [...want].every(code => state.phases.has(code));
+}
+
 function scopeText() {
-  const custom = state.q || state.disease || state.lead || state.role || state.phase;
+  const custom = state.q || state.disease || state.lead || state.role || !phasesAreDefault();
   const kind = state.rt ? "RT-related studies" : "studies";
   return custom ? `open ${kind} matching your filters` : `open ${kind}`;
 }
@@ -792,7 +854,7 @@ function paceItem(s) {
     <div>
       <button class="linkbtn strong" type="button" data-show="${esc(s.protocol)}">${esc(s.protocol)}</button>${s.alias ? ` <span class="muted">${esc(s.alias)}</span>` : ""} ${roleChip(s.rt_role)}
       <div class="pi-title" title="${esc(s.title)}">${esc(s.title)}</div>
-      <div class="pi-meta">${esc(s.lead)} · Phase ${esc(s.phase)} · ${num(s.accrual, 0)}${s.target ? ` of ${num(s.target, 0)} (${num(s.pct)}%)` : ""} in ${num(s.months_open)} months</div>
+      <div class="pi-meta">${esc(s.lead)} · Phase ${esc(phaseLabel(s.phase))} · ${num(s.accrual, 0)}${s.target ? ` of ${num(s.target, 0)} (${num(s.pct)}%)` : ""} in ${num(s.months_open)} months</div>
     </div>
     <div class="pi-val">${v}</div>
   </li>`;
@@ -876,6 +938,7 @@ function detailInner(s) {
   return `<div class="detail-inner">
     <div class="detail-grid">
       <div><b>NCT</b><br>${s.nct ? `<a href="${ctgov(s.nct)}" target="_blank" rel="noopener">${esc(s.nct)}</a>` : "n/a"}</div>
+      <div><b>ClinicalTrials.gov status</b><br>${registryStatus(s).label ? esc(registryStatus(s).label) : "Not on this record"}${registryStatus(s).mismatch ? `<div class="muted">Different from the usual pair for this CTSU status.</div>` : ""}</div>
       <div><b>Disease</b><br>${esc(s.disease)}</div>
       <div><b>NCI program</b><br>${esc(s.program)}</div>
       <div><b>Start (ClinicalTrials.gov)</b><br>${fmtDate(s.start_date)} ${s.start_type ? "(" + esc(s.start_type.toLowerCase()) + ")" : ""}</div>
@@ -901,9 +964,9 @@ function studyCard(s) {
       ${starBtn(s.protocol)}
       <button class="sc-open" type="button" aria-expanded="${open}">
         <span class="sc-name"><b>${esc(s.protocol)}</b>${s.alias ? ` <span class="muted">${esc(s.alias)}</span>` : ""}</span>
-        <span class="sc-meta">${esc(s.lead)} · ${esc(s.disease || "Site n/a")} · Phase ${esc(s.phase)}</span>
+        <span class="sc-meta">${esc(s.lead)} · ${esc(s.disease || "Site n/a")} · Phase ${esc(phaseLabel(s.phase))}</span>
         <span class="sc-title">${esc(s.title)}</span>
-        <span class="sc-row">${roleChip(s.rt_role)} ${statusChip(s.status)} <span>${s.accrual != null ? num(s.accrual, 0) : ""}${s.target ? " / " + num(s.target, 0) : ""}${s.pct != null ? ` (${num(s.pct)}%)` : ""}</span>${s.avg_rate != null ? ` <span class="muted">${num(s.avg_rate)} /mo</span>` : ""}</span>
+        <span class="sc-row">${roleChip(s.rt_role)} ${statusCell(s)} <span>${s.accrual != null ? num(s.accrual, 0) : ""}${s.target ? " / " + num(s.target, 0) : ""}${s.pct != null ? ` (${num(s.pct)}%)` : ""}</span>${s.avg_rate != null ? ` <span class="muted">${num(s.avg_rate)} /mo</span>` : ""}</span>
       </button>
     </div>
     ${open ? detailInner(s) : ""}
@@ -936,10 +999,10 @@ function renderStudies() {
       <td><b>${esc(s.protocol)}</b>${s.alias ? `<div class="muted" style="font-size:12px">${esc(s.alias)}</div>` : ""}</td>
       <td>${esc(s.lead)}</td>
       <td>${esc(s.disease)}</td>
-      <td>${esc(s.phase)}</td>
+      <td>${esc(phaseLabel(s.phase))}</td>
       <td class="title-cell">${esc(s.title)}</td>
       <td>${roleChip(s.rt_role)}</td>
-      <td>${statusChip(s.status)}</td>
+      <td>${statusCell(s)}</td>
       <td class="acc-cell">${accBar(s)}</td>
       <td>${s.avg_rate != null ? num(s.avg_rate) : ""}</td>
       <td>${fmtMonth(s.start_date)}</td>
@@ -969,7 +1032,8 @@ function render() {
 
 function showInTable(p) {
   if (!S.some(s => s.protocol === p && matches(s))) {
-    Object.assign(state, DEFAULTS, {rt: false, openOnly: false, q: p});
+    Object.assign(state, DEFAULTS, {rt: false, status: "all", q: p});
+    state.phases = new Set(PHASE_CODES);
     syncFilterInputs();
   }
   state.expanded.add(p);
@@ -978,21 +1042,62 @@ function showInTable(p) {
   if (el) el.scrollIntoView({block: "center", behavior: "smooth"});
 }
 
+function phaseButtonLabel() {
+  if (!state.phases.size) return "No phase";
+  const all = state.phases.size === PHASE_CODES.length;
+  if (all) return "All phases";
+  if (phasesAreDefault()) return "All phases except I";
+  return PHASE_CODES.filter(code => state.phases.has(code)).map(phaseLabel).join(", ");
+}
+
+function syncPhaseInputs() {
+  document.querySelectorAll('input[name="phase"]').forEach(box => { box.checked = state.phases.has(box.value); });
+  $("phase-all").checked = state.phases.size === PHASE_CODES.length;
+  $("phase-btn").textContent = phaseButtonLabel();
+}
+
 function syncFilterInputs() {
   $("q").value = state.q;
   $("f-rt").checked = state.rt;
-  $("f-open").checked = state.openOnly;
-  $("f-phase1").checked = state.showPhase1;
-  [["f-disease", "disease"], ["f-lead", "lead"], ["f-role", "role"], ["f-phase", "phase"]].forEach(([id, k]) => { $(id).value = state[k]; });
+  $("f-status").value = state.status;
+  [["f-disease", "disease"], ["f-lead", "lead"], ["f-role", "role"]].forEach(([id, k]) => { $(id).value = state[k]; });
+  syncPhaseInputs();
 }
 
 $("q").oninput = e => { state.q = e.target.value; render(); };
 $("f-rt").onchange = e => { state.rt = e.target.checked; render(); };
-$("f-open").onchange = e => { state.openOnly = e.target.checked; render(); };
-$("f-phase1").onchange = e => { state.showPhase1 = e.target.checked; render(); };
-[["f-disease", "disease"], ["f-lead", "lead"], ["f-role", "role"], ["f-phase", "phase"]].forEach(([id, k]) =>
+$("f-status").onchange = e => { state.status = e.target.value; render(); };
+$("phase-btn").onclick = () => {
+  const panel = $("phase-panel");
+  panel.hidden = !panel.hidden;
+  $("phase-btn").setAttribute("aria-expanded", String(!panel.hidden));
+};
+$("phase-panel").addEventListener("change", ev => {
+  const box = ev.target;
+  if (box.id === "phase-all") {
+    state.phases = box.checked ? new Set(PHASE_CODES) : new Set();
+  } else if (box.name === "phase") {
+    if (box.checked) state.phases.add(box.value);
+    else state.phases.delete(box.value);
+  }
+  syncPhaseInputs();
+  render();
+});
+document.addEventListener("click", ev => {
+  if (!ev.target.closest(".phase-wrap")) {
+    $("phase-panel").hidden = true;
+    $("phase-btn").setAttribute("aria-expanded", "false");
+  }
+});
+document.addEventListener("keydown", ev => {
+  if (ev.key === "Escape") {
+    $("phase-panel").hidden = true;
+    $("phase-btn").setAttribute("aria-expanded", "false");
+  }
+});
+[["f-disease", "disease"], ["f-lead", "lead"], ["f-role", "role"]].forEach(([id, k]) =>
   $(id).onchange = e => { state[k] = e.target.value; render(); });
-$("reset").onclick = () => { Object.assign(state, DEFAULTS); syncFilterInputs(); render(); };
+$("reset").onclick = () => { Object.assign(state, DEFAULTS); state.phases = defaultPhases(); syncFilterInputs(); render(); };
 $("m-sort").onchange = e => {
   state.sort = e.target.value;
   state.dir = ["pct", "avg_rate", "accrual"].includes(state.sort) ? -1 : 1;
@@ -1043,6 +1148,7 @@ $("m-sync").innerHTML = sync.available
 
 store.load();
 readSharedLink();
+syncPhaseInputs();
 renderAccount();
 refreshAll();
 if (sync.available) initFirebase();
