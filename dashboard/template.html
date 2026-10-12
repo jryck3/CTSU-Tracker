@@ -187,6 +187,8 @@
   .btn.ghost { border-color: var(--line); color: var(--muted); }
   .btn.light { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .7); }
   .btn:disabled { opacity: .45; cursor: default; }
+  .digest-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+  .digest-btn { display: inline-block; margin: 0; white-space: normal; text-align: left; max-width: 100%; }
   .linkbtn { all: unset; cursor: pointer; color: var(--accent); font-size: 12.5px; }
   .linkbtn:focus-visible { outline: 2px solid var(--accent); }
   .linkbtn.strong { font-weight: 650; font-size: 13.5px; }
@@ -217,6 +219,10 @@
 
   <h2 id="mine-h">My trials</h2>
   <section class="panel" aria-labelledby="mine-h">
+    <div class="digest-actions">
+      <button class="btn digest-btn" id="print-mine-brief" type="button">Print brief PDF of filtered studies displayed below</button>
+      <button class="btn digest-btn" id="print-mine-full" type="button">Print comprehensive PDF of filtered studies displayed below</button>
+    </div>
     <div id="shared"></div>
     <div class="mine-tools">
       <div class="combo">
@@ -227,6 +233,28 @@
       </div>
       <button class="btn" id="share" type="button">Copy share link</button>
       <button class="btn ghost" id="clear" type="button">Clear list</button>
+    </div>
+    <div class="filters" id="mine-filters">
+      <input id="mine-q" type="search" placeholder="Search protocol, title, NCT, acronym, disease" aria-label="Filter My trials">
+      <select id="mine-f-status" aria-label="Status">
+        <option value="active">Open to accrual</option>
+        <option value="approved">Approved, not yet open</option>
+        <option value="temporary">Temporarily closed</option>
+        <option value="all">Any status on this list</option>
+      </select>
+      <select id="mine-f-disease" aria-label="Site"><option value="">All sites</option></select>
+      <select id="mine-f-lead" aria-label="Lead group"><option value="">All lead groups</option></select>
+      <div class="role-wrap">
+        <button type="button" class="role-btn" id="mine-role-btn" aria-expanded="false" aria-controls="mine-role-panel">RT roles</button>
+        <div class="role-panel" id="mine-role-panel" hidden></div>
+      </div>
+      <div class="phase-wrap">
+        <button type="button" class="phase-btn" id="mine-phase-btn" aria-expanded="false" aria-controls="mine-phase-panel">All phases except Phase 0 and Phase 1</button>
+        <div class="phase-panel" id="mine-phase-panel" hidden></div>
+      </div>
+      <label class="check"><input type="checkbox" id="mine-protocol"> Protocol available?</label>
+      <button class="linkbtn" id="mine-reset" type="button">Reset filters</button>
+      <span class="count" id="mine-count"></span>
     </div>
     <div class="save-state" id="save-state"></div>
     <div class="sr-only" id="announce" aria-live="polite"></div>
@@ -257,6 +285,10 @@
 
   <h2 id="explore-h">Explore CTSU studies</h2>
   <section class="panel" aria-labelledby="explore-h">
+    <div class="digest-actions">
+      <button class="btn digest-btn" id="print-explore-brief" type="button">Print brief PDF of filtered studies displayed below</button>
+      <button class="btn digest-btn" id="print-explore-full" type="button">Print comprehensive PDF of filtered studies displayed below</button>
+    </div>
     <div class="filters">
       <input id="q" type="search" placeholder="Search protocol, title, NCT, acronym, disease" aria-label="Search studies">
       <select id="f-status" aria-label="Status">
@@ -285,6 +317,7 @@
           <option value="avg_rate">Average per month</option>
         </select>
       </label>
+      <label class="check"><input type="checkbox" id="f-protocol"> Protocol available?</label>
       <button class="linkbtn" id="reset" type="button">Reset filters</button>
       <span class="count" id="count"></span>
     </div>
@@ -647,9 +680,9 @@ $("clear").onclick = () => {
 };
 
 // ------------------------------------------------------------ My trials cards
-function colors() {
+function colorsFor(protocols) {
   const out = {};
-  store.list.filter(p => BY[p]).forEach((p, i) => { out[p] = PALETTE[i % PALETTE.length]; });
+  protocols.forEach((p, i) => { out[p] = PALETTE[i % PALETTE.length]; });
   return out;
 }
 
@@ -680,15 +713,22 @@ function card(s, color) {
 }
 
 function renderMine() {
+  const shown = mineShown();
   $("share").disabled = $("clear").disabled = !store.list.length;
+  $("print-mine-brief").disabled = $("print-mine-full").disabled = !shown.length;
+  $("mine-count").textContent = `${shown.length} ${shown.length === 1 ? "study" : "studies"}`;
   if (!store.list.length) {
     $("mine").innerHTML = `<div class="empty"><p><b>No trials selected.</b> Search above to add trials one at a time, for example the trials open at your institution, or click ☆ next to any study below. The fastest accruing open studies are shown in the explorer as examples.</p></div>`;
     return;
   }
-  const col = colors();
-  $("mine").innerHTML = store.list.map(p => BY[p] ? card(BY[p], col[p]) : `
+  if (!shown.length) {
+    $("mine").innerHTML = `<div class="empty"><p>No selected trials match these filters.</p></div>`;
+    return;
+  }
+  const col = colorsFor(shown.filter(row => row.study).map(row => row.protocol));
+  $("mine").innerHTML = shown.map(row => row.study ? card(row.study, col[row.protocol]) : `
     <article class="card missing">
-      <div class="top"><div class="name">${esc(p)}</div><div class="top-right"><button class="x" type="button" data-remove="${esc(p)}" aria-label="Remove ${esc(p)} from My trials">×</button></div></div>
+      <div class="top"><div class="name">${esc(row.protocol)}</div><div class="top-right"><button class="x" type="button" data-remove="${esc(row.protocol)}" aria-label="Remove ${esc(row.protocol)} from My trials">×</button></div></div>
       <div>Not on the current CTSU list (closed to accrual, renamed, or not a CTSU study).</div>
     </article>`).join("");
 }
@@ -726,7 +766,7 @@ function seriesFor(s, color) {
 }
 
 function drawCharts() {
-  const list = store.list.map(p => BY[p]).filter(Boolean);
+  const list = mineShown().map(row => row.study).filter(Boolean);
   $("charts").hidden = !list.length;
   if (trendChart) trendChart.destroy();
   if (rateChart) rateChart.destroy();
@@ -736,7 +776,7 @@ function drawCharts() {
     $("trend-note").textContent = "Charts need an internet connection to load the Chart.js library.";
     return;
   }
-  const col = colors();
+  const col = colorsFor(list.map(s => s.protocol));
   trendChart = new Chart($("trend"), {
     type: "line",
     data: {datasets: list.map(s => seriesFor(s, col[s.protocol]))},
@@ -823,7 +863,8 @@ function phaseCodes() {
 }
 const PHASE_CODES = phaseCodes();
 function defaultPhases() { return new Set(PHASE_CODES.filter(code => code !== "0" && code !== "1")); }
-const state = {...DEFAULTS, phases: defaultPhases(), roles: defaultRoles(), sort: "protocol", dir: 1, expanded: new Set()};
+const state = {...DEFAULTS, phases: defaultPhases(), roles: defaultRoles(), protocol: false, sort: "protocol", dir: 1, expanded: new Set()};
+const mineState = {...DEFAULTS, phases: defaultPhases(), roles: defaultRoles(), protocol: false};
 let paceMode = "n";
 
 const SITE_MAP = {
@@ -891,28 +932,57 @@ function fillSelect(id, values) {
   const el = $(id);
   [...new Set(values)].filter(Boolean).sort().forEach(v => el.insertAdjacentHTML("beforeend", `<option>${esc(v)}</option>`));
 }
-fillSelect("f-lead", S.map(leadGroup));
-fillSelect("f-disease", S.flatMap(sitesOf));
-$("role-panel").innerHTML = `<label class="check"><input type="checkbox" id="role-all"> All</label>` +
-  ROLE_MENU.map(([value, text]) => `<label class="check"><input type="checkbox" name="role" value="${esc(value)}"> ${esc(text)}</label>`).join("");
-$("phase-panel").innerHTML = `<label class="check"><input type="checkbox" id="phase-all"> All</label>` +
-  PHASE_CODES.map(code => `<label class="check"><input type="checkbox" name="phase" value="${esc(code)}"> ${esc(phaseMenuLabel(code))}</label>`).join("");
+function fillChoicePanel(panelId, allId, name, items) {
+  $(panelId).innerHTML = `<label class="check"><input type="checkbox" id="${allId}"> All</label>` +
+    items.map(([value, text]) => `<label class="check"><input type="checkbox" name="${name}" value="${esc(value)}"> ${esc(text)}</label>`).join("");
+}
+const leadChoices = S.map(leadGroup);
+const siteChoices = S.flatMap(sitesOf);
+fillSelect("f-lead", leadChoices);
+fillSelect("f-disease", siteChoices);
+fillSelect("mine-f-lead", leadChoices);
+fillSelect("mine-f-disease", siteChoices);
+fillChoicePanel("role-panel", "role-all", "role", ROLE_MENU);
+fillChoicePanel("phase-panel", "phase-all", "phase", PHASE_CODES.map(code => [code, phaseMenuLabel(code)]));
+fillChoicePanel("mine-role-panel", "mine-role-all", "mine-role", ROLE_MENU);
+fillChoicePanel("mine-phase-panel", "mine-phase-all", "mine-phase", PHASE_CODES.map(code => [code, phaseMenuLabel(code)]));
 
-function statusSelected(s) {
-  if (state.status === "all") return true;
-  if (state.status === "approved") return s.status === "Approved";
-  if (state.status === "temporary") return String(s.status || "").startsWith("Temporarily Closed");
+function protocolOnFile(s) {
+  if (s.protocol_on_file != null) return !!s.protocol_on_file;
+  return !!s.brief;
+}
+
+function statusSelected(s, st = state) {
+  if (st.status === "all") return true;
+  if (st.status === "approved") return s.status === "Approved";
+  if (st.status === "temporary") return String(s.status || "").startsWith("Temporarily Closed");
   return s.status === "Active";
 }
 
+function matchesState(s, st, ignoreStatus = false) {
+  const q = st.q.toLowerCase();
+  return st.roles.has(s.rt_role) &&
+    (ignoreStatus || statusSelected(s, st)) &&
+    st.phases.has(String(s.phase || "Other")) &&
+    (!st.lead || leadGroup(s) === st.lead) &&
+    (!st.disease || sitesOf(s).includes(st.disease)) &&
+    (!q || searchBlob(s).toLowerCase().includes(q)) &&
+    (!st.protocol || protocolOnFile(s));
+}
+
 function matches(s, ignoreStatus = false) {
-  const q = state.q.toLowerCase();
-  return state.roles.has(s.rt_role) &&
-    (ignoreStatus || statusSelected(s)) &&
-    state.phases.has(String(s.phase || "Other")) &&
-    (!state.lead || leadGroup(s) === state.lead) &&
-    (!state.disease || sitesOf(s).includes(state.disease)) &&
-    (!q || searchBlob(s).toLowerCase().includes(q));
+  return matchesState(s, state, ignoreStatus);
+}
+
+function mineShown() {
+  const q = mineState.q.trim().toLowerCase();
+  const rows = store.list.map(protocol => ({protocol, study: BY[protocol] || null}));
+  const filtered = rows.filter(row => {
+    if (!row.study) return !mineState.protocol && (!q || row.protocol.toLowerCase().includes(q));
+    return matchesState(row.study, mineState);
+  });
+  filtered.sort((a, b) => String(a.protocol).localeCompare(String(b.protocol), undefined, {numeric: true}));
+  return filtered;
 }
 
 function rows() {
@@ -1075,6 +1145,7 @@ const mobileQuery = window.matchMedia("(max-width: 760px)");
 function renderStudies() {
   const r = rows();
   $("count").textContent = `${r.length} ${r.length === 1 ? "study" : "studies"}`;
+  $("print-explore-brief").disabled = $("print-explore-full").disabled = !r.length;
   if ($("m-sort").querySelector(`option[value="${state.sort}"]`)) $("m-sort").value = state.sort;
   const phone = mobileQuery.matches;
   document.querySelector(".table-wrap").style.display = phone ? "none" : "";
@@ -1128,6 +1199,7 @@ function showInTable(p) {
     Object.assign(state, DEFAULTS, {status: "all", q: p});
     state.phases = new Set(PHASE_CODES);
     state.roles = new Set(ROLE_MENU.map(([value]) => value));
+    state.protocol = false;
     syncFilterInputs();
   }
   state.expanded.add(p);
@@ -1166,6 +1238,7 @@ function syncRoleInputs() {
 function syncFilterInputs() {
   $("q").value = state.q;
   $("f-status").value = state.status;
+  $("f-protocol").checked = !!state.protocol;
   [["f-disease", "disease"], ["f-lead", "lead"]].forEach(([id, k]) => { $(id).value = state[k]; });
   syncPhaseInputs();
   syncRoleInputs();
@@ -1205,27 +1278,23 @@ $("phase-panel").addEventListener("change", ev => {
   syncPhaseInputs();
   render();
 });
-document.addEventListener("click", ev => {
-  if (!ev.target.closest(".phase-wrap")) {
-    $("phase-panel").hidden = true;
-    $("phase-btn").setAttribute("aria-expanded", "false");
-  }
-  if (!ev.target.closest(".role-wrap")) {
-    $("role-panel").hidden = true;
-    $("role-btn").setAttribute("aria-expanded", "false");
-  }
-});
+function closeChoiceMenus(ev) {
+  document.querySelectorAll(".phase-wrap, .role-wrap").forEach(wrap => {
+    if (ev && wrap.contains(ev.target)) return;
+    const panel = wrap.querySelector(".phase-panel, .role-panel");
+    const btn = wrap.querySelector(".phase-btn, .role-btn");
+    if (panel) panel.hidden = true;
+    if (btn) btn.setAttribute("aria-expanded", "false");
+  });
+}
+document.addEventListener("click", closeChoiceMenus);
 document.addEventListener("keydown", ev => {
-  if (ev.key === "Escape") {
-    $("phase-panel").hidden = true;
-    $("phase-btn").setAttribute("aria-expanded", "false");
-    $("role-panel").hidden = true;
-    $("role-btn").setAttribute("aria-expanded", "false");
-  }
+  if (ev.key === "Escape") closeChoiceMenus(null);
 });
 [["f-disease", "disease"], ["f-lead", "lead"]].forEach(([id, k]) =>
   $(id).onchange = e => { state[k] = e.target.value; render(); });
-$("reset").onclick = () => { Object.assign(state, DEFAULTS); state.phases = defaultPhases(); state.roles = defaultRoles(); syncFilterInputs(); render(); };
+$("reset").onclick = () => { Object.assign(state, DEFAULTS); state.phases = defaultPhases(); state.roles = defaultRoles(); state.protocol = false; syncFilterInputs(); render(); };
+$("f-protocol").onchange = e => { state.protocol = e.target.checked; render(); };
 $("m-sort").onchange = e => {
   state.sort = e.target.value;
   state.dir = ["pct", "avg_rate", "accrual"].includes(state.sort) ? -1 : 1;
@@ -1257,6 +1326,395 @@ document.addEventListener("click", e => {
   if (show) showInTable(show.dataset.show);
 });
 
+function choiceButtonLabel(st, kind) {
+  if (kind === "phase") {
+    if (!st.phases.size) return "No phase";
+    if (st.phases.size === PHASE_CODES.length) return "All phases";
+    const want = defaultPhases();
+    if (st.phases.size === want.size && [...want].every(code => st.phases.has(code))) return "All phases except Phase 0 and Phase 1";
+    return PHASE_CODES.filter(code => st.phases.has(code)).map(phaseMenuLabel).join(", ");
+  }
+  if (!st.roles.size) return "No role";
+  if (st.roles.size === ROLE_MENU.length) return "All roles";
+  if (st.roles.size === RT_ROLE_VALUES.length && RT_ROLE_VALUES.every(role => st.roles.has(role))) return "RT roles";
+  return ROLE_MENU.filter(([value]) => st.roles.has(value)).map(([, text]) => text).join(", ");
+}
+
+function syncMineFilters() {
+  $("mine-q").value = mineState.q;
+  $("mine-f-status").value = mineState.status;
+  $("mine-f-disease").value = mineState.disease;
+  $("mine-f-lead").value = mineState.lead;
+  $("mine-protocol").checked = !!mineState.protocol;
+  document.querySelectorAll('#mine-phase-panel input[name="mine-phase"]').forEach(box => { box.checked = mineState.phases.has(box.value); });
+  $("mine-phase-all").checked = mineState.phases.size === PHASE_CODES.length;
+  $("mine-phase-btn").textContent = choiceButtonLabel(mineState, "phase");
+  document.querySelectorAll('#mine-role-panel input[name="mine-role"]').forEach(box => { box.checked = mineState.roles.has(box.value); });
+  $("mine-role-all").checked = mineState.roles.size === ROLE_MENU.length;
+  $("mine-role-btn").textContent = choiceButtonLabel(mineState, "role");
+}
+
+function refreshMine() {
+  renderMine();
+  drawCharts();
+}
+
+$("mine-q").oninput = e => { mineState.q = e.target.value; refreshMine(); };
+$("mine-f-status").onchange = e => { mineState.status = e.target.value; refreshMine(); };
+[["mine-f-disease", "disease"], ["mine-f-lead", "lead"]].forEach(([id, k]) =>
+  $(id).onchange = e => { mineState[k] = e.target.value; refreshMine(); });
+$("mine-protocol").onchange = e => { mineState.protocol = e.target.checked; refreshMine(); };
+$("mine-role-btn").onclick = () => {
+  const panel = $("mine-role-panel");
+  panel.hidden = !panel.hidden;
+  $("mine-role-btn").setAttribute("aria-expanded", String(!panel.hidden));
+};
+$("mine-role-panel").addEventListener("change", ev => {
+  const box = ev.target;
+  if (box.id === "mine-role-all") mineState.roles = box.checked ? new Set(ROLE_MENU.map(([value]) => value)) : new Set();
+  else if (box.name === "mine-role") box.checked ? mineState.roles.add(box.value) : mineState.roles.delete(box.value);
+  syncMineFilters();
+  refreshMine();
+});
+$("mine-phase-btn").onclick = () => {
+  const panel = $("mine-phase-panel");
+  panel.hidden = !panel.hidden;
+  $("mine-phase-btn").setAttribute("aria-expanded", String(!panel.hidden));
+};
+$("mine-phase-panel").addEventListener("change", ev => {
+  const box = ev.target;
+  if (box.id === "mine-phase-all") mineState.phases = box.checked ? new Set(PHASE_CODES) : new Set();
+  else if (box.name === "mine-phase") box.checked ? mineState.phases.add(box.value) : mineState.phases.delete(box.value);
+  syncMineFilters();
+  refreshMine();
+});
+$("mine-reset").onclick = () => {
+  Object.assign(mineState, DEFAULTS);
+  mineState.phases = defaultPhases();
+  mineState.roles = defaultRoles();
+  mineState.protocol = false;
+  syncMineFilters();
+  refreshMine();
+};
+
+const DIGEST_LIMIT = 25;
+const DIGEST_CAVEAT = "Clinic rendition of the protocol brief on file. Confirm the current protocol before enrollment.";
+const DIGEST_CSS = `
+  @page { size: letter; margin: 0.45in 0.55in 0.4in; }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; color: #1b2430; font: 11pt/1.45 Georgia, "Iowan Old Style", Palatino, "Palatino Linotype", serif; }
+  .measure { position: absolute; left: 0; top: 0; width: 7.4in; visibility: hidden; }
+  .probe-sheet { width: 7.4in; height: 10.15in; }
+  .sheet { width: 7.4in; min-height: 10.15in; display: flex; flex-direction: column; break-after: page; page-break-after: always; }
+  .sheet:last-child { break-after: auto; page-break-after: auto; }
+  .sheet > header.run, .sheet > footer.run { flex: none; }
+  .sheet-body { flex: 1 1 auto; }
+  header.run { border-bottom: 2.5px solid #1f3a5f; padding-bottom: 8px; margin-bottom: 6px; }
+  .tracker { margin: 0; font: 650 8.5pt/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #1f3a5f; }
+  .tracker-line { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: baseline; margin: 0; }
+  .loc { font: 700 8.5pt/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: .02em; color: #1f3a5f; }
+  .filters { margin: 7px 0 2px; font: 9.5pt/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #3d4756; }
+  header.run h1 { margin: 2px 0 0; font: 650 18pt/1.15 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1f3a5f; }
+  .when { margin: 4px 0 0; color: #5b6676; font: 10pt/1.3 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  article.study { break-inside: avoid; page-break-inside: avoid; padding: 10px 0 12px; border-bottom: 1px solid #d5dde6; }
+  article.study h2 { margin: 0; font: 650 13pt/1.25 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1f3a5f; }
+  .meta, .title, .accrual, .none { margin: 3px 0 0; }
+  .meta, .accrual, .none { font: 9.5pt/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #3d4756; }
+  .title { font-style: italic; color: #1b2430; }
+  .schema { margin-top: 6px; }
+  .step { margin: 4px 0; }
+  .step > b { color: #1f3a5f; }
+  .arms { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px; }
+  .arm { border: 1px solid #d5dde6; border-left: 3px solid #2b6cb0; border-radius: 4px; padding: 4px 8px; font-size: 10pt; background: #f7f9fc; }
+  .arm b { color: #1f3a5f; }
+  .toc-site { break-inside: avoid; page-break-inside: avoid; padding: 8px 0 10px; border-bottom: 1px solid #d5dde6; }
+  .toc-line { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+  .toc-line b { font: 650 13pt/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1f3a5f; }
+  .toc-num { font: 650 12pt/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1f3a5f; }
+  .toc-site ul { margin: 4px 0 0; padding-left: 18px; }
+  .toc-site li { margin: 1px 0; }
+  footer.run { display: flex; justify-content: space-between; gap: 16px; align-items: flex-end; border-top: 1px solid #d5dde6; padding-top: 6px; margin-top: auto; font: 8.5pt/1.3 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #5b6676; }
+  .pageno { font: 650 12pt/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1f3a5f; }
+`;
+
+function armBlocks(arms) {
+  return (arms || []).map(arm => `<div class="arm"><b>${esc(arm.label || "Arm")}</b> ${esc(arm.text || "")}</div>`).join("");
+}
+
+function schemaBlocks(steps) {
+  return (steps || []).map(step => {
+    const arms = armBlocks(step.arms);
+    const label = step.label ? `<b>${esc(step.label)}.</b> ` : "";
+    return `<div class="step">${label}${esc(step.text || "")}${arms ? `<div class="arms">${arms}</div>` : ""}</div>`;
+  }).join("");
+}
+
+function briefSchema(steps) {
+  const arms = [];
+  const endpoints = [];
+  (steps || []).forEach(step => {
+    (step.arms || []).forEach(arm => arms.push(arm));
+    if (/primary endpoint/i.test(step.label || "")) endpoints.push(step);
+  });
+  const armHtml = armBlocks(arms);
+  const endHtml = endpoints.map(step => `<div class="step"><b>${esc(step.label)}.</b> ${esc(step.text || "")}</div>`).join("");
+  return `${armHtml ? `<div class="arms">${armHtml}</div>` : ""}${endHtml}`;
+}
+
+function accrualLine(s) {
+  const parts = [];
+  if (s.accrual != null) parts.push(s.target != null ? `${num(s.accrual, 0)} of ${num(s.target, 0)} accrued (${num(s.pct)}%)` : `${num(s.accrual, 0)} accrued`);
+  if (s.start_date) parts.push(`open since ${fmtMonth(s.start_date)}`);
+  if (s.avg_rate != null) parts.push(`${num(s.avg_rate)} per month on average`);
+  if (s.projected_completion) parts.push(`projected ${fmtMonth(s.projected_completion)} at that rate`);
+  return parts.join(". ");
+}
+
+function displayName(protocol, alias) {
+  const p = String(protocol || "").trim();
+  const a = String(alias || "").trim();
+  if (!p) return a;
+  if (!a || a.toLowerCase() === p.toLowerCase()) return p;
+  return `${p} (${a})`;
+}
+
+function studyArticle(s, mode) {
+  const name = displayName(s.protocol, s.alias);
+  const meta = [`Phase ${phaseLabel(s.phase) || "not stated"}`, s.lead, s.status === "Active" ? "Open" : (s.status || ""), s.nct].filter(Boolean).join(" · ");
+  const site = siteLabel(s) || "Site not stated";
+  const steps = s.brief && s.brief.schema;
+  const schema = steps && steps.length ? (mode === "brief" ? briefSchema(steps) : schemaBlocks(steps)) : "";
+  const accrual = mode === "comprehensive" ? accrualLine(s) : "";
+  return `<article class="study" data-site="${esc(site)}"><h2>${esc(name)}</h2><p class="meta">${esc(meta)}</p>${s.title ? `<p class="title">${esc(s.title)}</p>` : ""}${schema ? `<div class="schema">${schema}</div>` : (mode === "brief" && s.brief ? "" : `<p class="none">${s.brief ? "No schema is on file for this protocol brief." : "No protocol brief is on file."}</p>`)}${accrual ? `<p class="accrual">${esc(accrual)}</p>` : ""}</article>`;
+}
+
+function digestDocument(meta) {
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>${esc(meta.fileTitle || meta.heading)}</title><style>${DIGEST_CSS}</style></head><body data-tracker="${esc(meta.tracker)}" data-mode="${esc(meta.mode)}" data-heading="${esc(meta.heading)}" data-when="${esc(meta.when)}" data-filters="${esc(meta.filters || "")}" data-places="${esc(meta.places || "")}"><div id="measure" class="measure">${meta.articles}</div><div id="out"></div><script>
+function packDigest() {
+  var measure = document.getElementById("measure");
+  var tracker = document.body.dataset.tracker;
+  var mode = document.body.dataset.mode;
+  var heading = document.body.dataset.heading;
+  var when = document.body.dataset.when;
+  var filters = document.body.dataset.filters || "";
+  var places = document.body.dataset.places || "";
+  var studies = Array.prototype.slice.call(measure.querySelectorAll("article.study"));
+  var whenText = mode + " · " + heading + " · " + studies.length + (studies.length === 1 ? " study" : " studies") + " · " + when;
+  var caveat = ${JSON.stringify(DIGEST_CAVEAT)};
+  function makeHeader(kind, title) {
+    var header = document.createElement("header");
+    header.className = "run " + kind;
+    header.innerHTML = '<p class="tracker-line"><span class="tracker"><\/span><\/p><h1><\/h1>' + (kind === "toc-head" ? '<p class="when"><\/p>' : "");
+    header.querySelector(".tracker").textContent = tracker;
+    if (places) {
+      var loc = document.createElement("b");
+      loc.className = "loc";
+      loc.textContent = places;
+      header.querySelector(".tracker-line").appendChild(loc);
+    }
+    if (kind === "toc-head" && filters) {
+      var line = document.createElement("p");
+      line.className = "filters";
+      line.textContent = filters;
+      header.insertBefore(line, header.querySelector("h1"));
+    }
+    header.querySelector("h1").textContent = title;
+    if (kind === "toc-head") header.querySelector(".when").textContent = whenText;
+    return header;
+  }
+  function makeFooter(pageNo) {
+    var footer = document.createElement("footer");
+    footer.className = "run";
+    footer.innerHTML = '<span class="caveat"><\/span><span class="pageno"><\/span>';
+    footer.querySelector(".caveat").textContent = caveat;
+    footer.querySelector(".pageno").textContent = String(pageNo);
+    return footer;
+  }
+  var probeSheet = document.createElement("div");
+  probeSheet.className = "probe-sheet";
+  var siteProbe = makeHeader("site-head", "Site");
+  var tocProbe = makeHeader("toc-head", "Contents");
+  var footProbe = makeFooter("00");
+  measure.insertBefore(footProbe, measure.firstChild);
+  measure.insertBefore(tocProbe, measure.firstChild);
+  measure.insertBefore(siteProbe, measure.firstChild);
+  measure.insertBefore(probeSheet, measure.firstChild);
+  function outerH(el) {
+    var s = getComputedStyle(el);
+    return el.offsetHeight + (parseFloat(s.marginTop) || 0) + (parseFloat(s.marginBottom) || 0);
+  }
+  var sheetH = probeSheet.offsetHeight;
+  var footH = outerH(footProbe);
+  var slack = 48;
+  function contentAvail(site) {
+    siteProbe.querySelector("h1").textContent = site || "Site";
+    return sheetH - outerH(siteProbe) - footH - slack;
+  }
+  var tocAvail = sheetH - outerH(tocProbe) - footH - slack;
+  var groups = [];
+  var seen = {};
+  studies.forEach(function(article) {
+    var site = article.dataset.site || "Site not stated";
+    if (!seen[site]) { seen[site] = {site: site, articles: []}; groups.push(seen[site]); }
+    seen[site].articles.push({el: article, h: outerH(article)});
+  });
+  groups.sort(function(a, b) { return a.site.localeCompare(b.site, undefined, {numeric: true}); });
+  function packStudies() {
+    var pages = [];
+    groups.forEach(function(group) {
+      var avail = contentAvail(group.site);
+      var bucket = [];
+      var used = 0;
+      function flush() {
+        if (!bucket.length) return;
+        pages.push({site: group.site, items: bucket});
+        bucket = [];
+        used = 0;
+      }
+      group.articles.forEach(function(item) {
+        if (bucket.length && used + item.h > avail) flush();
+        bucket.push(item);
+        used += item.h;
+        if (item.h > avail) flush();
+      });
+      flush();
+    });
+    return pages;
+  }
+  function tocBlocks(start) {
+    return groups.map(function(group) {
+      var block = document.createElement("section");
+      block.className = "toc-site";
+      var line = document.createElement("div");
+      line.className = "toc-line";
+      var name = document.createElement("b");
+      name.textContent = group.site;
+      var num = document.createElement("span");
+      num.className = "toc-num";
+      num.textContent = String(start[group.site] || "");
+      line.appendChild(name);
+      line.appendChild(num);
+      var list = document.createElement("ul");
+      group.articles.forEach(function(item) {
+        var li = document.createElement("li");
+        li.textContent = item.el.querySelector("h2").textContent;
+        list.appendChild(li);
+      });
+      block.appendChild(line);
+      block.appendChild(list);
+      measure.appendChild(block);
+      return {el: block, h: outerH(block)};
+    });
+  }
+  function packBlocks(blocks, avail) {
+    var pages = [];
+    var bucket = [];
+    var used = 0;
+    function flush() {
+      if (!bucket.length) return;
+      pages.push(bucket);
+      bucket = [];
+      used = 0;
+    }
+    blocks.forEach(function(block) {
+      if (bucket.length && used + block.h > avail) flush();
+      bucket.push(block);
+      used += block.h;
+      if (block.h > avail) flush();
+    });
+    flush();
+    return pages;
+  }
+  function makeSheet(title, pageNo, contents) {
+    var section = document.createElement("section");
+    section.className = "sheet";
+    var header = makeHeader(contents ? "toc-head" : "site-head", title);
+    var body = document.createElement("div");
+    body.className = "sheet-body";
+    section.appendChild(header);
+    section.appendChild(body);
+    section.appendChild(makeFooter(pageNo));
+    return section;
+  }
+  var tocPageCount = 1;
+  var contentPages = [];
+  var tocPages = [];
+  var pass;
+  for (pass = 0; pass < 5; pass++) {
+    Array.prototype.forEach.call(measure.querySelectorAll(".toc-site"), function(el) { el.remove(); });
+    contentPages = packStudies();
+    var start = {};
+    contentPages.forEach(function(page, i) {
+      if (start[page.site] == null) start[page.site] = tocPageCount + 1 + i;
+    });
+    tocPages = packBlocks(tocBlocks(start), tocAvail);
+    if (tocPages.length === tocPageCount) break;
+    tocPageCount = Math.max(1, tocPages.length);
+  }
+  var out = document.getElementById("out");
+  var pageNo = 1;
+  tocPages.forEach(function(bucket) {
+    var sheet = makeSheet("Contents", pageNo, true);
+    bucket.forEach(function(block) { sheet.querySelector(".sheet-body").appendChild(block.el); });
+    out.appendChild(sheet);
+    pageNo++;
+  });
+  contentPages.forEach(function(page) {
+    var sheet = makeSheet(page.site, pageNo, false);
+    page.items.forEach(function(item) { sheet.querySelector(".sheet-body").appendChild(item.el); });
+    out.appendChild(sheet);
+    pageNo++;
+  });
+  measure.remove();
+}
+packDigest();
+<\/script></body></html>`;
+}
+
+function digestFilters(st) {
+  const statusText = {active: "Open to accrual", approved: "Approved, not yet open", temporary: "Temporarily closed", all: "Any status"}[st.status] || st.status;
+  return [
+    st.q ? `Search: ${st.q}` : "",
+    statusText,
+    st.disease ? `Site: ${st.disease}` : "All sites",
+    st.lead ? `Lead group: ${st.lead}` : "All lead groups",
+    choiceButtonLabel(st, "role"),
+    choiceButtonLabel(st, "phase"),
+    st.protocol ? "Protocol available" : "Protocol not limited"
+  ].filter(Boolean).join(" · ");
+}
+
+function openDigest(items, heading, mode, filters) {
+  if (!items.length) return;
+  if (items.length > DIGEST_LIMIT && !confirm("You have selected to print more than 25 studies. Are you sure?")) return;
+  const when = new Date().toLocaleString("en-US", {dateStyle: "long", timeStyle: "short"});
+  const articles = items.map(item => item.study ? studyArticle(item.study, mode) : `<article class="study" data-site="Not on the current list"><h2>${esc(item.protocol)}</h2><p class="none">Not on the current CTSU list. No protocol brief is on file.</p></article>`).join("");
+  const kind = mode === "brief" ? "Brief" : "Comprehensive";
+  const now = new Date();
+  const stamp = String(now.getMonth() + 1).padStart(2, "0") + String(now.getDate()).padStart(2, "0") + now.getFullYear();
+  const html = digestDocument({
+    tracker: "CTSU Trials Dashboard",
+    mode: kind,
+    fileTitle: `CTSU Trials Dashboard ${kind} ${stamp}`,
+    heading,
+    when,
+    filters: filters || "",
+    places: "",
+    articles
+  });
+  const w = window.open("", "_blank");
+  if (!w) return;
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+  setTimeout(() => { try { w.focus(); w.print(); } catch (e) {} }, 250);
+}
+
+$("print-mine-brief").onclick = () => openDigest(mineShown(), "My trials", "brief", digestFilters(mineState));
+$("print-mine-full").onclick = () => openDigest(mineShown(), "My trials", "comprehensive", digestFilters(mineState));
+$("print-explore-brief").onclick = () => openDigest(rows().map(study => ({protocol: study.protocol, study})), "Explore CTSU studies", "brief", digestFilters(state));
+$("print-explore-full").onclick = () => openDigest(rows().map(study => ({protocol: study.protocol, study})), "Explore CTSU studies", "comprehensive", digestFilters(state));
+
 // --------------------------------------------------------------------- Start
 function refreshAll() {
   renderKpis();
@@ -1278,6 +1736,7 @@ store.load();
 readSharedLink();
 syncPhaseInputs();
 syncRoleInputs();
+syncMineFilters();
 renderAccount();
 refreshAll();
 if (sync.available) initFirebase();
