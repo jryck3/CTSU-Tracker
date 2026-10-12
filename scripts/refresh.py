@@ -40,6 +40,7 @@ DATA = ROOT / "data"
 SNAPSHOTS = DATA / "snapshots"
 CTGOV_CACHE = DATA / "ctgov"
 HISTORY_CSV = DATA / "accrual_history.csv"
+LIBRARY_STAMP = DATA / "protocol_library.json"
 STUDIES_JSON = DATA / "studies.json"
 CONFIG = ROOT / "config" / "institution_trials.json"
 OVERRIDES = ROOT / "config" / "rt_overrides.json"
@@ -627,6 +628,7 @@ def build(protocols, history, fetched_at, today, approved_ncts=None):
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "snapshot_fetched_at": fetched_at,
+        "protocol_library_as_of": load_json(LIBRARY_STAMP, {}).get("as_of"),
         "history_start": min((pts[0]["date"] for pts in history.values() if pts), default=today.isoformat()),
         "snapshot_days": len({p["date"] for pts in history.values() for p in pts}),
         "sources": {"ctsu": "https://ctsu.cancer.gov/protocol", "ctgov": "https://clinicaltrials.gov"},
@@ -687,10 +689,12 @@ def main():
     ap.add_argument("--force-ctgov", action="store_true", help="Refetch all ClinicalTrials.gov records")
     ap.add_argument("--no-save", action="store_true",
                     help="Leave the snapshot, history CSV, and public page untouched (local rebuild)")
+    ap.add_argument("--page-only", action="store_true",
+                    help="Rebuild the public page (new protocol briefs) without saving a snapshot or history row")
     args = ap.parse_args()
 
     today = date.today()
-    save = not args.no_save
+    save = not args.no_save and not args.page_only
     protocols, fetched_at = snapshot_ctsu(today, save=save)
     history = update_history(protocols, today, save=save)
     approved_ncts = not_yet_recruiting_ncts()
@@ -699,7 +703,7 @@ def main():
         ncts = sorted({p["nctNumber"] for p in protocols if p.get("nctNumber")} | set(approved_ncts))
         refreshed = refresh_ctgov(ncts, force=args.force_ctgov)
     payload = build(protocols, history, fetched_at, today, approved_ncts)
-    if save:
+    if save or args.page_only:
         render_dashboard(payload, PUBLIC_SITE, local=False, firebase=firebase_config())
     if MANIFEST.exists():
         render_dashboard(payload, DASHBOARD, local=True)

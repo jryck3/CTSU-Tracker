@@ -3,9 +3,10 @@
 Download current protocol documents from the CTSU member site (www.ctsu.org)
 into protocols/<PROTOCOL>/ and record them in protocols/manifest.json.
 
-Requires the automation Chrome (tools/launch_chrome_debug.sh) to be running and
-signed in to CTSU. Stop and ask Jeff to complete ID.me before using this script.
-Do not call it while logged out. Requests go through that browser's session
+Requires the automation Chrome (tools/launch_chrome_debug.sh) to be running.
+If CTSU is logged out, this script waits for Dr. Ryckman to finish ID.me.
+It does not download protocols while logged out, and it does not type the
+password. Requests go through that browser's session
 cookies. Protocol documents are for site use under the CTSU terms of use and
 stay on this machine.
 
@@ -18,6 +19,7 @@ Each run appends logs/protocol_changes.md.
 
 Usage:
     python3 scripts/download_protocols.py --port 9223 [--only NRG-GU013 S2427] [--open-only] [--rt-only] [--dry-run]
+    python3 scripts/download_protocols.py --port 9223 --protocols-dir "/path/to/CTSU Trials Workspace/protocols"
 """
 import argparse
 import html
@@ -260,14 +262,165 @@ def append_log(checked, summary, notes, baseline):
         f.write("\n".join(lines).rstrip() + "\n\n")
 
 
+def wait_for_ctsu_login(req, once=False, wait_minutes=None):
+    """Wait until CTSU shows a logged-in session. Do not type credentials or click.
+
+    once returns at the first failed check. wait_minutes gives up after that long.
+    Either way the exit code is 2 and Chrome is left open for the sign-in.
+    """
+    announced = False
+    deadline = time.time() + wait_minutes * 60 if wait_minutes else None
+    while True:
+        try:
+            check = req.get(f"{BASE}/pp_default.aspx?nodeKey=3").text()
+        except Exception as exc:
+            print("Still waiting for CTSU. The page check failed: " + str(exc), flush=True)
+            check = ""
+            if once:
+                raise SystemExit(2)
+        if "Log Out" in check:
+            if announced:
+                print("CTSU session is signed in. Continuing the protocol check.", flush=True)
+            return
+        if once:
+            print("CTSU is not signed in on this profile.", flush=True)
+            raise SystemExit(2)
+        if deadline and time.time() > deadline:
+            print("No CTSU sign-in within %s minutes. Not downloading protocols." % wait_minutes, flush=True)
+            raise SystemExit(2)
+        if not announced:
+            print(
+                "Two-factor authentication is required by Dr. Ryckman to log into CTSU.org. "
+                "Waiting for the ID.me sign-in in the CTSU window. "
+                "Not downloading protocols while logged out.",
+                flush=True,
+            )
+            announced = True
+        time.sleep(20)
+
+
+def check_one(req, proto, lead, role, manifest, summary, notes, dry_run=False, extra=None):
+    """Check one protocol on CTSU, download what changed, and update manifest[proto].
+
+    This is the only code that writes manifest entries. It keeps the version
+    history and the amendment memorandum fields. extra adds caller fields such
+    as bucket or nct. The caller writes MANIFEST to disk.
+    """
+    entry = manifest.get(proto, {})
+    try:
+        doc, memo, note = find_current_protocol(req, proto, lead)
+        now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+        if not doc:
+            entry.update({"status": "unavailable", "note": note, "checked_at": now, **(extra or {})})
+            manifest[proto] = entry
+            summary["unavailable"].append(proto)
+            return "unavailable"
+        protocol_same = entry.get("doc_id") == doc["doc_id"] and entry.get("files")
+        memo_changed = bool(entry.get("amendment_doc_id")) and memo and entry.get("amendment_doc_id") != memo["doc_id"]
+        if protocol_same and not memo_changed:
+            entry.update({"status": "unchanged", "checked_at": now, **(extra or {})})
+            if memo and not entry.get("amendment_doc_id"):
+                entry["amendment_doc_id"] = memo["doc_id"]
+                entry["amendment_label"] = memo["label"]
+            manifest[proto] = entry
+            summary["unchanged"].append(proto)
+            return "unchanged"
+        if dry_run:
+            print(json.dumps({"protocol": proto, "protocol_doc": doc, "memo": memo, "memo_changed": memo_changed}))
+            return "dry-run"
+        if protocol_same and memo_changed:
+            path, size, server_name = download(req, memo, proto, kind="amendment")
+            rel = str(path.relative_to(PROTOCOLS))
+            entry.update({
+                "status": "unchanged", "checked_at": now,
+                "amendment_doc_id": memo["doc_id"], "amendment_label": memo["label"],
+                "amendment_file": rel, "amendment_bytes": size, **(extra or {}),
+            })
+            manifest[proto] = entry
+            summary["memos"].append(proto)
+            notes.append({
+                "protocol": proto,
+                "summary": f"Amendment memorandum changed to {memo['label']}. The protocol file on disk is still {entry.get('label')}.",
+                "file": rel,
+                "memo": memo["label"],
+                "annotation": annotate_pdf(path),
+            })
+            print(json.dumps({"protocol": proto, "amendment": rel, "label": memo["label"]}), flush=True)
+            return "memo"
+        path, size, server_name = download(req, doc, proto)
+        rel = str(path.relative_to(PROTOCOLS))
+        history = entry.get("history", [])
+        previous = entry.get("label")
+        if entry.get("doc_id"):
+            history.append({k: entry.get(k) for k in ("doc_id", "label", "version", "posted", "files")})
+        memo_file = entry.get("amendment_file")
+        memo_label = memo["label"] if memo else None
+        mpath = None
+        msize = None
+        if memo and not protocol_same:
+            try:
+                mpath, msize, _ = download(req, memo, proto, kind="amendment")
+                memo_file = str(mpath.relative_to(PROTOCOLS))
+            except Exception as e:
+                memo_label = f"{memo['label']} (download failed: {e})"
+                mpath = None
+                msize = None
+        kept = {k: entry[k] for k in ("bucket", "nct") if k in entry}
+        manifest[proto] = {
+            **kept,
+            "status": "downloaded", "rt_role": role if role is not None else entry.get("rt_role"),
+            "doc_id": doc["doc_id"], "label": doc["label"],
+            "version": pvd_iso(doc["label"]) or doc.get("posted"), "posted": doc.get("posted"),
+            "source": doc["source"], "files": [rel], "server_filename": server_name, "bytes": size,
+            "downloaded_at": now, "checked_at": now, "history": history,
+            "amendment_doc_id": memo["doc_id"] if memo else entry.get("amendment_doc_id"),
+            "amendment_label": memo["label"] if memo else entry.get("amendment_label"),
+            "amendment_file": memo_file,
+            "amendment_bytes": msize if mpath else entry.get("amendment_bytes"),
+            **(extra or {}),
+        }
+        summary["downloaded"].append(proto)
+        if previous:
+            change = f"{previous} replaced by {doc['label']}"
+        else:
+            change = f"First copy on file: {doc['label']}"
+        if doc.get("posted"):
+            change += f" (posted {doc['posted']})"
+        annotation = annotate_pdf(Path(PROTOCOLS / memo_file)) if memo_file and mpath else annotate_pdf(path)
+        notes.append({
+            "protocol": proto, "summary": change, "file": rel,
+            "memo": memo_label, "annotation": annotation,
+        })
+        print(json.dumps({"protocol": proto, "file": rel, "bytes": size, "label": doc["label"]}), flush=True)
+        return "downloaded"
+    except Exception as e:
+        entry.update({"status": "error", "note": str(e)})
+        manifest[proto] = entry
+        summary["errors"].append(f"{proto}: {e}")
+        return "error"
+
+
 def main():
+    global PROTOCOLS, MANIFEST
     ap = argparse.ArgumentParser()
     ap.add_argument("--port", type=int, required=True, help="CDP port of the signed-in automation Chrome")
     ap.add_argument("--only", nargs="*", help="Limit to these protocol numbers")
     ap.add_argument("--open-only", action="store_true", help="Active RT-related studies only")
     ap.add_argument("--rt-only", action="store_true", help="RT-related studies and institution trials only")
     ap.add_argument("--dry-run", action="store_true", help="Find documents without downloading")
+    ap.add_argument("--once", action="store_true", help="Return immediately if CTSU is not signed in")
+    ap.add_argument("--wait-minutes", type=int, help="Give up waiting for the ID.me sign-in after this many minutes")
+    ap.add_argument("--summary-json", help="Write the run summary (downloaded, memos, errors, ...) to this file")
+    ap.add_argument("--protocols-dir", help="Folder for the PDFs and manifest.json. Must be the CTSU Trials Workspace protocols folder.")
     args = ap.parse_args()
+    if args.protocols_dir:
+        chosen = Path(args.protocols_dir).expanduser().resolve()
+        if chosen.name != "protocols" or chosen.parent.name != "CTSU Trials Workspace":
+            raise SystemExit("Protocol files stay in the CTSU Trials Workspace protocols folder.")
+        PROTOCOLS = chosen
+        MANIFEST = PROTOCOLS / "manifest.json"
+    PROTOCOLS.mkdir(parents=True, exist_ok=True)
+    print(json.dumps({"protocols_dir": str(PROTOCOLS)}), flush=True)
 
     manifest = json.loads(MANIFEST.read_text()) if MANIFEST.exists() else {}
     summary = {"downloaded": [], "unchanged": [], "memos": [], "unavailable": [], "errors": []}
@@ -280,106 +433,16 @@ def main():
     with sync_playwright() as p:
         browser = p.chromium.connect_over_cdp(f"http://localhost:{args.port}")
         req = browser.contexts[0].request
-        check = req.get(f"{BASE}/pp_default.aspx?nodeKey=3").text()
-        if "Log Out" not in check:
-            raise RuntimeError(
-                "Not signed in to CTSU. Stop and ask Jeff to complete ID.me in the automation Chrome, then rerun. Do not continue against the member site while logged out."
-            )
+        wait_for_ctsu_login(req, once=args.once, wait_minutes=args.wait_minutes)
 
         for proto, lead, role in rows:
-            entry = manifest.get(proto, {})
-            try:
-                doc, memo, note = find_current_protocol(req, proto, lead)
-                now = datetime.now(timezone.utc).isoformat(timespec="seconds")
-                if not doc:
-                    entry.update({"status": "unavailable", "note": note, "checked_at": now})
-                    manifest[proto] = entry
-                    summary["unavailable"].append(proto)
-                    continue
-                protocol_same = entry.get("doc_id") == doc["doc_id"] and entry.get("files")
-                memo_changed = bool(entry.get("amendment_doc_id")) and memo and entry.get("amendment_doc_id") != memo["doc_id"]
-                if protocol_same and not memo_changed:
-                    entry.update({"status": "unchanged", "checked_at": now})
-                    if memo and not entry.get("amendment_doc_id"):
-                        entry["amendment_doc_id"] = memo["doc_id"]
-                        entry["amendment_label"] = memo["label"]
-                    manifest[proto] = entry
-                    summary["unchanged"].append(proto)
-                    continue
-                if args.dry_run:
-                    print(json.dumps({"protocol": proto, "protocol_doc": doc, "memo": memo, "memo_changed": memo_changed}))
-                    continue
-                if protocol_same and memo_changed:
-                    path, size, server_name = download(req, memo, proto, kind="amendment")
-                    rel = str(path.relative_to(PROTOCOLS))
-                    entry.update({
-                        "status": "unchanged", "checked_at": now,
-                        "amendment_doc_id": memo["doc_id"], "amendment_label": memo["label"],
-                        "amendment_file": rel, "amendment_bytes": size,
-                    })
-                    manifest[proto] = entry
-                    summary["memos"].append(proto)
-                    notes.append({
-                        "protocol": proto,
-                        "summary": f"Amendment memorandum changed to {memo['label']}. The protocol file on disk is still {entry.get('label')}.",
-                        "file": rel,
-                        "memo": memo["label"],
-                        "annotation": annotate_pdf(path),
-                    })
-                    print(json.dumps({"protocol": proto, "amendment": rel, "label": memo["label"]}), flush=True)
-                    continue
-                path, size, server_name = download(req, doc, proto)
-                rel = str(path.relative_to(PROTOCOLS))
-                history = entry.get("history", [])
-                previous = entry.get("label")
-                if entry.get("doc_id"):
-                    history.append({k: entry.get(k) for k in ("doc_id", "label", "version", "posted", "files")})
-                memo_file = entry.get("amendment_file")
-                memo_label = memo["label"] if memo else None
-                if memo and (not protocol_same):
-                    try:
-                        mpath, msize, _ = download(req, memo, proto, kind="amendment")
-                        memo_file = str(mpath.relative_to(PROTOCOLS))
-                    except Exception as e:
-                        memo_label = f"{memo['label']} (download failed: {e})"
-                        mpath = None
-                        msize = None
-                else:
-                    mpath = None
-                    msize = None
-                manifest[proto] = {
-                    "status": "downloaded", "rt_role": role, "doc_id": doc["doc_id"], "label": doc["label"],
-                    "version": pvd_iso(doc["label"]) or doc.get("posted"), "posted": doc.get("posted"),
-                    "source": doc["source"], "files": [rel], "server_filename": server_name, "bytes": size,
-                    "downloaded_at": now, "checked_at": now, "history": history,
-                    "amendment_doc_id": memo["doc_id"] if memo else entry.get("amendment_doc_id"),
-                    "amendment_label": memo["label"] if memo else entry.get("amendment_label"),
-                    "amendment_file": memo_file,
-                    "amendment_bytes": msize if mpath else entry.get("amendment_bytes"),
-                }
-                summary["downloaded"].append(proto)
-                if previous:
-                    change = f"{previous} replaced by {doc['label']}"
-                    if doc.get("posted"):
-                        change += f" (posted {doc['posted']})"
-                else:
-                    change = f"First copy on file: {doc['label']}"
-                    if doc.get("posted"):
-                        change += f" (posted {doc['posted']})"
-                annotation = annotate_pdf(Path(PROTOCOLS / memo_file)) if memo_file and mpath else annotate_pdf(path)
-                notes.append({
-                    "protocol": proto, "summary": change, "file": rel,
-                    "memo": memo_label, "annotation": annotation,
-                })
-                print(json.dumps({"protocol": proto, "file": rel, "bytes": size, "label": doc["label"]}), flush=True)
-            except Exception as e:
-                entry.update({"status": "error", "note": str(e)})
-                manifest[proto] = entry
-                summary["errors"].append(f"{proto}: {e}")
+            check_one(req, proto, lead, role, manifest, summary, notes, dry_run=args.dry_run)
             MANIFEST.write_text(json.dumps(manifest, indent=1, sort_keys=True))
 
     if not args.dry_run:
         append_log(len(rows), summary, notes, baseline)
+    if args.summary_json:
+        Path(args.summary_json).write_text(json.dumps(summary, indent=1))
     printable = {k: (len(v) if k != "errors" else v) for k, v in summary.items()}
     print(json.dumps(printable))
     if summary["unavailable"]:

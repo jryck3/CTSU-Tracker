@@ -21,9 +21,9 @@
         <integer>0</integer>
     </dict>
     <key>StandardOutPath</key>
-    <string>/Users/jeffryckman/AI Workspace/Projects/CTSU Trials Workspace/logs/protocol_check.stdout.log</string>
+    <string>/Users/jeffryckman/Library/Logs/com.jeffryckman.ctsuProtocolCheck.log</string>
     <key>StandardErrorPath</key>
-    <string>/Users/jeffryckman/AI Workspace/Projects/CTSU Trials Workspace/logs/protocol_check.stderr.log</string>
+    <string>/Users/jeffryckman/Library/Logs/com.jeffryckman.ctsuProtocolCheck.log</string>
     <key>RunAtLoad</key>
     <false/>
 </dict>

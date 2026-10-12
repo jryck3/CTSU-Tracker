@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Fill protocol brief sections from the local protocol PDFs.
 
-Reads the newest PDF in protocols/<ID>/ and updates data/protocol_briefs.json.
+Reads the current PDF in protocols/<ID>/ (the one manifest.json names) and
+updates data/protocol_briefs.json.
 Schema, eligibility, pre-treatment assessments, and amendments already written
 by hand are kept. Empty sections, plus assessments during treatment and
 assessments in follow-up, are filled from the PDF. A section the PDF does not
@@ -17,11 +18,16 @@ from pathlib import Path
 
 from pypdf import PdfReader
 
+import protocol_library as lib
+from schema_fallback import schema_from_reader
+
 ROOT = Path(__file__).resolve().parents[1]
 PROTOCOLS = ROOT / "protocols"
 BRIEFS = ROOT / "data" / "protocol_briefs.json"
 
 HAND_KEYS = ("schema", "eligibility", "pretreatment", "amendments")
+AUTO_SCHEMA = "Read from the schema page of the protocol on file."
+REVIEWABLE = ("schema", "eligibility", "pretreatment", "during", "followup", "calendar", "specimens", "submission")
 
 NEXT_SECTION = re.compile(
     r"^(?:"
@@ -621,29 +627,66 @@ def brief_from_pdf(path, protocol):
         for key, rows in calendar_tables(pages, calendar_at, protocol).items():
             if rows and not brief.get(key):
                 brief[key] = rows
+    if not brief.get("schema"):
+        steps = schema_from_reader(reader)
+        if steps:
+            brief["schema"] = steps
+            brief["schema_source"] = AUTO_SCHEMA
     for key in ("amendments", "schema", "eligibility", "pretreatment", "during", "followup"):
         if not brief.get(key):
             brief.pop(key, None)
     return brief
 
 
-def newest_pdf(protocol):
-    files = sorted((PROTOCOLS / protocol).glob("*.pdf"))
-    protocols = [path for path in files if "amendment" not in path.name.lower() and "memo" not in path.name.lower()]
-    return protocols[-1] if protocols else (files[-1] if files else None)
+def hand_written(brief, key):
+    if key == "schema" and brief.get("schema_source") == AUTO_SCHEMA:
+        return False
+    return key in HAND_KEYS and bool(brief.get(key))
 
 
 def merge(existing, extracted):
+    """Fill from the PDF without replacing hand-written or locked sections.
+
+    A schema read by the fallback parser is not hand-written, so a newer
+    protocol version replaces it.
+    """
     locked = set(existing.get("locked") or [])
     out = dict(existing)
     for key, value in extracted.items():
         if key in locked:
             continue
-        if key in HAND_KEYS and existing.get(key):
+        if hand_written(existing, key):
+            continue
+        if key == "schema_source" and hand_written(existing, "schema"):
             continue
         if value:
             out[key] = value
     return out
+
+
+def stamp_version(brief, doc):
+    """Record the protocol version the brief now reflects.
+
+    When the manifest has a newer version than the brief, hand-written sections
+    kept from the older version are listed in needs_review with that version.
+    """
+    version = doc.get("version")
+    if not version:
+        return None
+    previous = brief.get("version_date")
+    flagged = None
+    if previous and previous != version:
+        locked = set(brief.get("locked") or [])
+        kept = [key for key in brief if key in REVIEWABLE and brief.get(key)
+                and (hand_written(brief, key) or key in locked) and key != "amendments"]
+        if kept:
+            flagged = {"sections": kept, "written_for": previous, "current": version}
+            brief["needs_review"] = flagged
+    brief["version_date"] = version
+    for field, source in (("version_label", "label"), ("posted", "posted")):
+        if doc.get(source):
+            brief[field] = doc[source]
+    return flagged
 
 
 def main():
@@ -653,12 +696,12 @@ def main():
     args = parser.parse_args()
     briefs = json.loads(BRIEFS.read_text()) if BRIEFS.exists() else {}
     wanted = set(args.only) if args.only else None
-    stats = {"pdfs": 0, "updated": 0, "sections": {}}
-    for folder in sorted(path for path in PROTOCOLS.iterdir() if path.is_dir()):
-        protocol = folder.name
+    stats = {"pdfs": 0, "updated": 0, "sections": {}, "needs_review": {}}
+    manifest = lib.manifest()
+    for protocol in lib.protocol_folders():
         if wanted and protocol not in wanted:
             continue
-        pdf = newest_pdf(protocol)
+        pdf = lib.current_pdf(protocol)
         if not pdf:
             continue
         stats["pdfs"] += 1
@@ -672,14 +715,9 @@ def main():
         for key in extracted:
             stats["sections"][key] = stats["sections"].get(key, 0) + 1
         merged = merge(briefs.get(protocol, {}), extracted)
-        manifest = json.loads((PROTOCOLS / "manifest.json").read_text()) if (PROTOCOLS / "manifest.json").exists() else {}
-        doc = manifest.get(protocol) or {}
-        if doc.get("version") and not merged.get("version_date"):
-            merged["version_date"] = doc["version"]
-            if doc.get("label"):
-                merged["version_label"] = doc["label"]
-            if doc.get("posted"):
-                merged["posted"] = doc["posted"]
+        flagged = stamp_version(merged, manifest.get(protocol) or {})
+        if flagged:
+            stats["needs_review"][protocol] = flagged
         briefs[protocol] = merged
         stats["updated"] += 1
     if not args.debug:

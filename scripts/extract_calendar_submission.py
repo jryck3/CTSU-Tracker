@@ -16,6 +16,8 @@ from pathlib import Path
 
 from pypdf import PdfReader
 
+import protocol_library as lib
+
 ROOT = Path(__file__).resolve().parents[1]
 PROTOCOLS = ROOT / "protocols"
 BRIEFS = ROOT / "data" / "protocol_briefs.json"
@@ -172,11 +174,10 @@ def specimens_from(pages):
 
 
 def pdf_pages(protocol):
-    folder = PROTOCOLS / protocol
-    files = sorted(path for path in folder.glob("*.pdf") if "amendment" not in path.name.lower())
-    if not files:
+    path = lib.current_pdf(protocol)
+    if path is None:
         return []
-    reader = PdfReader(str(files[-1]))
+    reader = PdfReader(str(path))
     return [(page.extract_text() or "") for page in reader.pages]
 
 

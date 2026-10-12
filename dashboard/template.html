@@ -1205,7 +1205,7 @@ function refreshAll() {
 }
 
 $("sub").textContent =
-  `CTSU accrual snapshot ${new Date(DATA.snapshot_fetched_at).toLocaleString("en-US", {dateStyle: "medium", timeStyle: "short"})}. Study-wide accrual from the public CTSU Protocol List; trial details from ClinicalTrials.gov.${DATA.local ? " Local copy with protocol status." : ""}`;
+  `CTSU accrual snapshot ${new Date(DATA.snapshot_fetched_at).toLocaleString("en-US", {dateStyle: "medium", timeStyle: "short"})}. Study-wide accrual from the public CTSU Protocol List; trial details from ClinicalTrials.gov.${DATA.protocol_library_as_of ? ` Protocol briefs from the protocol library as of ${fmtDate(DATA.protocol_library_as_of)}.` : ""}${DATA.local ? " Local copy with protocol status." : ""}`;
 $("hist-start").textContent = fmtDate(DATA.history_start);
 $("m-sync").innerHTML = sync.available
   ? "<b>My trials</b> is saved in your browser. If you sign in with Google, the list is also saved to this dashboard's Firebase project so it follows you to other devices: Firebase Authentication keeps your Google name and email, and the database keeps only your list of protocol numbers. Share links contain only protocol numbers."

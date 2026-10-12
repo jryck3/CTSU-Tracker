@@ -1,4 +1,10 @@
 {
   "PBTC-060": {"role": null, "reason": "SurVaxM vaccine after prior RT; no protocol-directed RT"},
-  "CCTG-HN11": {"role": "RT-focused", "reason": "SELECT: SPECT-CT guided elective contralateral neck RT (CT.gov intervention named 'Ipsilateral and Contralateral Neck')"}
+  "CCTG-HN11": {"role": "RT-focused", "reason": "SELECT: SPECT-CT guided elective contralateral neck RT (CT.gov intervention named 'Ipsilateral and Contralateral Neck')"},
+  "NRG-HN006": {"role": "RT component", "reason": "Protocol section 5.3 assigns adjuvant RT or cisplatin chemoradiation by pathology in both arms (60, 56, 66 Gy in 30 fractions), with IMRT/IGRT credentialing and TRIAD submission; the randomized question is surgical"},
+  "EAF223": {"role": "RT component", "reason": "Protocol-specified standard chemoradiation, 59.4-60 Gy at 1.8-2.0 Gy, defined GTV/CTV/PTV and OAR constraints, DICOM plan submission; noncompliant RT makes the patient unevaluable"},
+  "AOST2032": {"role": "RT component", "reason": "Protocol section 17 RT guidelines with IROC credentialing: RT to unresectable or margin-positive primary and SBRT or conventional RT to unresected bone and lung metastases"},
+  "ARAR2331": {"role": "RT component", "reason": "Protocol section 17 RT for Type II/III PPB with IROC credentialing: thoracic, CNS, and consolidative metastatic RT"},
+  "A081801": {"role": "RT component", "reason": "Optional PORT in both arms (occult N2/N3, R1, extranodal extension), 50-54 Gy with protocol volumes, technique, and OAR constraints; delivery at physician discretion"},
+  "NRG-BR009": {"role": "RT component", "reason": "Protocol section 5.3 requires whole breast RT after lumpectomy, prohibits partial breast RT, directs PMRT and nodal RT, and specifies dose and heart/lung constraints; standard-of-care, not randomized, no central review"}
 }

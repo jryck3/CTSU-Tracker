@@ -3,6 +3,12 @@ name: Refresh CTSU accrual
 on:
   schedule:
     - cron: "17 11 * * *"
+  push:
+    branches: [main]
+    paths:
+      - data/protocol_briefs.json
+      - data/protocol_library.json
+      - dashboard/template.html
   workflow_dispatch:
 
 permissions:
@@ -24,9 +30,16 @@ jobs:
           python-version: "3.12"
 
       - name: Snapshot CTSU and rebuild the dashboard
+        if: github.event_name != 'push'
         env:
           FIREBASE_WEB_CONFIG: ${{ vars.FIREBASE_WEB_CONFIG }}
         run: python scripts/refresh.py
+
+      - name: Rebuild the public page for new protocol briefs
+        if: github.event_name == 'push'
+        env:
+          FIREBASE_WEB_CONFIG: ${{ vars.FIREBASE_WEB_CONFIG }}
+        run: python scripts/refresh.py --page-only
 
       - name: Commit history and public page
         run: |
@@ -36,6 +49,11 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes"
           else
-            git commit -m "Accrual snapshot $(date -u +%F)"
+            if [ "${{ github.event_name }}" = "push" ]; then
+              git commit -m "Rebuild the public page for protocol briefs $(date -u +%F)"
+            else
+              git commit -m "Accrual snapshot $(date -u +%F)"
+            fi
+            git pull --rebase
             git push
           fi
