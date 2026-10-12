@@ -5540,20 +5540,33 @@
  "A041703": {
   "schema": [
    {
-    "label": "Entry",
-    "text": "Cohort 3 Patients: -Ph/ BCR-ABL1-positive, CD22-positive precursor B-cell acute lymphoblastic leukemia -Age ≥ 75 years OR -Age ≥ 18 years AND ineligible for Hyper CVAD regimens -No prior therapy for ALL exceptasingle dose of intrathecal chemotherapy, a BCR-ABL1 targeted TKI, corticosteroids, hydroxyurea, and/or leukapheresis to reduce peripheral blast count and prevent ALL complications. Allowed therapy may be administered for no more than 14 days before starting study therapy and must be"
+    "label": "Step 0: Pre-registration",
+    "text": "Mandatory first-pull bone marrow aspirate and peripheral blood to the HEME Biobank for MRD. Protocol treatment starts within 7 days of registration."
+   },
+   {
+    "label": "Cohort 1",
+    "text": "Newly diagnosed Ph-negative CD22-positive B-ALL, age 60 or older, not planned for HCT. Induction Course IA: inotuzumab ozogamicin 0.8 mg/m2 Day 1 and 0.5 mg/m2 Days 8 and 15 (21 days), marrow Day 18-21. CR/CRi: Course IB, inotuzumab 0.5 mg/m2 Days 1, 8, 15 (28 days). Adequate cytoreduction without CR (50% or greater blast reduction or marrow cellularity 20% or less): Course IC, 0.8/0.5/0.5 mg/m2 (28 days). Inadequate cytoreduction goes straight to Course II. Then Course II blinatumomab (84 days), then Course IIIA (two 42-day blinatumomab cycles) after CR/CRi to induction, or Course IIIB (three 42-day cycles) if induction did not produce CR/CRi."
+   },
+   {
+    "label": "Cohort 2",
+    "text": "Relapsed or refractory Ph-negative CD22-positive B-ALL in salvage 1 or 2, age 18 or older. Same inotuzumab induction (Courses IA, IB, or IC) and Course II blinatumomab, then Course IIIB blinatumomab (126 days) if in CR/CRi. Allogeneic HCT is allowed any time after CR/CRi."
+   },
+   {
+    "label": "Cohort 3 (feasibility)",
+    "text": "Newly diagnosed Ph/BCR-ABL1-positive CD22-positive B-ALL, age 75 or older, or 18 or older and HyperCVAD-ineligible. Course I (35 days): ponatinib 45 mg daily, dexamethasone 20 mg/m2 Days 1-7 and 15-21, IT methotrexate Days 1, 15, 29. Course IIA (21 days): ponatinib 15 mg (if CMR) or 30 mg with inotuzumab 0.3 mg/m2 Days 1, 8, 15 if in CR/CRi, or 0.6/0.3/0.3 mg/m2 if not. Course IIB (CR/CRi after IIA) or IIC (no CR/CRi): one more 28-day inotuzumab cycle with ponatinib. Courses III and IV: two 42-day blinatumomab cycles each with ponatinib. Maintenance: ponatinib 15 mg daily (CMR) or 30 mg daily (no CMR) for 24 months. Ponatinib continues without breaks through maintenance."
+   },
+   {
+    "label": "Blinatumomab dosing",
+    "text": "Continuous infusion 9 mcg/day Days 1-7 of the first cycle, then 28 mcg/day for 28 days of each 42-day cycle (BSA-based doses if weight under 45 kg). Hospital admission recommended for initiation and cycle restarts."
+   },
+   {
+    "label": "Primary endpoint",
+    "text": "Cohorts 1 and 2: 1-year event-free survival. Cohort 3: feasibility of the regimen. The confirmation of tolerability lead-in for Cohorts 1 and 2 was completed as of Update #03."
    }
   ],
   "version_date": "2026-07-17",
   "version_label": "Protocol Version Date 07/17/26",
   "posted": "10-Aug-2026",
-  "calendar": [
-   {
-    "item": "Within 14 days",
-    "window": "To be completed ≤ 14 DAYS before registration: All baseline tests, observations, laboratory studies, staging, and sample submissions",
-    "note": ""
-   }
-  ],
   "submission": [
    {
     "label": "Rave",
@@ -5563,7 +5576,145 @@
     "label": "Rave",
     "text": "Supporting documentation will include all lab, pathology, cytogenetics and FISH reports, flow cytometry, immunophenotype, and molecular testing reports (if available)."
    }
-  ]
+  ],
+  "eligibility": [
+   "Morphologic precursor B-cell ALL (WHO), CD22 on 20% or more of lymphoblasts by local hematopathology. Ph/BCR-ABL1 status by cytogenetics, FISH, or PCR determines cohort (negative for Cohorts 1 and 2, positive for Cohort 3). No Burkitt lymphoma/leukemia.",
+   "No active CNS leukemia: only CNS-1 allowed. No CNS-directed treatment for active disease or symptomatic CNS leukemia within 28 days, and no parenchymal CNS mass. Prophylactic IT therapy alone is allowed.",
+   "Known or suspected testicular involvement is allowed only with concomitant scrotal/testicular radiotherapy (section 3.3.1); the schema summary instead lists testicular involvement as an exclusion.",
+   "ECOG performance status 0-2. Not pregnant and not nursing; pregnancy test within 7 days before registration.",
+   "No unstable cardiac disease (MI, angina, uncontrolled heart failure or arrhythmia) within 6 months. No LVEF under 45% or NYHA class III-IV heart failure. No clinically significant ventricular arrhythmia, unexplained non-vasovagal syncope, or chronic bradycardic states unless a permanent pacemaker is in place. QTcF 470 msec or less.",
+   "HIV allowed on effective antiretroviral therapy with undetectable viral load within 6 months. HBV allowed only on suppressive therapy with no active virus or liver damage. HCV allowed only after eradication with undetectable viral load and no liver damage.",
+   "No clinically relevant neurologic disorder (epilepsy, seizure, aphasia, stroke, severe brain injury, structural brain abnormality, benign brain tumor, dementia, Parkinson disease, movement or cerebellar disorder).",
+   "No other malignancy except treated basal or squamous cell skin cancer, cervical carcinoma in situ, stage I-II cancer in complete remission, or any cancer disease-free for 2 years or more.",
+   "No chronic liver disease or cirrhosis, and no history of SOS/VOD. No uncontrolled infection, and no deep tissue infection (fasciitis, osteomyelitis) within 4 months.",
+   "Total bilirubin 1.5 x ULN or less (2 x ULN or less for Gilbert disease or leukemic infiltration), AST and ALT 2.5 x ULN or less, creatinine clearance 40 mL/min or higher.",
+   "Cohort 1: age 60 or older, Ph-negative, no plan for allogeneic or autologous HCT, and no prior ALL therapy except single-dose IT chemotherapy, corticosteroids, hydroxyurea, or leukapheresis for no more than 14 days, completed at least 24 hours before protocol therapy.",
+   "Cohort 2: age 18 or older, Ph-negative, relapsed or refractory in salvage 1 or 2, no isolated extramedullary relapse. Prior allogeneic HCT allowed if 4 months or more before registration, no GVHD, and off immunosuppression for 30 days or more. No prior inotuzumab, blinatumomab, or other CD22- or CD19-directed therapy. Rituximab completed 7 days or more and other monoclonal antibodies 6 weeks or more before registration.",
+   "Cohort 2: other prior ALL therapy completed 14 days or more before registration, except IT chemotherapy, hydroxyurea, corticosteroids, 6-mercaptopurine, methotrexate, vincristine, or leukapheresis (completed at least 24 hours before protocol therapy). Prior non-hematologic toxicity resolved to grade 1 or less. Peripheral blast count 10,000/uL or less.",
+   "Cohort 3: age 75 or older, or 18 or older and ineligible for HyperCVAD; Ph/BCR-ABL1-positive; no prior ALL therapy except single-dose IT chemotherapy, corticosteroids, hydroxyurea, a BCR-ABL1 TKI, or leukapheresis for no more than 14 days, completed at least 24 hours before protocol therapy. No chronic strong CYP3A4 inducers."
+  ],
+  "pretreatment": [
+   {
+    "item": "All baseline tests, observations, labs, staging, and sample submissions",
+    "window": "Within 14 days before registration",
+    "note": ""
+   },
+   {
+    "item": "History and physical with testicular exam in men, ECOG PS, weight, BSA, height",
+    "window": "Within 14 days before registration",
+    "note": "Testicular ultrasound or other imaging recommended; biopsy if findings are equivocal."
+   },
+   {
+    "item": "ECG with QTcF",
+    "window": "Within 14 days before registration",
+    "note": ""
+   },
+   {
+    "item": "CBC with differential, platelets, and smear; creatinine, BUN, electrolytes, glucose; AST, ALT, alkaline phosphatase, bilirubin; LDH; uric acid",
+    "window": "Within 14 days before registration",
+    "note": "Labs within 24 hours before treatment may serve as Day 1 labs."
+   },
+   {
+    "item": "Pregnancy test",
+    "window": "Within 7 days before registration",
+    "note": "Women of childbearing potential."
+   },
+   {
+    "item": "Bone marrow aspirate and biopsy with peripheral blood; flow cytometry and IHC; cytogenetics, karyotype, and ALL FISH",
+    "window": "Within 14 days before registration",
+    "note": "Cohort 3 adds quantitative BCR-ABL1 p190 and p210 RT-PCR. First-pull aspirate to central MRD."
+   },
+   {
+    "item": "CSF cell count and cytospin",
+    "window": "Before registration",
+    "note": "IT methotrexate 15 mg may be given at this lumbar puncture; protocol therapy must then start within 7 days."
+   },
+   {
+    "item": "Fatigue and Uniscale questionnaire",
+    "window": "After registration, within 21 days before treatment",
+    "note": ""
+   }
+  ],
+  "during": [
+   {
+    "item": "History and physical, ECOG PS, weight, BSA, AE assessment",
+    "window": "Day 1 of each course (and maintenance for Cohort 3)",
+    "note": "Tests may be done within 24 hours before treatment."
+   },
+   {
+    "item": "ECG with QTcF",
+    "window": "Day 1 of induction courses (Cohort 3: Course I and Course IIA)",
+    "note": ""
+   },
+   {
+    "item": "CBC, chemistry, and liver tests",
+    "window": "Cohorts 1 and 2: Days 1, 8, 15 of each inotuzumab course; Cohort 3: Days 1, 8, 15, 22, 29 of Course I and Days 1, 8, 15 of Courses IIA-IIC",
+    "note": "CBC also on Day 1, Day 39-42, and Day 81-84 of blinatumomab courses; Cohort 3 CBC every 3 months during maintenance."
+   },
+   {
+    "item": "Bone marrow aspirate and biopsy with peripheral blood, flow, cytogenetics",
+    "window": "Cohorts 1 and 2: Course IA Day 18-21, IB or IC Day 25-28, Course II Days 39-42 and 81-84, IIIA Day 81-84, IIIB Day 123-126",
+    "note": "Central MRD submission at each time point."
+   },
+   {
+    "item": "Cohort 3 bone marrow and BCR-ABL1 PCR",
+    "window": "Course I Day 32-35, IIA Day 18-21, IIB or IIC Day 25-28, Course III Days 39-42 and 81-84, Course IV Day 81-84, every 6 months during maintenance",
+    "note": "Peripheral blood CMR assessment every 3 months during maintenance; marrow at month 24 of maintenance."
+   },
+   {
+    "item": "CSF cell count and cytospin",
+    "window": "With each scheduled IT chemotherapy (plus or minus 3 days)",
+    "note": ""
+   },
+   {
+    "item": "Patient medication diary",
+    "window": "Each course (Cohort 3)",
+    "note": "Ponatinib compliance."
+   }
+  ],
+  "followup": [
+   {
+    "item": "Physical exam and blood tests",
+    "window": "Every 12 weeks (plus or minus 2 weeks) for 2 years after end of consolidation or allogeneic HCT, then every 6 months in year 3",
+    "note": ""
+   },
+   {
+    "item": "Bone marrow aspirate and biopsy with peripheral blood",
+    "window": "Every 6 months for 2 years after end of consolidation or allogeneic HCT, then at 12 months in year 3",
+    "note": "Central MRD every 6 months for 2 years, at 3 years, and whenever relapse is suspected."
+   },
+   {
+    "item": "Survival",
+    "window": "Every 6 months (plus or minus 1 month) until 10 years after registration",
+    "note": "Cytogenetics reports through 15 years."
+   },
+   {
+    "item": "Relapse, withdrawal, or removal evaluation",
+    "window": "At relapse or removal",
+    "note": "History and physical with testicular exam, labs, marrow, flow, cytogenetics, CSF; Cohort 3 adds ABL1 mutation analysis."
+   }
+  ],
+  "amendments": [
+   {
+    "date": "July 17, 2026",
+    "text": "Update #10, the current version. Updated blinatumomab CAEPR (version 2.8) with new risks and matching consent changes, per NCI Action Letter; consent addendum required for patients on or awaiting blinatumomab."
+   }
+  ],
+  "locked": [
+   "amendments",
+   "calendar",
+   "during",
+   "eligibility",
+   "followup",
+   "pretreatment",
+   "schema"
+  ],
+  "reviewed": {
+   "date": "2026-10-11",
+   "version": "2026-07-17",
+   "by": "hand, from the protocol PDF",
+   "notes": "Section 3.3.1 (p49) says known or suspected testicular involvement is allowed with concomitant scrotal/testicular RT. The schema summary (p9-10) excludes it, and section 8.1.6 (p99) removes patients who need RT. Worth confirming with the study team; RT is not prescribed by the protocol. The schema says prior rituximab must be completed 14 days before registration for Cohort 2, and section 3.3.8 says 7 days; the brief uses section 3.3.8. Cohort 3 flowchart (p16) is an image with no extractable text, so Cohort 3 arms were taken from sections 7.7-7.10. Enrollment status of each cohort is not stated in the PDF. Existing submission entries are readable and left alone."
+  }
  },
  "A042302": {
   "schema": [
@@ -10820,81 +10971,185 @@
  },
  "EA1242": {
   "eligibility": [
-   "Patient must be ≥ 18 years of age.",
-   "Patient must have an ECOG Performance Status of 0-2 within 28 days prior to Step 0 P re-R egistration.",
-   "Patient must beapostmenopausal woman oraman",
-   "NOTE: Menopause can be determined by any of the following",
-   "Prior bilateral oophorectomy",
-   "Age < 60 years with amenorrhea for ≥12 months and estradiol and FSH levels in the postmenopausal range",
-   "NOTE: FSH and estradiol levels should be repeated as clinically indicated to ensure menopausal status in patients with breast cancer with chemotherapy- induced amenorrhea.",
-   "Patient must meet one of the following staging criteria postoperatively according to AJCC 8th edition criteria",
-   "p T0-T3 with 3 positive ipsilateral lymph nodes (micro-or macrometastatic disease) and no planned axillary lymph node dissection after definitive surgery in the breast and axilla with curative intent.",
-   "Patients with T4 breast cancer are not eligible.",
-   "Positive isolated tumor cells (ITCs) in axillary nodes without micro-or macrometastasis are considered N0 for eligibility purposes.",
-   "ITC does not contribute to nodal count for staging purposes.",
-   "Patient must haveaprimary breast tumor that is estrogen receptor (ER) positive with >10% ER expression by IHC as per 2020",
-   "ASCO/CAP Estrogen Receptor Testing Guideline.",
-   "NOTE: ER 1-10% are reported as ER low positive. These tumors have less endocrine-sensitive disease and are not eligible).",
-   "Patient must haveaprimary breast tumor that is HER2-negative by current ASCO/CAP guidelines utilizing immunohistochemistry and/or FISH.",
-   "Patient may have multicentric or multifocal breast cancer if the highest stage tumor meets eligibility criteria outlined above, and the tumor sites are felt to representasingle disease process by local pathology or other sites of disease are also ER-posi tive (>10%) and HER2- ECOG-ACRIN EA1242 negative, if such testing is completed. If local pathology feels that multicentric or multifocal disease may represent",
-   "For patients who have undergonealumpectomy, the margins of the resected specimen or re-excision must be histologically free of invasive tumor and DCIS as determined by the local pathologist. If pathologic examination demonstrates tumor at the line of res ection, additional excisions may be performed to obtain clear margins.",
-   "Positive posterior margin is allowed if surgeon deems no further resection possible. Patients with margins positive for LCIS are eligible without additional resection.",
-   "For patients who have undergone mastectomy, the margins must be free of residual gross tumor. Patients with microscopic positive margins are eligible if post-mastectomy RT of the chest wall will be administered.",
-   "Patient must have undergone axillary staging with sentinel lymph node biopsy (SLNB), targeted axillary dissection (TAD), or axillary lymph node dissection (ALND).",
-   "Patient must have no evidence of locoregional or distant metastatic disease by clinical history and physical exam. Treating physician can consider additional imaging evaluation per NCCN guidelines and/or institutional practice.",
-   "Patient must be able to have Oncotype DX testing performed.",
-   "If Oncotype DX testing was previously performed, the results of",
-   "Recurrence Score (RS) must be available and must meet Step 1",
-   "If Oncotype DX testing was not performed yet, tissue from the core, excisional biopsy or surgical specimen of the tumor lesion must be available and must be shipped to Exact Sciences for determination of the Oncotype DX Recurrence Score (RS) for eligibilityand stratification.",
-   "NOTE: Exact Sciences will notify the submitting institution of",
-   "Recurrence Score results within two (2) weeks of receipt of the tumor specimen. Institutions will receive an email notification of eligibility status once Recurrence Score results are entered into Ra ve by the submitting institution.",
-   "Patient must have had their final cancer surgery for breast cancer (including re-excision of margins) less than 16 weeks prior to Step 0 Pre-Registration.",
-   "NOTE: This excludes additional surgery for reconstructive purposes."
+   "Age 18 or older; ECOG 0-2 within 28 days before pre-registration.",
+   "Postmenopausal woman (bilateral oophorectomy, age 60 or older, or age under 60 with 12 months of amenorrhea and postmenopausal estradiol and FSH) or man; premenopausal women not eligible.",
+   "Postoperative AJCC 8th stage: pT0-T3 with 3 positive nodes and no planned ALND, pT0-T3 N2 or N3, or pT3 N0-N3. Isolated tumor cells count as N0. No T4.",
+   "ER greater than 10% by IHC (ER-low 1-10% not eligible) and HER2-negative; multifocal or multicentric disease allowed if all sites meet these criteria.",
+   "Lumpectomy margins free of invasive cancer and DCIS (positive posterior margin allowed if no further resection possible; LCIS margins allowed); mastectomy margins free of gross tumor, with microscopic positive margins allowed only if chest wall RT will be given.",
+   "Axillary staging by SLNB, targeted axillary dissection, or ALND; final breast cancer surgery less than 16 weeks before pre-registration.",
+   "No locoregional or distant metastatic disease (documented within 28 days by history, exam, or imaging per NCCN).",
+   "Oncotype DX RS 0-25 required for randomization, on a specimen obtained before any endocrine therapy.",
+   "ANC 1,500/uL or higher, hemoglobin 9.0 g/dL or higher, platelets 100,000/uL or higher, bilirubin at or below ULN (under 1.5 x ULN with Gilbert's), AST/ALT 2.5 x ULN or less, eGFR 30 mL/min/1.73 m2 or higher (within 28 days).",
+   "ECG within 28 days with QTcF under 450 msec and resting heart rate 50-90 bpm; NYHA class 2 or better if cardiac history or prior cardiotoxic therapy.",
+   "HIV allowed with undetectable viral load on therapy within 6 months; HBV must be suppressed; HCV treated and cured or undetectable on treatment.",
+   "No prior invasive ER-positive breast cancer (prior ER-negative breast cancer or ER-negative DCIS allowed if 5 or more years earlier without recurrence); synchronous DCIS or LCIS allowed.",
+   "No prior chemotherapy for this cancer, no prior CDK4/6 inhibitor, no contraindication to chemotherapy or ribociclib.",
+   "No endocrine therapy (including chemoprevention) within 5 years except a short course of less than 6 weeks before pre-registration; no concurrent systemic HRT.",
+   "Step 1: no major surgery or radiotherapy within 14 days before randomization."
   ],
   "version_date": "2026-06-23",
   "version_label": "Protocol Version Date 06/23/26",
-  "posted": "29-Jul-2026"
+  "posted": "29-Jul-2026",
+  "schema": [
+   {
+    "label": "Step 0: Pre-registration",
+    "text": "Postmenopausal women or men with resected high anatomic stage ER-positive (>10%), HER2-negative breast cancer. Central Oncotype DX (Exact Sciences) unless prior Oncotype results exist. RS 0-25 proceeds to Step 1; RS 26-100 goes off study."
+   },
+   {
+    "label": "Step 1: Stratification",
+    "text": "Tumor size (T0-T2 vs T3); nodal status (N0-N1 vs N2/N3); Recurrence Score (0-20 vs 21-25)."
+   },
+   {
+    "label": "Randomize 1:1",
+    "text": "N = 1978",
+    "arms": [
+     {
+      "label": "Arm A",
+      "text": "Physician's choice standard adjuvant chemotherapy (per NCCN), then aromatase inhibitor (letrozole 2.5 mg, anastrozole 1 mg, or exemestane 25 mg daily) plus ribociclib 400 mg daily Days 1-21 of 28-day cycles."
+     },
+     {
+      "label": "Arm B",
+      "text": "Aromatase inhibitor plus ribociclib as in Arm A, without chemotherapy."
+     }
+    ]
+   },
+   {
+    "label": "Treatment duration",
+    "text": "Ribociclib until recurrence, unacceptable toxicity, or maximum 3 years (switch to commercial abemaciclib allowed for toxicity or tamoxifen need); endocrine therapy at least 60 months from randomization. Men also receive an LH-RH agonist. Adjuvant RT per NCCN and institutional standards, before endocrine therapy and ribociclib."
+   },
+   {
+    "label": "Follow-up",
+    "text": "10 years from randomization."
+   },
+   {
+    "label": "Primary endpoint",
+    "text": "Invasive breast cancer-free survival (non-inferiority of endocrine therapy plus ribociclib without chemotherapy). Secondary: 5-year iDFS, DDFS, DRFS, RFI, OS, BCSS, toxicity."
+   }
+  ],
+  "pretreatment": [
+   {
+    "item": "History, physical, ECOG, weight, vital signs",
+    "window": "Within 28 days before Step 0",
+    "note": ""
+   },
+   {
+    "item": "CBC with differential, CMP (AST, ALT, bilirubin, creatinine)",
+    "window": "Within 28 days before Step 0",
+    "note": ""
+   },
+   {
+    "item": "12-lead ECG",
+    "window": "Within 28 days before Step 0",
+    "note": "QTcF under 450 msec, heart rate 50-90."
+   },
+   {
+    "item": "Disease assessment (exam or staging imaging per NCCN)",
+    "window": "Within 28 days before Step 0",
+    "note": "No evidence of metastatic disease."
+   },
+   {
+    "item": "Tumor tissue for Oncotype DX",
+    "window": "After Step 0",
+    "note": "Mandatory unless prior result; RS returned within 2 weeks of receipt."
+   },
+   {
+    "item": "Research blood and tissue (optional)",
+    "window": "Before Cycle 1 Day 1",
+    "note": "Streck and EDTA tubes; surgical tissue within 1 month of randomization."
+   }
+  ],
+  "during": [
+   {
+    "item": "History, physical, ECOG, vitals, adverse events, medication calendar",
+    "window": "Day 1 of ribociclib cycles 1-6, then every 3 cycles (cycles 7-36)",
+    "note": "Arm A during chemotherapy per institutional standard."
+   },
+   {
+    "item": "CBC and CMP",
+    "window": "Before ribociclib, every 2 weeks for the first 2 cycles, at the start of the next 4 cycles, then every 3 cycles",
+    "note": "More often if Grade 2 or higher abnormalities."
+   },
+   {
+    "item": "Calcium, magnesium, phosphorus",
+    "window": "Before each of the first 6 ribociclib cycles",
+    "note": ""
+   },
+   {
+    "item": "ECG",
+    "window": "Before ribociclib, 2 weeks after starting, then as clinically indicated",
+    "note": ""
+   },
+   {
+    "item": "Research blood (optional)",
+    "window": "Month 12 and year 2",
+    "note": ""
+   }
+  ],
+  "followup": [
+   {
+    "item": "End of treatment visit with labs and ECG",
+    "window": "28 days (+/- 3) after the last dose",
+    "note": ""
+   },
+   {
+    "item": "30-day safety follow-up",
+    "window": "30 days (+/- 3) after the last dose",
+    "note": ""
+   },
+   {
+    "item": "Recurrence and survival follow-up with history and physical",
+    "window": "Every 3 months for 12 months, every 6 months to year 5, then yearly to year 10 from randomization",
+    "note": "Imaging at standard-of-care time points per NCCN."
+   }
+  ],
+  "locked": [
+   "during",
+   "eligibility",
+   "followup",
+   "pretreatment",
+   "schema"
+  ],
+  "reviewed": {
+   "date": "2026-10-11",
+   "version": "2026-06-23",
+   "by": "hand, from the protocol PDF",
+   "notes": "Schema is a graphic but text extraction recovered the key elements (page 9). Version history not located in the PDF; cover lists Addendum 1."
+  }
  },
  "EA2185": {
   "schema": [
    {
-    "label": "Entry",
-    "text": "Patients enrolled before Addendum #5 should continue to be followed per Addendum #4 outlined in Appendix IV. Addendum #5 will apply only to newly registered patients at the time of Addendum #5 activation. Addendum #5 has redesigned EA2185 to beabiomarker driven study. The new primary goal is to determine the utility of blood-based and/or radiomic markers to identify patients at elevated risk for malignant degeneration of pre-existing pancreatic cysts. Sig nificant changes have been made"
+    "label": "Registration (Addendum 5 design)",
+    "text": "Single-arm prospective biomarker cohort of adults 50-75 with a pancreatic cyst 1 cm or larger not yet under surveillance. The prior randomization between low- and high-intensity surveillance was discontinued; patients enrolled before Addendum 5 continue under the Addendum 4 design (Appendix IV). Target total about 750 participants."
    },
    {
-    "label": "Ecog-Acrin Ea2185"
+    "label": "Surveillance (site discretion, minimum standard)",
+    "text": "Cysts under 3 cm without solid component or dilated duct: MRI or CT at 1 year, then every 2 years if unchanged. Cysts with at least two high-risk features (3 cm or larger, dilated main duct, solid component): EUS-FNA; if not concerning, MRI/CT at 1 year then every 2 years. Concerning findings are managed per standard of care, including surgery."
+   },
+   {
+    "label": "Mandatory research samples",
+    "text": "Serum at baseline, year 2, year 4, and at clinical biopsy or resection; all CT/MRI submitted to ACR via TRIAD; diagnostic slides from any biopsy or surgery for central pathology review. Biomarker results are analyzed retrospectively and do not guide care."
+   },
+   {
+    "label": "Follow-up",
+    "text": "About 5 years from registration; surveillance ends with pancreatic surgery, pseudocyst diagnosis, pancreatic cancer, or withdrawal, after which yearly survival follow-up continues to year 5."
+   },
+   {
+    "label": "Primary objective",
+    "text": "Whether the primary blood-based biomarker (5-protein, 3-microRNA panel) and MRI radiomic biomarker measured at baseline are associated with later development of worrisome features and/or high-risk stigmata (Fukuoka criteria)."
    }
   ],
   "eligibility": [
-   "Patient must be ≥ 50 years and ≤ 75 years of age.",
-   "Patient must not have acute pancreatitis orahistory of chronic pancreatitis.",
-   "Patient must have received a CT, MRI, or EUS within 6 months prior to enrollment that revealed one or more ≥ 1 cm pancreatic cyst (s).",
-   "Patients of childbearing potential must not be known to be pregnant.",
-   "Patient must not haveaprior diagnosis of pancreatic malignancy of any type. ECOG-ACRIN EA2185",
-   "Patient must not haveahistory of pancreatic resection.",
-   "Patients with only pancreatic lesions without malignant risk (pancreatic pseudocyst or classic serous cystic lesion) are not eligible.",
-   "Patient must not haveafamily history of pancreatic adenocarcinoma in one or more first-degree relatives (biological parents, full siblings or children).",
-   "Patient must not have pancreatic cyst morphology that would prompt immediate surgical consideration (enhancing mural nodule, solid component in cyst, pancreatic duct ≥10mm, cyst causing obstructive jaundice).",
-   "Patient must not haveacomorbid illness that precludes EUS or pancreatic cyst resection.",
-   "Patient must not be in any form of pancreatic cyst surveillance for > 1 year, defined as organized, periodic up-to-date imaging directed towards the pancreatic cyst of interest. Physician Signature Date",
-   "Food and Drug Administration (FDA) regulations require sponsors to select qualified investigators. National Cancer Institute (NCI) policy requires all individuals contributing to NCI-sponsored trials to register with their qualifications and credentials andto renew their registration annually. To register, all individuals must obtain Cancer Therapy",
-   "Evaluation Program (CTEP) credentials necessary to access secure NCI Clinical",
-   "Oncology Research Enterprise (CORE) systems. Investigators and clinical site staff who are significant contributors to research must register in the Registration and Credential",
-   "Repository (RCR). The RCR isaself-service online person registration application with electronic signature and document submission capability.",
-   "RCR utilizes four person registration types that are applicable to this study.",
-   "Investigator (IVR) - MD, DO, or international equivalent;",
-   "Non-Physician Investigator (NPIVR) - advanced practice providers (e.g., NP or PA) or graduate level researchers (e.g., Ph D);",
-   "Associate Plus (AP) - clinical site staff (e.g., RN or CRA) with data entry access to",
-   "CTSU applications such as the Roster Update Management System [RUMS], OPEN,",
-   "Rave, acting asaprimary site contact, or with consenting privileges; and",
-   "Associate (A) - other clinical site staff involved in the conduct of NCI-sponsored trials;",
-   "RCR requires the following registration documents: Documentation Required IVR NPIVR AP A FDA Form 1572 ✔ ✔ Financial Disclosure Form ✔ ✔ ✔ NCI Biosketch (education, training, ✔ ✔ ✔ employment, license, and certification) GCP training ✔ ✔ ✔ Agent Shipment Form (if applicable) ✔ CV (optional) ✔ ✔ ✔",
-   "IVRs and NPIVRs must list all clinical practice sites and Institutional Review Boards (IRBs) covering their practice sites in RCR to allow the following",
-   "Selection as the treating, credit, or consenting person in OPEN;",
-   "Ability to be named as the site-protocol Principal Investigator (PI) on the IRB approval; and",
-   "Assignment of the Clinical Investigator (CI) task on the Delegation of Tasks Log (DTL).",
-   "In addition, all investigators acting as the Site-Protocol PI (investigator listed on the IRB approval), consenting or treating investigator in OPEN, or as the CI on the DTL must be rostered at the enrolling site withaparticipating organization. ECOG-ACRIN EA2185",
-   "Permission to view and download this protocol and its supporting documents is restricted and is based on the person and site roster assignment housed in the Roster"
+   "Age 50 to 75 years.",
+   "CT, MRI, or EUS within 6 months before enrollment showing one or more pancreatic cysts 1 cm or larger.",
+   "Not in organized pancreatic cyst surveillance for more than 1 year.",
+   "No acute pancreatitis or history of chronic pancreatitis.",
+   "No prior pancreatic malignancy of any type and no prior pancreatic resection.",
+   "No lesions without malignant risk only (pseudocyst or classic serous cystic lesion).",
+   "No pancreatic adenocarcinoma in one or more first-degree relatives.",
+   "No cyst morphology prompting immediate surgical consideration: enhancing mural nodule, solid component, main pancreatic duct 10 mm or larger, or cyst causing obstructive jaundice.",
+   "No comorbid illness that precludes EUS or pancreatic cyst resection.",
+   "Not known to be pregnant."
   ],
   "version_date": "2025-04-24",
   "version_label": "Protocol Version Date 04/24/25",
@@ -10904,123 +11159,522 @@
     "label": "TRIAD",
     "text": "The protocol names TRIAD for image or RT data submission. A day deadline was not readable as a clean sentence."
    }
-  ]
+  ],
+  "pretreatment": [
+   {
+    "item": "Pre-enrollment CT or MRI",
+    "window": "Within 6 months before enrollment",
+    "note": "Submitted via TRIAD (EUS images not collected)."
+   },
+   {
+    "item": "Baseline serum (10 mL red top)",
+    "window": "Within 14 days after registration preferred, or at first clinical visit",
+    "note": "Mandatory under Addendum 5."
+   },
+   {
+    "item": "Baseline clinical update",
+    "window": "At registration",
+    "note": ""
+   }
+  ],
+  "during": [
+   {
+    "item": "Surveillance MRI or CT",
+    "window": "1 year after enrollment, then every 2 years if unchanged (minimum); more often per site",
+    "note": "All imaging submitted via TRIAD; eGFR before contrast if indicated."
+   },
+   {
+    "item": "EUS-FNA",
+    "window": "If two or more high-risk features",
+    "note": ""
+   },
+   {
+    "item": "Clinical update",
+    "window": "About every 6 months and at surveillance visits",
+    "note": "Vital and cancer status, comorbidities, cyst imaging and procedures, adverse events."
+   },
+   {
+    "item": "Serum",
+    "window": "Year 2 and year 4 (+/- 2 months of nearest visit), and at clinical biopsy or resection",
+    "note": ""
+   },
+   {
+    "item": "Diagnostic slides",
+    "window": "Any clinical biopsy or resection",
+    "note": "Central pathology review."
+   }
+  ],
+  "followup": [
+   {
+    "item": "Clinical update (vital status)",
+    "window": "Yearly after surveillance ends, through 5 years from registration",
+    "note": "PROs are not collected under Addendum 5."
+   }
+  ],
+  "amendments": [
+   {
+    "date": "April 24, 2025",
+    "text": "Current version (cover lists Addenda 1-6)."
+   },
+   {
+    "date": "Addendum 5",
+    "text": "Redesigned the study as a single-arm biomarker cohort: dropped low- vs high-intensity surveillance randomization, made blood samples mandatory, stopped PRO collection, set target near 750 participants. Earlier enrollees continue per Addendum 4 (Appendix IV)."
+   }
+  ],
+  "locked": [
+   "amendments",
+   "during",
+   "eligibility",
+   "followup",
+   "pretreatment",
+   "schema"
+  ],
+  "reviewed": {
+   "date": "2026-10-11",
+   "version": "2025-04-24",
+   "by": "hand, from the protocol PDF",
+   "notes": "The existing brief's eligibility list includes CTEP registration boilerplate; replaced. The batch rt_role 'Systemic therapy' does not fit; this is a surveillance/biomarker study."
+  }
  },
  "EA2192": {
   "eligibility": [
-   "ECOG - ACRIN Cancer Research Group 3. Selection of Patients Each of the criteria in the checklist that follows must be met in order for a patient to be considered eligible for this study. Use the checklist to confirm a patient’s eligibility. For each patient, this checklist must be photocopied, completed and mainta",
-   "ECOG - ACRIN Patient No.",
-   "Patient’s Initials (L, F, M)",
-   "NOTE: CTEP Policy does not allow for the issuance of waivers to any protocol specified criteria ( https://dctd.cancer.gov/research/ctep trials/memos/protocol - deviations.pdf Section 3 must be met, without exception. The registration of individuals who do not meet all criteria listed in Section censored from the analysis of the study, and the citation of a major prot violation during an audit. All questions regarding clarification of eligibility criteria must be directed to the Group's Executive Officer ( EA.ExecOfficer@ecog - acrin.org ) or the Group's Regulatory Officer ( EA.RegOfficer@ecog - acrin.org ).",
-   "NOTE: Institutions may use the eligibility checklist as source documentation if it has been reviewed, signed, and dated prior to registration/randomization by the treating physician.",
-   "Eligibility Criteria for Step 0 (Pre - Registration)",
-   "Patient must be ≥18 years of age on day of consent.",
-   "Patient must have an ECOG Performance Status of 0",
-   "Patient must have a diagnosis of pancreatic cancer and have successfully undergone a curative intent surgical resection and must have no evidence of recurrent disease as determined by the investigator.",
-   "NOTE: This includes patients with adenocarcinoma, acinar carcinoma, squamous cell carcinoma adenosquamous and variants thereof. Patients with neuroendocrine tumors are excluded from enrolling.",
-   "Patient must (1) be planning to receive, (2) be receiving or (3) have received at least three combined months (i.e., 12 weeks) of perioperative (neoadjuvant, adjuvant or a combination of both) systemic, multi - agent chemotherapy.Patients may have had up to months of perioperative systemic therapy as deemed appropriate by their primary treating medical team (patients can have received radiation or chemoradiation in addition to this 6 month course). 10",
-   "ECOG - ACRIN Cancer Research Group",
-   "Patient must be no more than 12 weeks from their most recent treatment (this may be chemotherapy, radiotherapy or surgery)",
-   "Patient must have a known pathogenic or somatic mutation in BRCA1, BRCA2 a Clinical Laboratory Improvement Amendments (CLIA) certified or equivalently - accredited laboratory. Mutations must be considered pathogenic or likely pathogenic by a reference database such as ClinVar or OncoKb.org.",
-   "Eligibility Crit eria for Step 1 (Randomization)",
-   "Patient must have met the eligibility criteria outlined in Section",
-   "Patient must have undergone at least 3 combined months (i.e., 12 weeks) of perioperative (neoadjuvant, adjuvant or a combination of both) systemic, multi - agent chemotherapy. Patients may have had up to 6 months of perioperative systemic therapy as deemed a by their primary treating medical team (patients can have received radiation or chemoradiation in addition to this 6 months course).",
-   "Central expert reviewer must have determined the patient eligible randomization after review of local genetic testing reports",
-   "If mutation in BRCA1, BRCA2 and the patient has not previously undergone germline testing, the",
-   "patient must agree to undergo germline testing.",
-   "Patient must have no evidence of recurrent or metastatic pancreatic cancer at the time of randomization as documented by baseline scans obtained ≤ 4 weeks prior to",
-   "Patient must not have previously had evidence of progressive pancreatic cancer while receiving platinum",
-   "Patient must be ≥ 21 days (three weeks) from their last treatment (including chemotherapy radiotherapy or surgery) but ≤ 84 days (twelve weeks) from their last treatment at the time of Step 1 randomization. Patients who have received neoadjuvant and/or adj uvant radiotherapy are eligible.",
-   "Patient must have recovered from any adverse events due to prior anti - cancer therapy (i.e., have no residual toxicities > Grade 1 with the exception of alopecia and/or neuropathy).",
-   "Patient must not be receiving any other investigational agents at the time of Step 1 randomization and while on protocol treatment.",
-   "Patient must not have any history of allergic reactions attributed to compounds of similar chemical or biological composition to",
-   "Patient must not have any personal history of myelodysplastic syndrome (MDS) or acute myeloid leukemia (AML). myelodysplastic syndrome/acute myeloid leukemia or with features suggestive of MDS/AML.",
-   "Patient must not have any uncontrolled gastrointestinal disorder that would, in the opinion of the investigator, interfere with the ingestion or absorption of olaparib. 11",
-   "Patient must not be pregnant or breast to an unborn fetus and possible risk for adverse events in nursing infants with the treatment regimens being used. All patients of childbearing potential must have a blood test or urine study within 14 days prior to pregnancy. A patient of childbearing potential is defined as anyone, regardless of whether they have undergone tubal ligation, who meets the following criteria: 1) has achieved menarche at some point, 2) has",
-   "not undergone a hyster ectomy or bilateral oophorectomy; or 3) has",
-   "not been naturally postmenopausal (amenorrhea following cancer therapy does not rule out childbearing po consecutive months (i.e., has had menses at any time in the preceding 24 consecutive months).",
-   "Patient of child bearing potential?",
-   "Patients must not expect to conceive or father children by using accepted and effective method(s) of contraception or by abstaining from sexual intercourse for the duration of their participation in the study and for 6 months after the last dose of protoco female patients and for 3 months after the last dose of protocol treatment for male patients. Patients must also not donate sperm while on protocol treatment and for 3 months after the last dose of protocol treatment. Patients must also no protocol treatment and for 1 month after the last dose of protocol treatment. Rev. Add 4 3.2.15 Patient must have adequate organ and marrow function as defined below: (labs must be obtained ≤ randomization): Leukocytes ≥ 3,000/mcL Leukocytes",
-   "patients with Gilbert’s syndrome. Patients with Gilbert’s syndrome ma y enroll if direct bilirubin ≤ 2.5 X ULN of the direct bilirubin Rev. Add 3 Total b ilirubin",
-   "Patient with Gilbert’s syndrome?",
-   "ECOG - ACRIN Cancer Research Group AST(SGOT)/ALT(SGPT) ≤ 2.5 X institutional ULN A S T"
+   "Age 18 or older; ECOG PS 0-2",
+   "Resected pancreatic adenocarcinoma, acinar, squamous, or adenosquamous carcinoma (no neuroendocrine tumors) with no evidence of recurrence",
+   "Pathogenic or likely pathogenic germline or somatic BRCA1, BRCA2, or PALB2 mutation by CLIA (or equivalently accredited) test; tumor-only results require germline testing",
+   "Completed at least 12 weeks (up to 6 months) of perioperative multi-agent chemotherapy; prior radiation or chemoradiation allowed",
+   "Randomization 21-84 days after the last treatment",
+   "No recurrence on scans within 4 weeks before randomization",
+   "No progression on prior platinum therapy",
+   "Prior toxicities resolved to Grade 1 or less (except alopecia and neuropathy)",
+   "WBC at least 3,000/mcL, ANC at least 1,500/mcL, platelets at least 100,000/mcL, Hgb at least 9.0 g/dL without transfusion within 28 days",
+   "Bilirubin 1.5 x ULN or less (Gilbert's: direct bilirubin 2.5 x ULN or less); AST/ALT 2.5 x ULN or less; creatinine 1.5 x ULN or less or CrCl over 50 mL/min",
+   "No history of MDS or AML",
+   "No GI disorder affecting absorption of oral medication",
+   "No potent CYP3A4 inhibitors",
+   "No uncontrolled cardiac ECG abnormalities, QTc over 500 ms, or congenital long QT syndrome",
+   "No active treatment for a concurrent malignancy (adjuvant hormonal therapy and topical skin therapy allowed)",
+   "No major surgery within 2 weeks before Step 1 randomization",
+   "Not pregnant or breastfeeding; negative pregnancy test within 14 days before randomization"
   ],
   "version_date": "2025-11-07",
   "version_label": "Protocol Version Date 11/07/25",
-  "posted": "01-Dec-2025"
+  "posted": "01-Dec-2025",
+  "schema": [
+   {
+    "label": "Step 0 (pre-registration)",
+    "text": "Resected pancreatic cancer with pathogenic or likely pathogenic germline or somatic BRCA1, BRCA2, or PALB2 mutation; local CLIA reports undergo central expert review before Step 1."
+   },
+   {
+    "label": "Stratification",
+    "text": "R1 vs R0 resection; platinum vs non-platinum perioperative chemotherapy; neoadjuvant vs adjuvant therapy."
+   },
+   {
+    "label": "Step 1 randomization",
+    "text": "Double-blind, 2:1 (olaparib:placebo) after at least 12 weeks of perioperative chemotherapy; 152 patients randomized.",
+    "arms": [
+     {
+      "label": "Arm A",
+      "text": "Olaparib 300 mg PO BID, Days 1-28, 28-day cycles x 12 cycles"
+     },
+     {
+      "label": "Arm B",
+      "text": "Placebo 300 mg PO BID, Days 1-28, 28-day cycles x 12 cycles"
+     }
+    ]
+   },
+   {
+    "label": "Primary endpoint",
+    "text": "Relapse-free survival. Follow-up for survival 10 years from Step 1 randomization."
+   }
+  ],
+  "pretreatment": [
+   {
+    "item": "Confirmation of pathogenic BRCA1/BRCA2/PALB2 mutation",
+    "window": "Before Step 1 randomization",
+    "note": "Central expert review of local report"
+   },
+   {
+    "item": "History, physical exam, vital signs, performance status",
+    "window": "Baseline",
+    "note": "History includes prior radiation and surgical history"
+   },
+   {
+    "item": "CT chest/abdomen/pelvis (or CT chest plus MRI abdomen/pelvis)",
+    "window": "Within 4 weeks before Step 1 randomization",
+    "note": "Must show no evidence of disease"
+   },
+   {
+    "item": "CBC with differential and platelets",
+    "window": "28 days or less before randomization",
+    "note": ""
+   },
+   {
+    "item": "Comprehensive metabolic panel",
+    "window": "28 days or less before randomization",
+    "note": ""
+   },
+   {
+    "item": "CA 19-9 and CEA",
+    "window": "Baseline",
+    "note": ""
+   },
+   {
+    "item": "Urinalysis",
+    "window": "Baseline",
+    "note": ""
+   },
+   {
+    "item": "12-lead ECG",
+    "window": "Baseline",
+    "note": "As clinically indicated"
+   },
+   {
+    "item": "Pregnancy test",
+    "window": "Within 14 days before Step 1 randomization",
+    "note": "Persons of childbearing potential"
+   },
+   {
+    "item": "HIV antibody and viral load",
+    "window": "Baseline",
+    "note": "HIV-infected patients only"
+   }
+  ],
+  "during": [
+   {
+    "item": "Physical exam, vital signs, performance status, concurrent meds, AE assessment",
+    "window": "Cycle 1 Day 1, Cycle 1 Day 15, Day 1 of cycles 2-12",
+    "note": "Telemedicine allowed from cycle 3 (no more than 2 consecutive)"
+   },
+   {
+    "item": "CBC with differential and CMP",
+    "window": "Cycle 1 Day 1, Cycle 1 Day 15, Day 1 of cycles 2-12",
+    "note": "Within 3 days of time point"
+   },
+   {
+    "item": "CA 19-9 and CEA",
+    "window": "Cycle 1 Day 1, Cycle 1 Day 15, Day 1 of cycles 2-12",
+    "note": ""
+   },
+   {
+    "item": "Imaging",
+    "window": "Every 4 months (+/- 1 month) for first year after randomization",
+    "note": "Same modality as baseline"
+   },
+   {
+    "item": "Germline mutation analysis",
+    "window": "After Step 1 randomization",
+    "note": "Patients with tumor-only mutation results"
+   }
+  ],
+  "followup": [
+   {
+    "item": "End-of-treatment visit: exam, AEs, labs, staging scans, correlatives",
+    "window": "1 month (+/- 7 days) after last treatment cycle",
+    "note": ""
+   },
+   {
+    "item": "AE follow-up",
+    "window": "At least 30 days after last dose",
+    "note": ""
+   },
+   {
+    "item": "Relapse and survival",
+    "window": "Every 4 months (+/- 1 month) in year 1; survival every 6 months (+/- 1 month) years 2-10",
+    "note": "Relapse follow-up for 5 years; imaging thereafter per clinical scenario and guidelines"
+   }
+  ],
+  "locked": [
+   "during",
+   "eligibility",
+   "followup",
+   "pretreatment",
+   "schema"
+  ],
+  "reviewed": {
+   "date": "2026-10-11",
+   "version": "2025-11-07",
+   "by": "hand, from the protocol PDF",
+   "notes": "Schema on p6 is an image; schema rebuilt from sections 2, 4.2.3, 5.1, and 9 (2:1 ratio, 152 patients). Amendment history not summarized in readable form, so amendments omitted."
+  }
  },
  "EA2222": {
   "eligibility": [
-   "unresectable liver-only metastatic CRC O • RAS status: wildtype vs S (Allowed: Any calcified pulmonary nodule mutant *SOC Chemo M and/or < 5 pulmonary nodules < 6mm and T stable for > 3 months on chemotherapy) I • Primary sidedness: right R (cecum to distal 2/3 Prior systemic chemotherapy Z A transverse colon) vs left (see Section 3.1.3) 2 A (distal 1/3 transverse Arm B T colon to sigmoid)/rectum",
-   "New CRLM < 12 months after completing T *SOC Chemo adjuvant therapy for stage II-III CRC I I O O N N N = 4082:1 Randomization",
-   "1. Arm A consists of HAI/FUDR (Hepatic arterial infusion/ floxuridine) plus standard of care chemotherapy options that are outli ned in Section 5.1.1.3. admin istered atanon-registering institution following the requirements in Appendix V. ECOG-ACRIN EA22221. Introduction",
-   "There are >140,000 new cases of colorectal cancer (CRC) each year in the",
-   "United States, of which 25% present with isolated metastases to the liver and 50- 1-4",
-   "60% will ultimately develop liver metastases during their disease course.",
-   "Surgical resection has the greatest impact on patient survival for metastases limited to the liver, which yields a 5-year survival rate up to 60% and is curative in 5,67",
-   "~20 %. However, less than 25% of patients are candidates for surgery.",
-   "Patients with unresectable colorectal liver metastases (CRLM) are generally treated with systemic chemotherapy, often in combination with other liver- directed therapies (e.g., trans-arterial embolotherapy, ablation, or radiation).",
-   "First-line chemotherapy, most commonly FOLFOX or FOLFIRI which are considered to be similarly effective, may facilitate resection of initially inoperable 8-17 disease, however, survival for all patients is only 15-31 months. For the majority who fail to achieve resectable status and/or develop dose-limiting toxicity, patients transition to one of many standard-of-care second-line or maintenance chemotherapy",
-   "FOLFIRI at the time of progression, or the reverse, and no difference in survival was observed. Similarly, the NORDIC-8 trial included 173 chemo-naïve patients with metastatic colorectal cancer randomized to FOLFIRI versus FOLFIRI alternating with FOLFOX, until progression. Both groups receivedamedian of",
-   "months of chemotherapy (11 vs 12 cycles), which yielded similar overall response rates (69% vs 78%, p=0.17), median progression free survival (11.9 vs",
-   "months, p=0.60), and importantly had no impact on median overa ll survival (40.7 vs 39.2 months, p=0.82), despite an early regimen switch. Concordantly, the STEAM trial randomized 280 patients with metastatic colorectal cancer to receive concurrent FOLFOXIRI-bevacizumab, sequential FOLFOX/FOLFIRI- bevacizumab, or FOLFOX-bevacizumab, neither of which regimen outperformed the others for the pri mary endpoint of",
-   "Although receipt of multiple lines of chemotherapy can improve survival, the choice ofaspecific regimen and the timing and sequence of subsequent lines of chemotherapy, including second-line and maintenance chemotherapy, does not impact overall survival for this population. With persistently dismal outcomes for patients with unresectable CRLM treated with chemotherapy only, there is an unmet need to identify",
-   "Hepatic tumors, including metastases, derive their blood supply primarily from the hepatic artery, while normal parenchyma receives dual blood supply from the artery and portal venous circulation. Hepatic arterial infusion (HAI) exploits this ECOG-ACRIN EA2222 inherent physiology, in combination with pharmacologic isolation of the liver by using floxuridine (FUDR), the cornerstone of HAI, which has the ideal",
-   "Figure 1: Illustration of HAI, which entails the surgical implantation ofasubcutaneous pump withacatheter that is inserted and secured into the hepatic arterial system, most commonly via the gastroduodenal artery.",
-   "Prospective trials for unresectable CRLM have previously demonstratedasurvival advantage for patients treated with HAI, though there are several significant limitations, outlined below, that have impeded widespread 26,27 utilization. The most recent randomized trial (published in 2006) compared",
-   "HAI with FUDR alone vs systemic 5FU alone (both now considered to be outdated regimens) for unresectable CRLM in the first-line, and reported improvements in response rates and survival with HA I. In this trial, Kemeny et al. randomized 135 patients with unresectable CRLM to HAI (without systemic therapy) versus 5FU systemic chemotherapy. The response rate was 47% with ECOG-ACRIN EA2222",
-   "HAI, twice that of systemic chemotherapy. The 2-year overall survival was 51% in the HAI arm compared to 35% in the systemic chemotherapy arm (Figure 2 ).",
-   "Figure 2: Overall and hepatic progression free survival from the 2006 CALGB",
-   "9481 RCT for patients with unresectable CRLM treated with first-line HAI alone vs 5FU alone, demonstrating an improvement in median hepatic PFS from 7.3 to 9.8 months and 2-year OS from 35% to 51% with HAI.",
-   "More recently, a non-randomized study demonstrated that HAI combined with modern chemotherapy (doublet chemotherapy with FOLFOX or FOLFIRI) in patients with unresectable disease elicitedaresponse rate of 82% in chemo- naïve patients and 72% in those previ ously treated, which facilitated conversion to resection in nearly 50%. Those resected had a 5-year survival of 63% (Figure 28,29",
-   "3) with 9 patients (14%) cancer free to date. Survival for the entire cohort was 26,27",
-   "46 months (Figure 4). Additionally, HAI may havearole later in the disease course based onaretrospective series: in chemo-refractory patients, HAI yieldsaresponse rate exceeding 30% andamedian survival of 20 months after pump implantation despite progression on oxalipla tin and irinotecan based regimens.",
-   "Figure 3: Survival outcomes for patients with unresectable CRLM treated with",
-   "HAI combined with modern chemotherapy, demonstrating that in the nearly 50% of patients who converted from unresectable to resectable status, 5-year OS 28,29 exceeds 60%. ECOG-ACRIN EA2222",
-   "Figure 4: Overall survival from the phase II non-randomized study for patients with unresectable CRLM treated with HAI and modern chemotherapy, 28,29 demonstratingamedian OS of 46 months for the entire cohort (solid line).",
-   "Despite such impressive results, widespread utilization of HAI for CRLM has been impeded by ongoing skepticism regarding safety, feasibility, and efficacy of",
-   "HAI, and critiques of these trials, including outdated regimens and their single"
+   "Age 18 or older; ECOG PS 0-1 and fit for surgery",
+   "Unresectable liver-confined metastatic CRC; primary tumor may be in place; calcified pulmonary nodules and/or up to 5 indeterminate nodules 6 mm or less stable for at least 3 months on chemotherapy allowed",
+   "No radiographic or clinical extrahepatic disease (including radiographically positive periportal nodes)",
+   "Prior first-line chemotherapy: 6-12 cycles (14-day) or 4-8 cycles (21-day), or new liver metastases within 12 months of adjuvant therapy for stage II-III CRC",
+   "No disease progression per multidisciplinary team (except the post-adjuvant group)",
+   "Technical unresectability confirmed by institutional multidisciplinary review (R0 resection would require resecting 3 hepatic veins, both portal veins, or the retrohepatic IVC, or would leave fewer than 2 adequately perfused and drained segments)",
+   "No CRLM resectable by 2-stage hepatectomy or ALPPS",
+   "Measurable disease; multiphase CT and/or MRI angiography of chest/abdomen/pelvis within 28 days confirming suitable hepatic arterial anatomy",
+   "Liver tumor burden 70% or less of total liver volume",
+   "No prior liver radiation (prior pelvic RT allowed if completed at least 2 weeks before randomization)",
+   "No prior bland embolization, TACE, TARE, or HAI/FUDR",
+   "No MSI-H colorectal cancer",
+   "No cirrhosis or portal hypertension",
+   "No active infection, non-healing wound, ulcer, or fracture",
+   "Leukocytes at least 3,000/mcL, ANC at least 1,500/mcL, platelets at least 100,000/mcL, total bilirubin 1.5 mg/dL or less, AST/ALT 3.0 x ULN or less, creatinine 1.5 x ULN or less or CrCl at least 50 mL/min, calcium at least LLN (within 28 days)",
+   "Not pregnant or breastfeeding; negative pregnancy test within 14 days before randomization"
   ],
   "version_date": "2025-12-19",
   "version_label": "Protocol Version Date 12/19/25",
-  "posted": "02-Jan-2026"
+  "posted": "02-Jan-2026",
+  "schema": [
+   {
+    "label": "Population",
+    "text": "Persistently and technically unresectable liver-only metastatic colorectal cancer after first-line chemotherapy (or new liver metastases within 12 months of adjuvant therapy for stage II-III CRC)."
+   },
+   {
+    "label": "Stratification",
+    "text": "RAS wildtype vs mutant; primary sidedness right (cecum to distal 2/3 transverse colon) vs left (distal 1/3 transverse colon to sigmoid)/rectum."
+   },
+   {
+    "label": "Randomization",
+    "text": "2:1, N = 408.",
+    "arms": [
+     {
+      "label": "Arm A",
+      "text": "HAI pump insertion (Intera 3000) with cholecystectomy within 6 weeks; HAI FUDR (max 0.12 mg/kg divided by pump flow rate, with dexamethasone 25 mg and heparin 30,000 units) Days 1-14 of 28-day cycles, starting within 12 weeks; plus SOC systemic chemotherapy (FOLFOX, FOLFIRI, or OX/IRI, +/- cetuximab or panitumumab) on Days 1 and 15 from Cycle 1 Day 15. No FOLFOXIRI, capecitabine, or bevacizumab in Arm A"
+     },
+     {
+      "label": "Arm B",
+      "text": "SOC systemic chemotherapy (FOLFOXIRI, FOLFOX, FOLFIRI, or OX/IRI, +/- panitumumab, cetuximab, or bevacizumab; capecitabine may replace 5FU) starting within 6 weeks"
+     }
+    ]
+   },
+   {
+    "label": "Treatment duration",
+    "text": "Until progression, unacceptable toxicity, conversion to resection, or complete response; restaging every 3 months (+/- 2 weeks)."
+   },
+   {
+    "label": "Primary endpoint",
+    "text": "Overall survival. Follow-up 5 years from randomization."
+   }
+  ],
+  "pretreatment": [
+   {
+    "item": "History, physical exam, vital signs, ECOG PS",
+    "window": "28 days or less before randomization",
+    "note": ""
+   },
+   {
+    "item": "Multiphase CT and/or MRI of chest, abdomen, pelvis with arterial phase",
+    "window": "28 days or less before randomization",
+    "note": "Single portal venous phase acceptable if prior arterial-phase imaging exists"
+   },
+   {
+    "item": "CBC with differential, CMP, LDH, CEA",
+    "window": "28 days or less before randomization",
+    "note": ""
+   },
+   {
+    "item": "ECG",
+    "window": "Baseline",
+    "note": "As clinically indicated"
+   },
+   {
+    "item": "Pregnancy test",
+    "window": "14 days or less before randomization",
+    "note": "Repeat before systemic chemotherapy if outside window; Arm A also within 21 days of FUDR Cycle 1"
+   },
+   {
+    "item": "Tc99m-MAA SPECT/CT",
+    "window": "After pump implantation, before HAI/FUDR",
+    "note": "Arm A only; confirms hepatic-only perfusion"
+   }
+  ],
+  "during": [
+   {
+    "item": "History, physical exam, vital signs, toxicity assessment",
+    "window": "Day 1 and Day 15 of all cycles",
+    "note": "ECOG PS on Day 1"
+   },
+   {
+    "item": "CBC with differential and CMP",
+    "window": "24-48 hours before each treatment (Day 1 and Day 15)",
+    "note": ""
+   },
+   {
+    "item": "LDH",
+    "window": "Day of FUDR initiation and Days 1 and 15 of all cycles",
+    "note": "Arm A only; distinguishes biliary toxicity from progression"
+   },
+   {
+    "item": "CEA",
+    "window": "Day 1 and Day 15 of all cycles",
+    "note": ""
+   },
+   {
+    "item": "CT and/or MRI chest, abdomen, pelvis",
+    "window": "Every 3 months (+/- 2 weeks) from randomization",
+    "note": "Portal venous phase acceptable"
+   }
+  ],
+  "followup": [
+   {
+    "item": "End-of-treatment visit: history, exam, vital signs, labs, toxicity",
+    "window": "End of protocol treatment",
+    "note": ""
+   },
+   {
+    "item": "Restaging imaging",
+    "window": "Every 3 months until both hepatic and extrahepatic progression",
+    "note": ""
+   },
+   {
+    "item": "Disease-free patients (resection, CR, or other curative therapy): surveillance per SOC",
+    "window": "Every 3 months years 1-2 after becoming disease free, then every 6 months to 5 years from randomization",
+    "note": ""
+   },
+   {
+    "item": "Survival and subsequent therapies",
+    "window": "Every 3 months up to 5 years from randomization",
+    "note": ""
+   }
+  ],
+  "locked": [
+   "during",
+   "eligibility",
+   "followup",
+   "pretreatment",
+   "schema"
+  ],
+  "reviewed": {
+   "date": "2026-10-11",
+   "version": "2025-12-19",
+   "by": "hand, from the protocol PDF",
+   "notes": "Optional rectal primary RT is restricted by arm (Arm A: short-course or 5FU-based long-course only; Arm B: short-course or 5FU/capecitabine long-course), so RT is permitted SOC rather than protocol-specified; borderline if the reclassification standard counts arm-specific RT rules. Addenda 1-5 listed on cover without dates or content, so amendments omitted."
+  }
  },
  "EA2234": {
   "eligibility": [
-   "Patient must be at least 18 years of age.",
-   "Patient must have an ECOG Performance Status of 0-1.",
-   "Patient must have histologically or cytologically confirmed microsatellite stable (MSS) or Mismatch Repair (MMR) protein expression proficient primary gastric or gastroesophageal adenocarcinoma (Siewert 3) with synchronous cytology positive disease (cyt+) OR peritoneal carcinomatosis detected by imaging, laparoscopy or laparotomy. Patients with microsatellite instability-high (MSI-H/d MMR) Mismatch Repair deficient",
-   "Patient must have receivedaminimum of 3 months andamaximum of 6 months of first line systemic treatment. ECOG-ACRIN EA2234",
-   "Patient must be registered to Step 0 within 4 weeks of the last dose of first line systemic therapy. Patient must not have any ongoing significant adverse events that would prohibit them from undergoingadiagnostic laparoscopy procedure followed by furthersystemic and intraperitoneal therapy.",
-   "Patient must have no evidence of small or large bowel obstruction other than gastric outlet obstruction due to primary malignancy.",
-   "Patient must have no evidence of solid organ metastases except for ovarian metastases. Baseline imaging must be done within 30 days prior to Step 0 registration.",
-   "Patient must have no evidence of clinically significant radiologic peritoneal disease progression during first line systemic therapy.",
-   "Patient must have no evidence of extensive retroperitoneal lymph node metastases not amenable to resection during gastrectomy.",
-   "Patient must have no history of prior surgery that would preclude safe diagnostic laparoscopy and port placement.",
-   "Patient must have no evidence of massive ascites on imaging or history of two therapeutic paracentesis with drainage of more than 1.0 liter of ascites each time in 30 days prior to Step 0 registration.",
-   "Patients with known history or current symptoms of cardiac disease, or history of treatment with cardiotoxic agents, should haveaclinical risk assessment of cardiac function using the New York Heart",
-   "Association Functional Classification. To be eligiblefor this trial, patients should be class II or better.",
-   "Patient must not have any uncontrolled intercurrent illness or any other significant condition (s) that would make this protocol unreasonably hazardous.",
-   "Patient must not have any known contraindications or drug allergies to the protocol treatment agents: Paclitaxel, 5-Fluorouracil, or Leucovorin.",
-   "Patient must have adequate organ and marrow function as defined below (these labs must be obtained ≤ 30 days prior to Step 0 registration): Leukocytes ≥ 2,000/ µ L",
-   "Leukocytes:__________ Date of Test",
-   "Absolute neutrophil count (ANC) ≥ 1,500/ µ L ANC:__________ Date of Test:__________ Platelets ≥ 75,000/ µ L",
-   "Platelets:__________ Date of Test",
-   "Total bilirubin ≤ 1.5 institutional upper limit of normal (ULN). If patient has Gilbert’s Syndrome, total bilirubin must be < 2.0 mg/d L",
-   "Total Bilirubin:__________ Institutional ULN:_________ ECOG-ACRIN EA2234 Date of Test:__________ Gilbert’s Syndrome______ ( or )",
-   "AST (SGOT) and ALT (SGPT) ≤ 3.0 × institutional ULN",
-   "Creatinine Clearance ≥ 30 m L/min (estimated using Cockcroft and",
-   "Gault formula or measured) See Appendix VII for calculation information.",
-   "Creatinine Clearance ______________Date:________ Hemoglobin ≥ 8 g/d L",
-   "Hemoglobin ______________Date of Test:________ Serum Albumin ≥ 2.5 g/d L",
-   "Serum Albumin ______________Date of Test",
-   "Human immunodeficiency virus (HIV)-infected patients on effective anti-retroviral therapy with undetectable viral load within 6 months of",
-   "Step 0 registration are eligible for this trial.",
-   "For patients with evidence of chronic hepatitis B virus (HBV) infection, the HBV viral load must be undetectable on suppressive therapy, if indicated."
+   "Age 18 or older; ECOG PS 0-1",
+   "Histologically or cytologically confirmed MSS or pMMR gastric or GEJ (Siewert 3) adenocarcinoma with synchronous positive cytology or peritoneal carcinomatosis by imaging, laparoscopy, or laparotomy; no MSI-H/dMMR",
+   "3 to 6 months of first-line systemic therapy; Step 0 registration within 4 weeks of last dose",
+   "No clinically significant radiologic peritoneal progression during first-line therapy",
+   "No solid organ metastases except ovarian metastases (imaging within 30 days before Step 0)",
+   "No extensive retroperitoneal nodal metastases not resectable at gastrectomy",
+   "No small or large bowel obstruction (gastric outlet obstruction from primary allowed)",
+   "No massive ascites, or 2 therapeutic paracenteses of more than 1.0 L within 30 days",
+   "No prior surgery precluding safe laparoscopy and port placement",
+   "NYHA class II or better if cardiac history or prior cardiotoxic therapy",
+   "No contraindication or allergy to paclitaxel, 5-FU, or leucovorin",
+   "Labs within 30 days: leukocytes at least 2,000/uL, ANC at least 1,500/uL, platelets at least 75,000/uL, Hgb at least 8 g/dL, albumin at least 2.5 g/dL",
+   "Total bilirubin 1.5 x ULN or less (Gilbert's under 2.0 mg/dL); AST/ALT 3.0 x ULN or less; CrCl at least 30 mL/min",
+   "Not pregnant or breastfeeding; pregnancy test within 14 days before Step 0",
+   "Step 1: diagnostic laparoscopy with peritoneal lavage cytology and PCI recorded",
+   "Step 1: no extensive intraabdominal adhesions precluding IP port placement"
   ],
   "version_date": "2026-07-09",
   "version_label": "Protocol Version Date 07/09/26",
-  "posted": "30-Jul-2026"
+  "posted": "30-Jul-2026",
+  "schema": [
+   {
+    "label": "Step 0 registration",
+    "text": "MSS/pMMR gastric or GEJ (Siewert 3) adenocarcinoma with cytology-positive disease or peritoneal carcinomatosis, no visceral metastases, no progression after 3-6 months of first-line systemic therapy; register within 4 weeks of last first-line dose; diagnostic laparoscopy scheduled within 4 weeks."
+   },
+   {
+    "label": "Step 1 randomization (intraoperative)",
+    "text": "1:1 in the operating room after PCI is calculated at diagnostic laparoscopy. Stratified by PCI 0 vs 1-6 vs 7-14 vs 15 or more, and first-line therapy chemotherapy plus targeted agent/IO vs chemotherapy alone. Phase II N = 78; phase II/III N = 148.",
+    "arms": [
+     {
+      "label": "Arm A",
+      "text": "Physician's choice SOC systemic therapy (e.g., FOLFOX, CAPOX, FLOT, CF, CX), +/- targeted therapy or immunotherapy"
+     },
+     {
+      "label": "Arm B",
+      "text": "IP port placed at laparoscopy; leucovorin 20 mg/m2 IV, 5-FU 400 mg/m2 IV push, paclitaxel 50 mg/m2 IV, and paclitaxel 40 mg/m2 IP on Days 1 and 8 of 21-day cycles, +/- targeted therapy or immunotherapy"
+     }
+    ]
+   },
+   {
+    "label": "Restaging",
+    "text": "CT and/or diffusion-weighted MRI after 12 weeks (+/- 2 weeks), then every 12 weeks. Stable disease or response continues assigned treatment; cytoreduction may be considered if PCI under 7 and complete cytoreduction feasible (within 6 weeks of last study treatment). Treatment continues until progression, intolerance, or cytoreduction."
+   },
+   {
+    "label": "Primary endpoints",
+    "text": "Phase II: PFS. Phase III: OS. Follow-up 5 years from Step 1 randomization."
+   }
+  ],
+  "pretreatment": [
+   {
+    "item": "History, physical exam, weight, height, ECOG PS, concomitant medications",
+    "window": "Within 30 days before Step 0 registration",
+    "note": ""
+   },
+   {
+    "item": "CT chest/abdomen/pelvis (or CT chest plus MRI abdomen/pelvis) with tumor measurements",
+    "window": "Within 30 days before Step 0 registration",
+    "note": ""
+   },
+   {
+    "item": "CBC with differential and CMP",
+    "window": "Within 30 days before Step 0 registration",
+    "note": "CMP includes bilirubin, AST, ALT, albumin, creatinine"
+   },
+   {
+    "item": "PT/INR, PTT, 12-lead ECG",
+    "window": "Baseline",
+    "note": "Only as clinically indicated"
+   },
+   {
+    "item": "Pregnancy test",
+    "window": "Within 14 days before Step 0 registration",
+    "note": "Persons of childbearing potential"
+   },
+   {
+    "item": "Diagnostic laparoscopy with PCI assessment and lavage cytology",
+    "window": "Within 4 weeks of Step 0 registration (Step 1 randomization)",
+    "note": "Arm B IP port placed at same procedure"
+   }
+  ],
+  "during": [
+   {
+    "item": "Physical exam, weight, ECOG PS, adverse events",
+    "window": "Day 1 of each cycle (3 days or less before)",
+    "note": "No surgical site infection on Cycle 1 Day 1"
+   },
+   {
+    "item": "CBC with differential",
+    "window": "3 days or less before Day 1 of each cycle; Day 8 for Arm B",
+    "note": "Arm A Day 8 only if clinically indicated"
+   },
+   {
+    "item": "CMP",
+    "window": "3 days or less before Day 1 of each cycle",
+    "note": ""
+   },
+   {
+    "item": "CT and/or MRI restaging",
+    "window": "After 12 weeks (+/- 2 weeks), then every 12 weeks",
+    "note": "Optional diagnostic laparoscopy with PCI if considering cytoreduction"
+   }
+  ],
+  "followup": [
+   {
+    "item": "Discontinuation visit: physical exam, adverse events",
+    "window": "At discontinuation of treatment",
+    "note": ""
+   },
+   {
+    "item": "Follow-up for response and survival",
+    "window": "Every 3 months (+/- 2 weeks) for 2 years, then every 6 months (+/- 2 weeks) to 5 years from Step 1",
+    "note": "CT chest/abdomen/pelvis every 3 months only as clinically indicated"
+   }
+  ],
+  "locked": [
+   "during",
+   "eligibility",
+   "followup",
+   "pretreatment",
+   "schema"
+  ],
+  "reviewed": {
+   "date": "2026-10-11",
+   "version": "2026-07-09",
+   "by": "hand, from the protocol PDF",
+   "notes": "Amendments #1 and #2 listed on cover without dates or content, so amendments omitted."
+  }
  },
  "EA3231": {
   "eligibility": [
