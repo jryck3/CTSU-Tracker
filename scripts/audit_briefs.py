@@ -30,7 +30,7 @@ SCHEMA_IN_TEXT = re.compile(r"\bSchema\b|Please refer to the full protocol|\bR\s
 LAB_JOIN = re.compile(r"(?:x|times)\s*(?:upper limit|ULN|institutional).{0,80}\b(?:Histolog|Documentation|Stage|Prior)\b", re.I)
 LOST_NO = re.compile(r"^(?:known|prior|history of|active|current|concurrent|uncontrolled|planned|patients on|nonprescribed|prescribed|investigational|enrollment on)\b")
 GLUED = re.compile(r"\b[a-z]{3,}(?:a|the|of|for|and)[A-Z][a-z]{2,}|\b(?:a|the)(?:complete|patient|participant)\b|\b\w+(?:mgthree|timesaday|forapsych|foracomplete)\b")
-SPLIT_WORD = re.compile(r"\b(?:pa rticipants|system ic|week s|C isplatin|G emcitabine|multi -centre|non -inferiority)\b|\b[a-z]{2,} [a-z]{1,2}\b(?= [a-z]{3,}tion)")
+SPLIT_WORD = re.compile(r"\b(?:pa rticipants|system ic|week s|C isplatin|G emcitabine|multi -centre|non -inferiority)\b|\b[a-z]{2,} (?!(?:of|or|to|in|at|by|an|on|as|is|if|no|up|be|vs|a)\b)[a-z]{1,2}\b(?= [a-z]{3,}tion)")
 PAGE_TAIL = re.compile(r"\s\d{2,3}$")
 FOOTNOTE_GLUE = re.compile(r"\b(?:Arm|Step)\s+[A-Z]?\d{2,}\b|\bRev\.\s|\bAdd\d")
 

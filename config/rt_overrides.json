@@ -6,5 +6,7 @@
   "AOST2032": {"role": "RT component", "reason": "Protocol section 17 RT guidelines with IROC credentialing: RT to unresectable or margin-positive primary and SBRT or conventional RT to unresected bone and lung metastases"},
   "ARAR2331": {"role": "RT component", "reason": "Protocol section 17 RT for Type II/III PPB with IROC credentialing: thoracic, CNS, and consolidative metastatic RT"},
   "A081801": {"role": "RT component", "reason": "Optional PORT in both arms (occult N2/N3, R1, extranodal extension), 50-54 Gy with protocol volumes, technique, and OAR constraints; delivery at physician discretion"},
+  "A041501": {"role": "RT component", "reason": "Protocol section 7.11 RT with IROC QA: cranial RT 18 Gy in 10 fractions for CNS3 patients in CR, and testicular RT 24 Gy in 12 fractions for persistent testicular disease"},
+  "AREN2231": {"role": "RT component", "reason": "Protocol section 17 RT with IROC credentialing and pre-treatment plan review: flank or whole abdomen RT for local stage III, whole lung RT for lung metastases, and RT to extrapulmonary metastases"},
   "NRG-BR009": {"role": "RT component", "reason": "Protocol section 5.3 requires whole breast RT after lumpectomy, prohibits partial breast RT, directs PMRT and nodal RT, and specifies dose and heart/lung constraints; standard-of-care, not randomized, no central review"}
 }
