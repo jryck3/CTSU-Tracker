@@ -21,7 +21,7 @@ GitHub Actions runs this daily and commits the history and public page. On the
 Mac, use --no-save after `git pull` so tracked files are left to Actions.
 
 Usage:
-    python3 scripts/refresh.py [--skip-ctgov] [--force-ctgov] [--no-save]
+    python3 scripts/refresh.py [--skip-ctgov] [--force-ctgov] [--no-save] [--render-only]
 """
 import argparse
 import csv
@@ -672,6 +672,51 @@ def to_script(obj):
     return json.dumps(obj, separators=(",", ":")).replace("</", "<\\/")
 
 
+def firebase_from_page(path):
+    """Keep the public page's Firebase web config when the env var is unset."""
+    if not path.exists():
+        return None
+    text = path.read_text()
+    marker = "const FIREBASE = "
+    start = text.find(marker)
+    if start < 0:
+        return None
+    start += len(marker)
+    if text.startswith("null", start):
+        return None
+    end = text.find(";", start)
+    raw = text[start:end].strip()
+    if not raw.startswith("{"):
+        return None
+    return json.loads(raw)
+
+
+def stamp_protocol_files(studies):
+    """Refresh on-file flags from the local manifest without a CTSU fetch."""
+    manifest = load_json(MANIFEST, {})
+    for study in studies:
+        doc = manifest.get(study["protocol"]) or {}
+        study["protocol_on_file"] = bool(doc.get("files"))
+        study["protocol_version"] = doc.get("version")
+
+
+def render_saved(firebase=None):
+    """Rebuild both dashboards from data/studies.json. Briefs are reattached
+    from data/protocol_briefs.json so a newly extracted brief appears."""
+    payload = load_json(STUDIES_JSON, None)
+    if not payload or not payload.get("studies"):
+        raise ValueError(f"No studies in {STUDIES_JSON}")
+    studies = payload["studies"]
+    stamp_protocol_files(studies)
+    attach_briefs(studies, load_json(MANIFEST, {}))
+    if firebase is None:
+        firebase = firebase_from_page(PUBLIC_SITE)
+    render_dashboard(payload, PUBLIC_SITE, local=False, firebase=firebase)
+    if MANIFEST.exists():
+        render_dashboard(payload, DASHBOARD, local=True)
+    return payload
+
+
 def render_dashboard(payload, out, local, firebase=None):
     data = dict(payload, local=local)
     if not local:
@@ -694,7 +739,15 @@ def main():
                     help="Leave the snapshot, history CSV, and public page untouched (local rebuild)")
     ap.add_argument("--page-only", action="store_true",
                     help="Rebuild the public page (new protocol briefs) without saving a snapshot or history row")
+    ap.add_argument("--render-only", action="store_true",
+                    help="Rebuild both dashboards from data/studies.json without fetching")
     args = ap.parse_args()
+
+    if args.render_only:
+        payload = render_saved(firebase_config())
+        c = payload["counts"]
+        print(json.dumps({"render_only": True, **c}))
+        return
 
     today = date.today()
     save = not args.no_save and not args.page_only

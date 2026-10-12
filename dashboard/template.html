@@ -319,7 +319,8 @@
       <li><b>History</b> is built from one CTSU snapshot per day, starting <span id="hist-start"></span>. CTSU does not publish past accrual, so the line from the study start date to the first snapshot is a straight-line interpolation (dashed), not observed data.</li>
       <li><b>Average rate</b> = current accrual divided by months since the actual study start date on ClinicalTrials.gov. Early ramp-up makes this lower than the current rate for most young trials. <b>Recent rate</b> = change over the last 30 days of snapshots, scaled to a month. <b>Projected target date</b> assumes the average rate continues.</li>
       <li><b>Accrual pace</b> lists the fastest open studies that match the explorer filters, have been open at least 6 months, and have not reached their target. <i>Patients per month</i> favors large trials; <i>% of target per month</i> adjusts for trial size. The studies under that list start in protocol order. Column headings sort the table. On a phone, the same list is cards, with a Sort menu, and an opened study wraps to the screen.</li>
-      <li><b>Protocol brief</b> on an opened study is a rendition of the current protocol on file: amendments, schema, eligibility, pre-treatment assessments, assessments during treatment, assessments in follow-up, the study calendar, specimen collection, and data submission, including TRIAD when the protocol requires it. A section is omitted when that protocol does not contain it. It is not a copy of the protocol page. Confirm the current protocol before enrollment.</li>
+      <li><b>Site</b> rolls the CTSU disease list into the same oncology groups used on the WVU tracker. Leukemia, lymphoma, myeloma, myelofibrosis, and other hematopoietic neoplasms are Hematologic Cancer. Kidney, urothelial, and germ cell cancers are Genitourinary Cancers, and prostate studies are listed there as well as under Male Reproductive System Cancer. Bone, endocrine, and soft tissue stay their own sites. The opened study still shows the CTSU disease string. Lead groups that start with LAO are one LAO filter choice. The protocol cell still shows the specific LAO code.</li>
+      <li><b>Protocol brief</b> on an opened study is a rendition of the current protocol on file: amendments, schema, eligibility, pre-treatment assessments, assessments during treatment, assessments in follow-up, the study calendar, specimen collection, and data submission, including TRIAD when the protocol requires it. A section is omitted when that protocol does not contain it. When no protocol is on file, the opened study says so instead of leaving the brief blank. It is not a copy of the protocol page. Confirm the current protocol before enrollment.</li>
       <li><b>Role</b> starts with the three radiotherapy roles checked. <i>RT-focused</i>: RT named in the title. <i>RT component</i>: protocol-specified RT intervention, often part of the treatment backbone. <i>Radiopharm</i>: a therapeutic isotope (for example Lu-177 or Ac-225) without external-beam RT. Imaging tracers and MUGA scans are not radiopharmaceuticals. Studies outside those three roles are Imaging, Surgery, Transplant / cellular therapy, Cancer control, Registry / biospecimen, or Systemic therapy. Those boxes start unchecked. Manual overrides are listed in the evidence for each study.</li>
       <li id="m-sync"></li>
     </ul>
@@ -568,7 +569,7 @@ function searchStudies(q) {
     else if (np.includes(nq)) score = 75;
     else if (na && na.includes(nq)) score = 70;
     else if (nq.length >= 4 && nn.includes(nq)) score = 65;
-    else if (toks.every(t => [s.protocol, s.alias, s.nct, s.title, s.disease, s.lead].join(" ").toLowerCase().includes(t))) score = 20;
+    else if (toks.every(t => searchBlob(s).toLowerCase().includes(t))) score = 20;
     if (score) score += (s.rt_related ? 3 : 0) + (s.status === "Active" ? 2 : 0);
     return [score, s];
   }).filter(x => x[0] > 0)
@@ -825,12 +826,73 @@ function defaultPhases() { return new Set(PHASE_CODES.filter(code => code !== "0
 const state = {...DEFAULTS, phases: defaultPhases(), roles: defaultRoles(), sort: "protocol", dir: 1, expanded: new Set()};
 let paceMode = "n";
 
+const SITE_MAP = {
+  "Leukemia": "Hematologic Cancer",
+  "Lymphoma": "Hematologic Cancer",
+  "Myeloma": "Hematologic Cancer",
+  "Myelofibrosis": "Hematologic Cancer",
+  "Hematopoietic Neoplasm (excluding Leukemia, Lymphoma and Myeloma)": "Hematologic Cancer",
+  "Kidney Cancer": "Genitourinary Cancers",
+  "Urothelial/ Bladder Cancer": "Genitourinary Cancers",
+  "Urothelial/Bladder Cancer": "Genitourinary Cancers",
+  "Germ Cell Cancer": "Genitourinary Cancers",
+  "Childhood Posterior Fossa Ependymoma": "CNS Cancer (Primary tumor)",
+  "Immune Disorder (excluding AIDS and malignancy)": "Hematologic Disease",
+  "Eye Cancer": "",
+  "Non-neoplastic Disorder": "",
+  "N/A": "",
+  "AIDS-related Malignancy and Condition": "Hematologic Cancer",
+};
+const DROP_IF_OTHER_SITE = new Set([
+  "Solid Tumor", "N/A", "Eye Cancer", "Non-neoplastic Disorder",
+  "AIDS-related Malignancy and Condition",
+]);
+
+function diseaseTokens(s) {
+  return (s.disease || "").split(";").map(part => part.trim()).filter(Boolean);
+}
+
+function sitesOf(s) {
+  const raw = diseaseTokens(s);
+  const specific = raw.filter(label => !DROP_IF_OTHER_SITE.has(label) && label !== "Solid Tumor");
+  const use = specific.length ? specific : raw;
+  const out = [];
+  const seen = new Set();
+  use.forEach(label => {
+    if (DROP_IF_OTHER_SITE.has(label) && specific.length) return;
+    let mapped = Object.prototype.hasOwnProperty.call(SITE_MAP, label) ? SITE_MAP[label] : label;
+    if (label === "Solid Tumor" && !specific.length) mapped = "Miscellaneous and Metastatic Cancer";
+    if (!mapped || seen.has(mapped)) return;
+    seen.add(mapped);
+    out.push(mapped);
+    if (mapped === "Male Reproductive System Cancer" && !seen.has("Genitourinary Cancers")) {
+      seen.add("Genitourinary Cancers");
+      out.push("Genitourinary Cancers");
+    }
+  });
+  return out;
+}
+
+function siteLabel(s) {
+  const sites = sitesOf(s);
+  return sites.length ? sites.join("; ") : (s.disease || "");
+}
+
+function leadGroup(s) {
+  const lead = s.lead || "";
+  return /^LAO-/.test(lead) ? "LAO" : lead;
+}
+
+function searchBlob(s) {
+  return [s.protocol, s.title, s.nct, s.disease, siteLabel(s), s.lead, leadGroup(s), s.alias].join(" ");
+}
+
 function fillSelect(id, values) {
   const el = $(id);
   [...new Set(values)].filter(Boolean).sort().forEach(v => el.insertAdjacentHTML("beforeend", `<option>${esc(v)}</option>`));
 }
-fillSelect("f-lead", S.map(s => s.lead));
-fillSelect("f-disease", S.flatMap(s => (s.disease || "").split(";").map(x => x.trim())));
+fillSelect("f-lead", S.map(leadGroup));
+fillSelect("f-disease", S.flatMap(sitesOf));
 $("role-panel").innerHTML = `<label class="check"><input type="checkbox" id="role-all"> All</label>` +
   ROLE_MENU.map(([value, text]) => `<label class="check"><input type="checkbox" name="role" value="${esc(value)}"> ${esc(text)}</label>`).join("");
 $("phase-panel").innerHTML = `<label class="check"><input type="checkbox" id="phase-all"> All</label>` +
@@ -848,15 +910,16 @@ function matches(s, ignoreStatus = false) {
   return state.roles.has(s.rt_role) &&
     (ignoreStatus || statusSelected(s)) &&
     state.phases.has(String(s.phase || "Other")) &&
-    (!state.lead || s.lead === state.lead) &&
-    (!state.disease || (s.disease || "").split(";").map(x => x.trim()).includes(state.disease)) &&
-    (!q || [s.protocol, s.title, s.nct, s.disease, s.lead, s.alias].join(" ").toLowerCase().includes(q));
+    (!state.lead || leadGroup(s) === state.lead) &&
+    (!state.disease || sitesOf(s).includes(state.disease)) &&
+    (!q || searchBlob(s).toLowerCase().includes(q));
 }
 
 function rows() {
   const k = state.sort, d = state.dir;
+  const sortValue = (s) => k === "disease" ? siteLabel(s) : s[k];
   return S.filter(s => matches(s)).sort((a, b) => {
-    const x = a[k], y = b[k];
+    const x = sortValue(a), y = sortValue(b);
     if (x == null && y == null) return 0;
     if (x == null) return 1;
     if (y == null) return -1;
@@ -928,7 +991,7 @@ function postedLabel(v) {
 
 function briefHtml(s) {
   const b = s.brief;
-  if (!b) return "";
+  if (!b) return `<p class="caveat">No protocol brief is on file. The CTSU documents page was not available for this study, or the protocol has not been downloaded.</p>`;
   const version = b.version_label || (b.version_date ? postedLabel(b.version_date) : "");
   const posted = postedLabel(b.posted);
   const steps = (b.schema || []).map((step, i) => {
@@ -998,7 +1061,7 @@ function studyCard(s) {
       ${starBtn(s.protocol)}
       <button class="sc-open" type="button" aria-expanded="${open}">
         <span class="sc-name"><b>${esc(s.protocol)}</b>${s.alias ? ` <span class="muted">${esc(s.alias)}</span>` : ""}</span>
-        <span class="sc-meta">${esc(s.lead)} · ${esc(s.disease || "Site n/a")} · Phase ${esc(phaseLabel(s.phase))}</span>
+        <span class="sc-meta">${esc(s.lead)} · ${esc(siteLabel(s) || "Site n/a")} · Phase ${esc(phaseLabel(s.phase))}</span>
         <span class="sc-title">${esc(s.title)}</span>
         <span class="sc-row">${roleChip(s.rt_role)} ${statusCell(s)} <span>${s.accrual != null ? num(s.accrual, 0) : ""}${s.target ? " / " + num(s.target, 0) : ""}${s.pct != null ? ` (${num(s.pct)}%)` : ""}</span>${s.avg_rate != null ? ` <span class="muted">${num(s.avg_rate)} /mo</span>` : ""}</span>
       </button>
@@ -1031,7 +1094,7 @@ function renderStudies() {
     <tr class="row${store.has(s.protocol) ? " mine" : ""}" data-p="${esc(s.protocol)}" tabindex="0" aria-expanded="${state.expanded.has(s.protocol)}">
       <td class="star-col">${starBtn(s.protocol)}</td>
       <td class="id-cell"><div class="id-stack"><div><b>${esc(s.protocol)}</b>${s.alias ? ` <span class="muted">${esc(s.alias)}</span>` : ""}</div><div class="id-lead">${esc(s.lead)}</div>${s.rt_role ? `<div>${roleChip(s.rt_role)}</div>` : ""}<div>${statusCell(s)}</div></div></td>
-      <td class="site-cell">${esc(s.disease)}</td>
+      <td class="site-cell">${esc(siteLabel(s))}</td>
       <td class="phase-cell">${esc(phaseLabel(s.phase))}</td>
       <td class="title-cell">${esc(s.title)}</td>
       <td class="acc-cell">${accBar(s)}${s.avg_rate != null ? `<div class="acc-rate">${num(s.avg_rate)} /mo</div>` : ""}</td>
