@@ -22,7 +22,11 @@ Set up October 7, 2026. Accrual history starts that day. GitHub Actions takes on
 | Piece | What it does |
 |---|---|
 | `scripts/refresh.py` | Pulls the public CTSU feed (`ctsu.cancer.gov/web-data-service/v1/protocols/browse`, the data behind ctsu.cancer.gov/protocol), appends `data/accrual_history.csv`, enriches each study from the ClinicalTrials.gov v2 API, classifies RT involvement, and builds the dashboards. |
-| `.github/workflows/refresh.yml` | Runs `refresh.py` daily and commits the history and `docs/index.html` (served by GitHub Pages). Passes the `FIREBASE_WEB_CONFIG` repository variable to the build. |
+| `.github/workflows/refresh.yml` | Runs `refresh.py` daily and commits the history and `docs/index.html` (served by GitHub Pages). A push that changes the briefs, `data/protocol_library.json`, or the template rebuilds the page only (`--page-only`). Passes the `FIREBASE_WEB_CONFIG` repository variable to the build. |
+| `scripts/protocol_library.py` | The one reader of `protocols/` and `data/protocol_briefs.json`: current PDF per protocol, protocol-number matching across group spellings, and the library stamp (latest check date plus a content hash). WVU and Worldwide import it. |
+| `scripts/extract_protocol_briefs.py` | Fills brief sections from the current PDF. Never overwrites a hand-written or locked section. When a protocol version changes, it marks those sections `needs_review`. |
+| `scripts/rebuild_consumers.sh` | Republishes all three trackers from the library after `publish_checks.py` passes for each: CTSU (commit and push), Worldwide (`build.py --briefs-only`, push to Pages), WVU (`enrich_details.py`, push, `clasp push`, redeploy the same web-app deployment). `--if-stale` skips trackers already built from the current library. Log: `logs/publish.<host>.log`. |
+| `scripts/audit_briefs.py`, `scripts/merge_brief_reviews.py`, `scripts/protocol_text.py` | Brief quality audit and RT check against the PDFs, merge of hand-reviewed briefs (marked `reviewed` and locked), and a text viewer for one protocol. |
 | `dashboard/template.html` | Dashboard page (vanilla JS, Chart.js, optional Firebase Auth and Firestore from Google's CDN). |
 | `firestore.rules` | Firestore security rules: each signed-in user can read and write only `users/{their uid}`. |
 | `scripts/download_protocols.py` | Downloads the current CIRB-approved protocol for every study on the CTSU list from the member site through a signed-in browser session. Re-runs skip unchanged documents and keep older versions when a protocol is amended. `--open-only` limits the check to active RT studies. |
@@ -33,7 +37,7 @@ Set up October 7, 2026. Accrual history starts that day. GitHub Actions takes on
 ## RT classification
 
 - **RT-focused**: RT named in the CTSU or ClinicalTrials.gov title.
-- **RT component**: protocol-specified RT intervention on ClinicalTrials.gov, often part of the treatment backbone.
+- **RT component**: protocol-specified RT intervention on ClinicalTrials.gov, often part of the treatment backbone. Also studies whose protocol prescribes RT (dose, volumes, credentialing) although the registry does not list it; those are set in `config/rt_overrides.json` with the protocol section as the reason.
 - **Radiopharm**: therapeutic isotope (Lu-177, Ac-225, Ra-223, and similar) without external-beam RT. The role menu also has Imaging, Surgery, Transplant / cellular therapy, Cancer control, Registry / biospecimen, and Systemic therapy for studies that are not one of the three radiotherapy roles.
 - Imaging tracers and MUGA scans are excluded. Each study's evidence is shown in the dashboard row details.
 
@@ -47,13 +51,15 @@ CTSU publishes study-wide actual and planned intervention accrual (all sites, no
 
 Downloaders use `scripts/download_protocols.py` after an ID.me session on the CTSU automation Chrome. They do not download while logged out, and they do not type the password.
 
-- This project: `scripts/check_protocol_updates.sh` and `scripts/update_local.sh --protocols`.
-- WVU Trial Tracker: the protocol button and the Monday job, for the list in `Projects/WVU Trials Demo/data/ctsu_protocols.json`. The ClinicalTrials.gov ingest button does not download PDFs.
+- This project: `scripts/check_protocol_updates.sh` (the scheduled Sunday check) and `scripts/update_local.sh --protocols`.
+- WVU Trial Tracker: `scripts/run_protocol_check.sh` for the list in `Projects/WVU Trials Demo/data/ctsu_protocols.json`. The protocol button and its poller are off. The ClinicalTrials.gov ingest button does not download PDFs.
 - Patient Trial Matching: `download_queue.py` writes into this folder, not into that project.
 
-Readers do not log into CTSU. This dashboard reads `data/protocol_briefs.json` and the manifest. Worldwide RT Trials reads the public export, those briefs, and a local PDF when a schema is still missing. It does not take the Chrome lock.
+`download_protocols.py` `check_one()` is the only writer of `protocols/manifest.json`.
 
-`scripts/ctsu_chrome_lock.py` is the one lock for the CTSU Chrome profile on this Mac. The WVU poller, the Monday job, a full-catalog check, and the Patient Trial Matching queue all honor it. The lock file is under `~/Library/Application Support/wvu-trial-tracker/` so it is not synced between computers.
+Readers do not log into CTSU and do not read PDFs. This dashboard, WVU, and Worldwide RT Trials read the briefs and manifest through `scripts/protocol_library.py`. A schema read from the protocol's schema page is filled into the brief here, by the extractor, when it passes a readability check.
+
+`scripts/ctsu_chrome_lock.py` locks the CTSU Chrome profile (scope `chrome`) and publishing (scope `publish`). Each Mac has its own lock file under `~/Library/Application Support/wvu-trial-tracker/`, and a marker in `protocols/` (synced by Syncthing) keeps the other Mac from starting the same work. A marker older than 3 hours is stale.
 
 The public protocol list (`ctsu.cancer.gov/protocol` and its browse feed) does not need a login. Anything on the CTSU member site (`www.ctsu.org`), including protocol PDFs and amendment checks, does.
 
@@ -61,7 +67,12 @@ Before opening the member site, prompt Jeff to sign in with ID.me in the automat
 
 To refresh protocols, have Jeff complete that sign-in, then run `scripts/update_local.sh --protocols`. The CTSU session expires, so expect a new sign-in for each protocol check.
 
-`scripts/check_protocol_updates.sh` refreshes the public study list, then checks the current protocol document for every study on the list. It appends `logs/protocol_changes.md` (local only, with the PDFs). A new protocol version is downloaded beside the previous file, and the log quotes the amendment memorandum or the summary-of-changes text from the opening pages. The launchd definition for a Sunday 7:00 PM local check is `launchd/com.jeffryckman.ctsuProtocolCheck.plist`. It runs only after it is copied into `~/Library/LaunchAgents` and loaded. If the Mac is asleep at that hour, that week is skipped. If the CTSU session is signed out, the script writes that in the log and opens the login page so Jeff can use ID.me.
+`scripts/check_protocol_updates.sh` refreshes the public study list, then checks the current protocol document for every study on the list. It appends `logs/protocol_changes.md` (local only, with the PDFs). A new protocol version is downloaded beside the previous file, and the log quotes the amendment memorandum or the summary-of-changes text from the opening pages. It opens https://www.ctsu.org/ in the automation Chrome and waits up to 60 minutes for Jeff's ID.me sign-in; Chrome stays open from sign-in through the downloads. After the downloads it refills the briefs of changed protocols and runs `rebuild_consumers.sh`. Either Mac can run it. It skips when the other Mac finished a full check within 12 hours (`protocols/.last_full_check.json`) or holds the lock. `--force` ignores the 12-hour rule. Log: `logs/protocol_check.<host>.log`.
+
+Scheduled jobs (`launchd/`, copied into `~/Library/LaunchAgents` and loaded on each Mac that should run them; loaded on Ryck's MB Air October 11, 2026):
+
+- `com.jeffryckman.ctsuProtocolCheck.plist`: Sunday 7:00 PM protocol check. If the Mac is asleep then, launchd runs it at the next wake.
+- `com.jeffryckman.trackerPublish.plist`: daily 6:30 AM `rebuild_consumers.sh --if-stale`, which republishes any tracker left behind by a failed publish or a hand edit to the briefs.
 
 ## Google sign-in setup (one time)
 

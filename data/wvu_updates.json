@@ -1,3 +1,3 @@
 {
- "line": "Protocol, ClinicalTrials.gov, and OnCore checks run Monday at 7:00 AM Eastern. Ingest now checks ClinicalTrials.gov and the public WVU pages. It does not download CTSU protocol PDFs."
+ "line": "CTSU protocols are checked Sunday evening, and changed briefs publish automatically. ClinicalTrials.gov, OnCore, and CTSU accrual checks run Monday at 7:00 AM Eastern. Ingest now checks ClinicalTrials.gov and the public WVU pages. It does not download CTSU protocol PDFs."
 }
