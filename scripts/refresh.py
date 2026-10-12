@@ -341,13 +341,74 @@ def approved_studies(ncts, taken_protocols, taken_ncts, overrides, manifest):
 
 # ------------------------------------------------------------- Classification
 
+REGISTRY_TITLE = re.compile(r"registry|biorepository|tissue procurement|biospecimen", re.I)
+CANCER_CONTROL_TITLE = re.compile(
+    r"symptom|distress|survivorship|mindfulness|financial navigation|out-of-pocket|"
+    r"genetic testing|genetic services|cascade genetic|prevention of|chemoprevention|"
+    r"cryocompression|who smoke|smoking|tobacco|cessation|early detection|colonoscopy|"
+    r"screen for cancer|screening tool|"
+    r"cannabis|vaginal atrophy|participation in cancer clinical trials",
+    re.I,
+)
+TRANSPLANT_TITLE = re.compile(
+    r"\bCAR[- ]T\b|CAR T-cell|chimeric antigen receptor|"
+    r"axicabtagene|tisagenlecleucel|idecabtagene|ciltacabtagene|lisocabtagene|brexucabtagene|"
+    r"stem cell transplant",
+    re.I,
+)
+SURGERY_TITLE = re.compile(r"versus surgery|surgery alone|open vs\.?\s+thoracoscopic|thoracoscopic management", re.I)
+IMAGING_TITLE = re.compile(
+    r"chest CT|chest x-?ray|\bPET\b|\bMRI\b|\bSPECT\b|mammogra|fluciclovine|"
+    r"MR spectroscopy|DSC-MRI|low[- ]dose CT|\bLDCT\b",
+    re.I,
+)
+IMAGING_AGENT = re.compile(r"fluciclovine|gadolinium|contrast", re.I)
+IMAGING_PROCEDURE = re.compile(
+    r"magnetic resonance|\bMRI\b|positron emission|\bPET\b|spectroscopy|mammogra|"
+    r"computed tomography|x-?ray",
+    re.I,
+)
+
+
+def diagnostic_imaging_only(interventions):
+    """True when the listed interventions are scans or imaging agents, not a cancer drug."""
+    if not interventions:
+        return False
+    saw_imaging = False
+    for iv in interventions:
+        kind = (iv.get("type") or "").upper()
+        name = iv.get("name") or ""
+        if kind == "RADIATION":
+            return False
+        if kind in {"DRUG", "BIOLOGICAL"} and not IMAGING_AGENT.search(name):
+            return False
+        if kind == "PROCEDURE" and not IMAGING_PROCEDURE.search(name):
+            return False
+        if IMAGING_PROCEDURE.search(name) or IMAGING_AGENT.search(name):
+            saw_imaging = True
+    return saw_imaging
+
+
+def non_rt_role(titles, interventions):
+    """One role for a study that is not RT-focused, an RT component, or a radiopharmaceutical."""
+    if REGISTRY_TITLE.search(titles):
+        return "Registry / biospecimen"
+    if CANCER_CONTROL_TITLE.search(titles):
+        return "Cancer control"
+    if TRANSPLANT_TITLE.search(titles) and not re.search(r"prior to\s+.{0,40}transplant", titles, re.I):
+        return "Transplant / cellular therapy"
+    if SURGERY_TITLE.search(titles):
+        return "Surgery"
+    if IMAGING_TITLE.search(titles) or diagnostic_imaging_only(interventions):
+        return "Imaging"
+    return "Systemic therapy"
+
+
 def classify_rt(ctsu, ps, overrides):
-    """Return (role, evidence list). Roles: RT-focused, RT component,
-    Radiopharmaceutical, Possible (arm text only), or None."""
+    """Return (role, evidence list)."""
     ident = ps.get("identificationModule", {})
     titles = " | ".join(filter(None, [ctsu.get("protocolTitle"), ident.get("officialTitle"), ident.get("briefTitle")]))
     interventions = ps.get("armsInterventionsModule", {}).get("interventions", []) or []
-    arms = ps.get("armsInterventionsModule", {}).get("armGroups", []) or []
 
     evidence = []
     title_rt = RT_TERMS.search(titles)
@@ -369,24 +430,23 @@ def classify_rt(ctsu, ps, overrides):
     if radiopharm_iv:
         evidence.append("radiopharmaceutical: " + "; ".join(sorted(set(radiopharm_iv))))
 
-    arm_hits = [a.get("label", "") for a in arms
-                if RT_TERMS.search(a.get("description", "") or "") or RT_TERMS.search(a.get("label", "") or "")]
-    if arm_hits and not (title_rt or rt_iv):
-        evidence.append("arm text: " + "; ".join(arm_hits[:3]))
-
     override = overrides.get(ctsu.get("protocolNumber"))
     if override:
         evidence.append(f"manual: {override.get('reason', '')}".strip())
-        return override.get("role"), evidence
+        if override.get("role"):
+            return override.get("role"), evidence
+        role = non_rt_role(titles, interventions)
+        evidence.append(f"role: {role}")
+        return role, evidence
     if (radiopharm_iv or RADIOPHARM.search(titles)) and not rt_iv:
         return "Radiopharmaceutical", evidence
     if title_rt:
         return "RT-focused", evidence
     if rt_iv:
         return "RT component", evidence
-    if arm_hits:
-        return "Possible (arm text only)", evidence
-    return None, evidence
+    role = non_rt_role(titles, interventions)
+    evidence.append(f"role: {role}")
+    return role, evidence
 
 
 RT_RELATED_ROLES = {"RT-focused", "RT component", "Radiopharmaceutical"}

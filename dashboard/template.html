@@ -84,13 +84,17 @@
   .filters input[type=search], .filters select { font: inherit; font-size: 13px; padding: 6px 9px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
   .filters input[type=search] { min-width: min(100%, 260px); flex: 1 1 220px; }
   .filters select { max-width: 220px; min-width: 0; width: 160px; }
-  .phase-wrap { position: relative; }
-  .phase-btn { font: inherit; font-size: 13px; padding: 6px 28px 6px 9px; border: 1px solid var(--line); border-radius: 7px; background: #fff; cursor: pointer; min-width: 250px; text-align: left; position: relative; }
-  .phase-btn::after { content: "▾"; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 11px; }
-  .phase-btn[aria-expanded="true"]::after { content: "▴"; }
-  .phase-panel { position: absolute; z-index: 6; top: calc(100% + 4px); left: 0; min-width: 210px; background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px rgba(20, 30, 50, .12); padding: 8px; gap: 4px; }
-  .phase-panel:not([hidden]) { display: grid; }
-  .phase-panel .check { width: 100%; }
+  .phase-wrap, .role-wrap { position: relative; }
+  .phase-btn, .role-btn { font: inherit; font-size: 13px; padding: 6px 28px 6px 9px; border: 1px solid var(--line); border-radius: 7px; background: #fff; cursor: pointer; text-align: left; position: relative; }
+  .phase-btn { min-width: 250px; }
+  .role-btn { min-width: 160px; }
+  .phase-btn::after, .role-btn::after { content: "▾"; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 11px; }
+  .phase-btn[aria-expanded="true"]::after, .role-btn[aria-expanded="true"]::after { content: "▴"; }
+  .phase-panel, .role-panel { position: absolute; z-index: 6; top: calc(100% + 4px); left: 0; background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px rgba(20, 30, 50, .12); padding: 8px; gap: 4px; }
+  .phase-panel { min-width: 210px; }
+  .role-panel { min-width: 260px; }
+  .phase-panel:not([hidden]), .role-panel:not([hidden]) { display: grid; }
+  .phase-panel .check, .role-panel .check { width: 100%; }
   .m-sort { display: none; align-items: center; gap: 6px; font-size: 13px; }
   .check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 7px; background: #fff; cursor: pointer; user-select: none; }
   .check:has(input:checked) { border-color: var(--accent); background: #ebf4ff; color: var(--navy); }
@@ -164,7 +168,7 @@
     main { padding: 12px 12px 28px; }
     .cards { grid-template-columns: 1fr; }
     .filters input[type=search] { flex-basis: 100%; }
-    .filters select, .phase-btn { width: 100%; max-width: 100%; flex: 1 1 calc(50% - 8px); }
+    .filters select, .phase-btn, .role-btn { width: 100%; max-width: 100%; flex: 1 1 calc(50% - 8px); }
     .combo { flex-basis: 100%; max-width: none; }
     .canvas-wrap { height: 240px; }
     .count { margin-left: 0; }
@@ -255,7 +259,6 @@
   <section class="panel" aria-labelledby="explore-h">
     <div class="filters">
       <input id="q" type="search" placeholder="Search protocol, title, NCT, acronym, disease" aria-label="Search studies">
-      <label class="check"><input type="checkbox" id="f-rt" checked> RT-related</label>
       <select id="f-status" aria-label="Status">
         <option value="active">Open to accrual</option>
         <option value="approved">Approved, not yet open</option>
@@ -264,7 +267,10 @@
       </select>
       <select id="f-disease" aria-label="Site"><option value="">All sites</option></select>
       <select id="f-lead" aria-label="Lead group"><option value="">All lead groups</option></select>
-      <select id="f-role" aria-label="RT role"><option value="">Any RT role</option></select>
+      <div class="role-wrap">
+        <button type="button" class="role-btn" id="role-btn" aria-expanded="false" aria-controls="role-panel">RT roles</button>
+        <div class="role-panel" id="role-panel" hidden></div>
+      </div>
       <div class="phase-wrap">
         <button type="button" class="phase-btn" id="phase-btn" aria-expanded="false" aria-controls="phase-panel">All phases except Phase 0 and Phase 1</button>
         <div class="phase-panel" id="phase-panel" hidden></div>
@@ -314,7 +320,7 @@
       <li><b>Average rate</b> = current accrual divided by months since the actual study start date on ClinicalTrials.gov. Early ramp-up makes this lower than the current rate for most young trials. <b>Recent rate</b> = change over the last 30 days of snapshots, scaled to a month. <b>Projected target date</b> assumes the average rate continues.</li>
       <li><b>Accrual pace</b> lists the fastest open studies that match the explorer filters, have been open at least 6 months, and have not reached their target. <i>Patients per month</i> favors large trials; <i>% of target per month</i> adjusts for trial size. The studies under that list start in protocol order. Column headings sort the table. On a phone, the same list is cards, with a Sort menu, and an opened study wraps to the screen.</li>
       <li><b>Protocol brief</b> on an opened study is a rendition of the current protocol on file: amendments, schema, eligibility, pre-treatment assessments, assessments during treatment, assessments in follow-up, the study calendar, specimen collection, and data submission, including TRIAD when the protocol requires it. A section is omitted when that protocol does not contain it. It is not a copy of the protocol page. Confirm the current protocol before enrollment.</li>
-      <li><b>RT classification</b> uses ClinicalTrials.gov interventions and titles. <i>RT-focused</i>: RT named in the title. <i>RT component</i>: protocol-specified RT intervention (often part of the treatment backbone). <i>Radiopharmaceutical</i>: therapeutic isotope (for example Lu-177, Ac-225) without external-beam RT. Imaging tracers and MUGA scans are excluded. Manual overrides are listed in the evidence for each study.</li>
+      <li><b>Role</b> starts with the three radiotherapy roles checked. <i>RT-focused</i>: RT named in the title. <i>RT component</i>: protocol-specified RT intervention, often part of the treatment backbone. <i>Radiopharm</i>: a therapeutic isotope (for example Lu-177 or Ac-225) without external-beam RT. Imaging tracers and MUGA scans are not radiopharmaceuticals. Studies outside those three roles are Imaging, Surgery, Transplant / cellular therapy, Cancer control, Registry / biospecimen, or Systemic therapy. Those boxes start unchecked. Manual overrides are listed in the evidence for each study.</li>
       <li id="m-sync"></li>
     </ul>
   </details>
@@ -343,7 +349,9 @@ const fmtDate = iso => iso ? toDate(iso).toLocaleDateString("en-US", {year: "num
 const fmtMonth = iso => iso ? toDate(iso).toLocaleDateString("en-US", {year: "numeric", month: "short"}) : "";
 const num = (v, d = 1) => v == null ? "" : Number(v).toLocaleString("en-US", {maximumFractionDigits: d});
 const label = s => s.alias ? `${s.alias} (${s.protocol})` : s.protocol;
-const roleChip = r => !r ? "" : `<span class="chip ${r === "RT-focused" ? "rt" : r === "RT component" ? "rtc" : r === "Radiopharmaceutical" ? "rp" : ""}">${esc(r)}</span>`;
+const ROLE_LABELS = {"Radiopharmaceutical": "Radiopharm"};
+function roleLabel(role) { return ROLE_LABELS[role] || role || ""; }
+const roleChip = r => !r ? "" : `<span class="chip ${r === "RT-focused" ? "rt" : r === "RT component" ? "rtc" : r === "Radiopharmaceutical" ? "rp" : ""}">${esc(roleLabel(r))}</span>`;
 const statusChip = st => {
   const kind = st === "Active" ? "active" : st === "Approved" ? "approved" : "closed";
   const text = st === "Active" ? "Open" : st === "Approved" ? "Approved" : st;
@@ -787,7 +795,20 @@ const COLS = [
   {k: "start_date", l: "Start", cls: "date-col"},
   {k: "projected_completion", l: "Projected", cls: "date-col"},
 ];
-const DEFAULTS = {q: "", rt: true, status: "active", disease: "", lead: "", role: ""};
+const DEFAULTS = {q: "", status: "active", disease: "", lead: ""};
+const ROLE_MENU = [
+  ["RT-focused", "RT-focused"],
+  ["RT component", "RT component"],
+  ["Radiopharmaceutical", "Radiopharm"],
+  ["Imaging", "Imaging"],
+  ["Surgery", "Surgery"],
+  ["Transplant / cellular therapy", "Transplant / cellular therapy"],
+  ["Cancer control", "Cancer control"],
+  ["Registry / biospecimen", "Registry / biospecimen"],
+  ["Systemic therapy", "Systemic therapy"],
+];
+const RT_ROLE_VALUES = ["RT-focused", "RT component", "Radiopharmaceutical"];
+function defaultRoles() { return new Set(RT_ROLE_VALUES); }
 const PHASE_LABELS = {"0": "0", "1": "1", "1/2": "1/2", "2": "2", "2/3": "2/3", "3": "3", "4": "4", "Other": "Other"};
 const PHASE_MENU = {"0": "Phase 0", "1": "Phase 1", "1/2": "Seamless 1/2", "2": "Phase 2", "2/3": "Seamless 2/3", "3": "Phase 3", "4": "Phase 4", "Other": "Other"};
 const PHASE_ORDER = ["0", "1", "1/2", "2", "2/3", "3", "4", "Other"];
@@ -801,7 +822,7 @@ function phaseCodes() {
 }
 const PHASE_CODES = phaseCodes();
 function defaultPhases() { return new Set(PHASE_CODES.filter(code => code !== "0" && code !== "1")); }
-const state = {...DEFAULTS, phases: defaultPhases(), sort: "protocol", dir: 1, expanded: new Set()};
+const state = {...DEFAULTS, phases: defaultPhases(), roles: defaultRoles(), sort: "protocol", dir: 1, expanded: new Set()};
 let paceMode = "n";
 
 function fillSelect(id, values) {
@@ -810,7 +831,8 @@ function fillSelect(id, values) {
 }
 fillSelect("f-lead", S.map(s => s.lead));
 fillSelect("f-disease", S.flatMap(s => (s.disease || "").split(";").map(x => x.trim())));
-fillSelect("f-role", S.map(s => s.rt_role));
+$("role-panel").innerHTML = `<label class="check"><input type="checkbox" id="role-all"> All</label>` +
+  ROLE_MENU.map(([value, text]) => `<label class="check"><input type="checkbox" name="role" value="${esc(value)}"> ${esc(text)}</label>`).join("");
 $("phase-panel").innerHTML = `<label class="check"><input type="checkbox" id="phase-all"> All</label>` +
   PHASE_CODES.map(code => `<label class="check"><input type="checkbox" name="phase" value="${esc(code)}"> ${esc(phaseMenuLabel(code))}</label>`).join("");
 
@@ -823,12 +845,11 @@ function statusSelected(s) {
 
 function matches(s, ignoreStatus = false) {
   const q = state.q.toLowerCase();
-  return (!state.rt || s.rt_related) &&
+  return state.roles.has(s.rt_role) &&
     (ignoreStatus || statusSelected(s)) &&
     state.phases.has(String(s.phase || "Other")) &&
     (!state.lead || s.lead === state.lead) &&
     (!state.disease || (s.disease || "").split(";").map(x => x.trim()).includes(state.disease)) &&
-    (!state.role || s.rt_role === state.role) &&
     (!q || [s.protocol, s.title, s.nct, s.disease, s.lead, s.alias].join(" ").toLowerCase().includes(q));
 }
 
@@ -848,9 +869,13 @@ function phasesAreDefault() {
   return state.phases.size === want.size && [...want].every(code => state.phases.has(code));
 }
 
+function rolesAreDefault() {
+  return state.roles.size === RT_ROLE_VALUES.length && RT_ROLE_VALUES.every(role => state.roles.has(role));
+}
+
 function scopeText() {
-  const custom = state.q || state.disease || state.lead || state.role || !phasesAreDefault();
-  const kind = state.rt ? "RT-related studies" : "studies";
+  const custom = state.q || state.disease || state.lead || !phasesAreDefault() || !rolesAreDefault();
+  const kind = rolesAreDefault() ? "RT-related studies" : "studies";
   return custom ? `open ${kind} matching your filters` : `open ${kind}`;
 }
 
@@ -1037,8 +1062,9 @@ function render() {
 
 function showInTable(p) {
   if (!S.some(s => s.protocol === p && matches(s))) {
-    Object.assign(state, DEFAULTS, {rt: false, status: "all", q: p});
+    Object.assign(state, DEFAULTS, {status: "all", q: p});
     state.phases = new Set(PHASE_CODES);
+    state.roles = new Set(ROLE_MENU.map(([value]) => value));
     syncFilterInputs();
   }
   state.expanded.add(p);
@@ -1061,17 +1087,45 @@ function syncPhaseInputs() {
   $("phase-btn").textContent = phaseButtonLabel();
 }
 
+function roleButtonLabel() {
+  if (!state.roles.size) return "No role";
+  if (state.roles.size === ROLE_MENU.length) return "All roles";
+  if (rolesAreDefault()) return "RT roles";
+  return ROLE_MENU.filter(([value]) => state.roles.has(value)).map(([, text]) => text).join(", ");
+}
+
+function syncRoleInputs() {
+  document.querySelectorAll('input[name="role"]').forEach(box => { box.checked = state.roles.has(box.value); });
+  $("role-all").checked = state.roles.size === ROLE_MENU.length;
+  $("role-btn").textContent = roleButtonLabel();
+}
+
 function syncFilterInputs() {
   $("q").value = state.q;
-  $("f-rt").checked = state.rt;
   $("f-status").value = state.status;
-  [["f-disease", "disease"], ["f-lead", "lead"], ["f-role", "role"]].forEach(([id, k]) => { $(id).value = state[k]; });
+  [["f-disease", "disease"], ["f-lead", "lead"]].forEach(([id, k]) => { $(id).value = state[k]; });
   syncPhaseInputs();
+  syncRoleInputs();
 }
 
 $("q").oninput = e => { state.q = e.target.value; render(); };
-$("f-rt").onchange = e => { state.rt = e.target.checked; render(); };
 $("f-status").onchange = e => { state.status = e.target.value; render(); };
+$("role-btn").onclick = () => {
+  const panel = $("role-panel");
+  panel.hidden = !panel.hidden;
+  $("role-btn").setAttribute("aria-expanded", String(!panel.hidden));
+};
+$("role-panel").addEventListener("change", ev => {
+  const box = ev.target;
+  if (box.id === "role-all") {
+    state.roles = box.checked ? new Set(ROLE_MENU.map(([value]) => value)) : new Set();
+  } else if (box.name === "role") {
+    if (box.checked) state.roles.add(box.value);
+    else state.roles.delete(box.value);
+  }
+  syncRoleInputs();
+  render();
+});
 $("phase-btn").onclick = () => {
   const panel = $("phase-panel");
   panel.hidden = !panel.hidden;
@@ -1093,16 +1147,22 @@ document.addEventListener("click", ev => {
     $("phase-panel").hidden = true;
     $("phase-btn").setAttribute("aria-expanded", "false");
   }
+  if (!ev.target.closest(".role-wrap")) {
+    $("role-panel").hidden = true;
+    $("role-btn").setAttribute("aria-expanded", "false");
+  }
 });
 document.addEventListener("keydown", ev => {
   if (ev.key === "Escape") {
     $("phase-panel").hidden = true;
     $("phase-btn").setAttribute("aria-expanded", "false");
+    $("role-panel").hidden = true;
+    $("role-btn").setAttribute("aria-expanded", "false");
   }
 });
-[["f-disease", "disease"], ["f-lead", "lead"], ["f-role", "role"]].forEach(([id, k]) =>
+[["f-disease", "disease"], ["f-lead", "lead"]].forEach(([id, k]) =>
   $(id).onchange = e => { state[k] = e.target.value; render(); });
-$("reset").onclick = () => { Object.assign(state, DEFAULTS); state.phases = defaultPhases(); syncFilterInputs(); render(); };
+$("reset").onclick = () => { Object.assign(state, DEFAULTS); state.phases = defaultPhases(); state.roles = defaultRoles(); syncFilterInputs(); render(); };
 $("m-sort").onchange = e => {
   state.sort = e.target.value;
   state.dir = ["pct", "avg_rate", "accrual"].includes(state.sort) ? -1 : 1;
@@ -1154,6 +1214,7 @@ $("m-sync").innerHTML = sync.available
 store.load();
 readSharedLink();
 syncPhaseInputs();
+syncRoleInputs();
 renderAccount();
 refreshAll();
 if (sync.available) initFirebase();
