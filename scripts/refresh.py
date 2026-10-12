@@ -77,9 +77,12 @@ RT_TERMS = re.compile(
     re.I,
 )
 RADIOPHARM = re.compile(
-    r"(lutetium|\bLu[- ]?177\b|\b177[- ]?Lu|radium|\bRa[- ]?223\b|actinium|\bAc[- ]?225\b|"
-    r"yttrium[- ]?90|\bY[- ]?90\b|thorium|\bPb[- ]?212\b|astatine|iobenguane I[- ]?131|131I[- ]?MIBG|"
-    r"radioligand therap\w*|radioemboli\w*|PSMA[- ]?617|\bSIRT\b|radioimmunotherap\w*)",
+    r"(lutetium|\bLu[- ]?177\b|\b177[- ]?Lu|pluvicto|lutathera|"
+    r"radium|\bRa[- ]?223\b|xofigo|actinium|\bAc[- ]?225\b|"
+    r"yttrium[- ]?90|\bY[- ]?90\b|therasphere|sir[- ]?spheres|"
+    r"thorium|\bPb[- ]?212\b|astatine|iobenguane|131I[- ]?MIBG|\bI[- ]?131\b|radioiodine|"
+    r"radioligand therap\w*|radioemboli\w*|PSMA[- ]?617|\bSIRT\b|radioimmunotherap\w*|"
+    r"ibritumomab|zevalin|tositumomab|bexxar|samarium|\bSm[- ]?153\b)",
     re.I,
 )
 IMAGING = re.compile(

@@ -36,9 +36,9 @@ Set up October 7, 2026. Accrual history starts that day. GitHub Actions takes on
 
 ## RT classification
 
-- **RT-focused**: RT named in the CTSU or ClinicalTrials.gov title.
-- **RT component**: protocol-specified RT intervention on ClinicalTrials.gov, often part of the treatment backbone. Also studies whose protocol prescribes RT (dose, volumes, credentialing) although the registry does not list it; those are set in `config/rt_overrides.json` with the protocol section as the reason.
-- **Radiopharm**: therapeutic isotope (Lu-177, Ac-225, Ra-223, and similar) without external-beam RT. The role menu also has Imaging, Surgery, Transplant / cellular therapy, Cancer control, Registry / biospecimen, and Systemic therapy for studies that are not one of the three radiotherapy roles.
+- **RT-focused**: RT named in the CTSU or ClinicalTrials.gov title (radiation, radiotherapy, SBRT, protons, brachytherapy, and similar). This is a title rule, not a claim that RT is the randomized question.
+- **RT component**: a RADIATION intervention or RT-named intervention on ClinicalTrials.gov, with no RT term in the title. Also studies whose protocol prescribes RT (dose, volumes, credentialing) although the registry does not list it; those are set in `config/rt_overrides.json` with the protocol section as the reason.
+- **Radiopharm**: therapeutic isotope (Lu-177, Ac-225, Ra-223, I-131, Y-90, SIRT, Zevalin, and similar) and no external-beam or brachytherapy intervention. A mixed Lu-177 plus EBRT trial stays RT-focused or RT component. Imaging tracers (Ga-68, F-18, FDG) are excluded.
 - Imaging tracers and MUGA scans are excluded. Each study's evidence is shown in the dashboard row details.
 
 ## Accrual and rates
