@@ -103,7 +103,7 @@ needed() {
   [ "$IF_STALE" -eq 0 ] || [ "$(published "$1")" != "$stamp_hash" ]
 }
 
-# RT-related CTSU studies with no Worldwide row. --briefs-only cannot add rows.
+# CTSU studies with no Worldwide row. --briefs-only cannot add rows.
 ww_missing_ctsu() {
   "$SYS" - "$WW/data/trials.json" << 'PY'
 import json, sys
@@ -115,7 +115,7 @@ have = set()
 for trial in json.load(open(sys.argv[1]))["trials"]:
     for protocol in trial.get("protocols") or []:
         have.update(lib.keys(protocol))
-missing = [s["protocol"] for s in studies if s.get("rt_related") and not set(lib.keys(s["protocol"])) & have]
+missing = [s["protocol"] for s in studies if s.get("protocol") and not set(lib.keys(s["protocol"])) & have]
 print(" ".join(sorted(missing)))
 PY
 }
@@ -171,7 +171,7 @@ ww_missing=$(ww_missing_ctsu)
 if needed worldwide || [ -n "$ww_missing" ]; then
   ww_build="--briefs-only"
   if [ -n "$ww_missing" ]; then
-    echo "Worldwide is missing RT-related CTSU studies ($ww_missing); running the full build."
+    echo "Worldwide is missing CTSU studies ($ww_missing); running the full build."
     ww_build=""
   fi
   if ! (cd "$WW" && git pull -q --rebase --autostash); then
@@ -214,7 +214,7 @@ if needed wvu || [ "$(published wvu_files)" != "$(wvu_files_hash)" ]; then
       record wvu_files "$files_hash"
       echo "WVU deployed: $(echo "$deployed" | tr -d '\n ')"
       code=$(curl -sL -o /tmp/wvu_publish_check.html -w "%{http_code}" "$WVU_URL")
-      if [ "$code" = "200" ] && grep -q "Also on the CTSU tracker" /tmp/wvu_publish_check.html; then
+      if [ "$code" = "200" ] && grep -q "Pulled from the CTSU tracker" /tmp/wvu_publish_check.html; then
         echo "WVU page answers at $WVU_URL"
       else
         fail "wvu-page(HTTP $code)"
