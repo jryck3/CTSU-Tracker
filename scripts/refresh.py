@@ -46,6 +46,7 @@ CONFIG = ROOT / "config" / "institution_trials.json"
 OVERRIDES = ROOT / "config" / "rt_overrides.json"
 MANIFEST = ROOT / "protocols" / "manifest.json"
 BRIEFS = DATA / "protocol_briefs.json"
+MATERIALS = DATA / "patient_materials.json"
 TEMPLATE = ROOT / "dashboard" / "template.html"
 DASHBOARD = ROOT / "dashboard" / "index.html"
 PUBLIC_SITE = ROOT / "docs" / "index.html"
@@ -552,6 +553,17 @@ def attach_briefs(studies, manifest):
             study["brief"] = brief
 
 
+def attach_patient_materials(studies):
+    """NRG patient pages and brochures. Kept out of protocol_briefs.json so extraction cannot overwrite them."""
+    materials = load_json(MATERIALS, {})
+    for study in studies:
+        record = materials.get(study.get("protocol"))
+        if record:
+            study["patient_materials"] = record
+        else:
+            study.pop("patient_materials", None)
+
+
 # ------------------------------------------------------------------- Build
 
 def build(protocols, history, fetched_at, today, approved_ncts=None):
@@ -625,6 +637,7 @@ def build(protocols, history, fetched_at, today, approved_ncts=None):
             study["ours"] = True
             study["alias"] = ours[study["protocol"]].get("alias") or study.get("alias")
     studies.extend(approved)
+    attach_patient_materials(studies)
 
     missing = sorted(set(ours) - {s["protocol"] for s in studies})
     rt = [s for s in studies if s["rt_related"]]
@@ -709,6 +722,7 @@ def render_saved(firebase=None):
     studies = payload["studies"]
     stamp_protocol_files(studies)
     attach_briefs(studies, load_json(MANIFEST, {}))
+    attach_patient_materials(studies)
     if firebase is None:
         firebase = firebase_from_page(PUBLIC_SITE)
     render_dashboard(payload, PUBLIC_SITE, local=False, firebase=firebase)

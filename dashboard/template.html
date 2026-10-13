@@ -132,6 +132,11 @@
   .detail-inner { position: sticky; left: 0; box-sizing: border-box; width: 100cqi; max-width: 100cqi; padding: 12px 14px 14px; overflow-wrap: anywhere; }
   .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 6px 18px; }
   .detail-grid b { color: var(--muted); font-weight: 600; }
+  .patient-materials { margin: 0 0 14px; padding: 12px 14px; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; background: #fff; }
+  .patient-materials h4 { margin: 0 0 8px; font-size: 15px; color: var(--navy); }
+  .patient-materials .links { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+  .patient-materials a { font-weight: 650; }
+  .patient-materials p { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
   .brief { margin-top: 14px; display: grid; gap: 14px; }
   .brief h4 { margin: 0 0 6px; font-size: 13px; color: var(--navy); }
   .brief .caveat { margin: 0; color: var(--muted); font-size: 12px; }
@@ -1098,11 +1103,23 @@ function briefHtml(s) {
   </div>`;
 }
 
+function patientMaterialsHtml(m) {
+  if (!m || (!m.page && !m.brochure)) return "";
+  const links = [
+    m.page ? `<a href="${esc(m.page)}" target="_blank" rel="noopener">Patient study page</a>` : "",
+    m.brochure ? `<a href="${esc(m.brochure)}" target="_blank" rel="noopener">Patient brochure</a>` : "",
+  ].filter(Boolean).join("");
+  const note = m.page && m.page_status === "unavailable"
+    ? `<p>NRG lists this page as not currently available for patients.</p>` : "";
+  return `<div class="patient-materials"><h4>Patient materials${m.name ? ` · ${esc(m.name)}` : ""}</h4><div class="links">${links}</div>${note}</div>`;
+}
+
 function detailInner(s) {
   const ev = (s.rt_evidence || []).map(esc).join("<br>") || "None";
   const t30 = s.trailing30 ? `${num(s.trailing30.per_month)} /mo (+${s.trailing30.delta} over ${s.trailing30.days} days)` : "Pending (needs 7+ days of snapshots)";
   const on = store.has(s.protocol);
   return `<div class="detail-inner">
+    ${patientMaterialsHtml(s.patient_materials)}
     <div class="detail-grid">
       <div><b>NCT</b><br>${s.nct ? `<a href="${ctgov(s.nct)}" target="_blank" rel="noopener">${esc(s.nct)}</a>` : "n/a"}</div>
       <div><b>ClinicalTrials.gov status</b><br>${registryStatus(s).label ? esc(registryStatus(s).label) : "Not on this record"}${registryStatus(s).mismatch ? `<div class="muted">Different from the usual pair for this CTSU status.</div>` : ""}</div>
