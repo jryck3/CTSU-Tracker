@@ -8,7 +8,7 @@ Public dashboard: https://jryck3.github.io/CTSU-Tracker/ (repo renamed from Rad-
 
 ## Status
 
-Set up October 7, 2026. Accrual history starts that day. GitHub Actions takes one CTSU snapshot per day (11:17 UTC) and republishes the dashboard.
+Set up October 7, 2026. Accrual history starts that day. GitHub Actions takes one CTSU snapshot per day (11:17 UTC) and republishes the dashboard. That run is how a new protocol enters the tracker: it reads the whole public browse feed, and it also adds not-yet-recruiting interventional trials from NRG, SWOG, ECOG-ACRIN, Alliance, COG, CCTG, NCI, RTOG, and NSABP that are missing from the feed, with status Approved. The 13 October 2026 run finished in a few seconds (288 registry records refreshed, 32 approved studies). The 10-minute job limit stays.
 
 ## Dashboard
 
