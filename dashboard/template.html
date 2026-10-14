@@ -85,7 +85,10 @@
   .filters input[type=search] { min-width: min(100%, 260px); flex: 1 1 220px; }
   .filters select { max-width: 220px; min-width: 0; width: 160px; }
   .phase-wrap, .role-wrap, .choice-wrap { position: relative; }
-  .phase-btn, .role-btn, .choice-btn { font: inherit; font-size: 13px; padding: 6px 28px 6px 9px; border: 1px solid var(--line); border-radius: 7px; background: #fff; cursor: pointer; text-align: left; position: relative; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .phase-btn, .role-btn, .choice-btn { font: inherit; font-size: 13px; padding: 6px 28px 6px 9px; border: 1px solid var(--line); border-radius: 7px; background: #fff; cursor: pointer; text-align: left; position: relative; max-width: min(280px, calc(100vw - 24px)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .choice-panel, .phase-panel, .role-panel { max-width: calc(100vw - 24px); max-height: min(320px, 70vh); overflow: auto; }
+  .type-btn { font: inherit; font-size: 12px; background: #fff; border: 1px solid var(--line); border-radius: 7px; padding: 2px 8px; cursor: pointer; }
+  .type-popover { position: absolute; z-index: 8; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 8px; max-width: calc(100vw - 24px); max-height: 50vh; overflow: auto; }
   .phase-btn { min-width: 250px; }
   .role-btn, .choice-btn { min-width: 160px; }
   .phase-btn::after, .role-btn::after, .choice-btn::after { content: "▾"; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 11px; }
@@ -580,7 +583,7 @@ function readSharedLink() {
   const raw = new URLSearchParams(location.search).get("trials");
   if (raw == null) return;
   history.replaceState(null, "", location.pathname + location.hash);
-  const list = [...new Set(raw.split(",").map(x => x.trim()).filter(x => /^[A-Za-z0-9._-]{2,40}$/.test(x)))];
+  const list = [...new Set(raw.split(",").map(x => decodeURIComponent(x).trim()).filter(x => /^[A-Za-z0-9._ -]{2,80}$/.test(x)))];
   if (list.length) sharedList = list;
 }
 
@@ -726,7 +729,7 @@ function card(s, color) {
       <div class="metric"><div class="mv">${s.avg_rate != null ? num(s.avg_rate) + " /mo" : "n/a"}</div><div class="ml">Average since activation</div></div>
       <div class="metric"><div class="mv">${recent}</div><div class="ml">Recent rate (last 30 days)</div></div>
       <div class="metric"><div class="mv">${s.months_open != null ? num(s.months_open) + " mo" : "n/a"}</div><div class="ml">Open since ${fmtMonth(s.start_date) || "n/a"}</div></div>
-      <div class="metric"><div class="mv">${s.projected_completion ? fmtMonth(s.projected_completion) : "n/a"}</div><div class="ml">Projected target date at average rate</div></div>
+      <div class="metric"><div class="mv">${s.projected_completion ? fmtMonth(s.projected_completion) : (s.avg_rate ? "Not projected" : "n/a")}</div><div class="ml">${s.projected_completion ? "Projected target date at average rate" : "Average rate is shown. The date is not projected."}</div></div>
     </div>
     <div>${roleChip(s.rt_role)} ${DATA.local && s.protocol_on_file ? '<span class="chip file">Protocol on file</span>' : ""}
       ${s.nct ? `<a href="${ctgov(s.nct)}" target="_blank" rel="noopener" style="font-size:12.5px;margin-left:6px">${esc(s.nct)}</a>` : ""}</div>
@@ -857,7 +860,7 @@ $("y-n").onclick = () => setY("n");
 // ------------------------------------------------------------------ Explorer
 const COLS = [
   {k: "protocol", l: "Protocol", cls: "id-col"},
-  {k: "disease", l: "Site", cls: "site-col"},
+  {k: "disease", l: "Cancer type", cls: "site-col"},
   {k: "phase", l: "Phase", cls: "phase-col"},
   {k: "title", l: "Title", cls: "title-col"},
   {k: "pct", l: "Accrual", cls: "acc-col"},
@@ -1044,6 +1047,19 @@ function siteSummary(text, categories) {
     return {text: raw[0], title: ""};
   }
   return {text: "Other", title: ""};
+}
+function cancerLabels(s) {
+  if (s.cancer_types && s.cancer_types.length) return s.cancer_types;
+  const brief = siteBrief(s);
+  if (brief.text === "Variety" && brief.title) return brief.title.split(", ");
+  return [brief.text || "Not classified"];
+}
+function cancerTypeHtml(labels, id) {
+  const clean = (labels || []).filter(Boolean);
+  if (!clean.length) return "Not classified";
+  if (clean.length <= 2 && clean.join("").length <= 40) return esc(clean.join(", "));
+  const pop = "type-pop-" + String(id).replace(/[^A-Za-z0-9_-]/g, "");
+  return `<button type="button" class="type-btn" aria-expanded="false" aria-controls="${pop}">Multiple cancer types (${clean.length})</button><div class="type-popover" id="${pop}" hidden><ul>${clean.map(label => `<li>${esc(label)}</li>`).join("")}</ul></div>`;
 }
 function siteBrief(s) {
   return siteSummary([s.title || "", s.disease || ""].join(" "), sitesOf(s));
@@ -1361,7 +1377,7 @@ function studyCard(s) {
       ${starBtn(s.protocol)}
       <button class="sc-open" type="button" aria-expanded="${open}">
         <span class="sc-name"><b>${esc(s.protocol)}</b>${s.alias ? ` <span class="muted">${esc(s.alias)}</span>` : ""}</span>
-        <span class="sc-meta">${esc(s.lead)} · ${esc(siteBrief(s).text || "Site n/a")} · Phase ${esc(phaseLabel(s.phase))}</span>
+        <span class="sc-meta">${esc(s.lead)} · ${cancerTypeHtml(cancerLabels(s), "card-" + s.protocol)} · Phase ${esc(phaseLabel(s.phase))}</span>
         <span class="sc-title">${esc(s.title)}</span>
         <span class="sc-row">${roleChip(s.rt_role)} ${statusCell(s)} <span>${s.accrual != null ? num(s.accrual, 0) : ""}${s.target ? " / " + num(s.target, 0) : ""}${s.pct != null ? ` (${num(s.pct)}%)` : ""}</span>${s.avg_rate != null ? ` <span class="muted">${num(s.avg_rate)} /mo</span>` : ""}</span>
       </button>
@@ -1395,12 +1411,12 @@ function renderStudies() {
     <tr class="row${store.has(s.protocol) ? " mine" : ""}" data-p="${esc(s.protocol)}" tabindex="0" aria-expanded="${state.expanded.has(s.protocol)}">
       <td class="star-col">${starBtn(s.protocol)}</td>
       <td class="id-cell"><div class="id-stack"><div><b>${esc(s.protocol)}</b>${s.alias ? ` <span class="muted">${esc(s.alias)}</span>` : ""}</div><div class="id-lead">${esc(s.lead)}</div>${s.rt_role ? `<div>${roleChip(s.rt_role)}</div>` : ""}<div>${statusCell(s)}</div></div></td>
-      <td class="site-cell"${siteBrief(s).text === "Variety" && siteBrief(s).title ? ` title="${esc(siteBrief(s).title)}"` : ""}>${esc(siteBrief(s).text)}</td>
+      <td class="site-cell">${cancerTypeHtml(cancerLabels(s), s.protocol)}</td>
       <td class="phase-cell">${esc(phaseLabel(s.phase))}</td>
       <td class="title-cell">${esc(s.title)}</td>
       <td class="acc-cell">${accBar(s)}${s.avg_rate != null ? `<div class="acc-rate">${num(s.avg_rate)} /mo</div>` : ""}</td>
       <td class="date-cell">${fmtMonth(s.start_date)}</td>
-      <td class="date-cell">${fmtMonth(s.projected_completion)}</td>
+      <td class="date-cell">${s.projected_completion ? fmtMonth(s.projected_completion) : (s.avg_rate != null ? "Not projected" : "")}</td>
     </tr>${state.expanded.has(s.protocol) ? detailRow(s) : ""}`).join("") ||
     `<tr><td colspan="${COLS.length + 1}" class="muted">No studies match these filters.</td></tr>`;
     document.querySelectorAll("tr.row").forEach(tr => {
@@ -1410,6 +1426,16 @@ function renderStudies() {
     });
     fitDetails();
   }
+  document.querySelectorAll(".type-btn").forEach(btn => {
+    btn.onclick = ev => {
+      ev.stopPropagation();
+      const pop = document.getElementById(btn.getAttribute("aria-controls"));
+      if (!pop) return;
+      const opening = pop.hidden;
+      pop.hidden = !opening;
+      btn.setAttribute("aria-expanded", opening ? "true" : "false");
+    };
+  });
 }
 
 function fitDetails() {

@@ -2,7 +2,7 @@ name: Refresh CTSU accrual
 
 on:
   schedule:
-    - cron: "17 11 * * *"
+    - cron: "17 */3 * * *"
   push:
     branches: [main]
     paths:
@@ -42,18 +42,26 @@ jobs:
         run: python scripts/refresh.py --page-only
 
       - name: Commit history and public page
+        id: commit
         run: |
           git config user.name "ctsu-refresh-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/accrual_history.csv docs/index.html
+          git add data/accrual_history.csv docs/index.html docs/ctsu-public.json docs/ctsu-public.manifest.json
           if git diff --cached --quiet; then
             echo "No changes"
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
           else
             if [ "${{ github.event_name }}" = "push" ]; then
               git commit -m "Rebuild the public page for protocol briefs $(date -u +%F)"
             else
               git commit -m "Accrual snapshot $(date -u +%F)"
             fi
-            git pull --rebase
+            git pull --rebase --no-autostash
             git push
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
+            echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Confirm the live Pages export
+        if: steps.commit.outputs.pushed == 'true'
+        run: bash scripts/wait_for_pages.sh jryck3/CTSU-Tracker "${{ steps.commit.outputs.sha }}" "https://jryck3.github.io/CTSU-Tracker/ctsu-public.manifest.json" docs/ctsu-public.manifest.json

@@ -86,6 +86,16 @@ if [ -z "$stamp_hash" ]; then
   exit 1
 fi
 echo "Library $stamp_hash"
+tracker_machine_env
+export_hash=""
+if [ -f "$SYNCED_CTSU/docs/ctsu-public.manifest.json" ]; then
+  export_hash=$("$SYS" -c 'import json,sys; print(json.load(open(sys.argv[1])).get("content_hash",""))' "$SYNCED_CTSU/docs/ctsu-public.manifest.json")
+fi
+publish_key="$stamp_hash"
+if [ -n "$export_hash" ]; then
+  publish_key="${stamp_hash}:${export_hash}"
+fi
+echo "Publish key $publish_key"
 
 wvu_files_hash() {
   (cd "$WVU" && cat appsscript.json Code.gs Data.gs Index.html | shasum -a 256 | cut -c1-16)
@@ -106,7 +116,17 @@ PY
 }
 
 needed() {
-  [ "$IF_STALE" -eq 0 ] || [ "$(published "$1")" != "$stamp_hash" ]
+  [ "$IF_STALE" -eq 0 ] || [ "$(published "$1")" != "$publish_key" ]
+}
+
+skip_or_fail() {
+  local name="$1"
+  if [ "$IF_STALE" -eq 1 ] && [ -z "${TRACKER_CHECKOUT_ROOT:-}" ]; then
+    echo "Skipped ${name}. Set TRACKER_CHECKOUT_ROOT before publishing."
+    return 0
+  fi
+  fail "$name"
+  return 1
 }
 
 # CTSU studies with no Worldwide row. --briefs-only cannot add rows.
@@ -188,16 +208,16 @@ activate_publish_tree() {
 
 CTSU_SHA=""
 WW_SHA=""
+WVU_CONFIRMED=0
 
 # CTSU
 if needed ctsu; then
   if ! activate_publish_tree; then
-    fail ctsu
+    skip_or_fail ctsu || true
   elif ! "$SYS" scripts/publish_checks.py briefs; then
     fail ctsu
   elif [ "$PUSH" -eq 1 ]; then
-    if CTSU_SHA=$(git_publish "$CTSU" "Protocol briefs: $REASON." data/protocol_briefs.json data/protocol_library.json); then
-      record ctsu "$stamp_hash"
+    if CTSU_SHA=$(git_publish "$CTSU" "Protocol briefs: $REASON." data/protocol_briefs.json data/protocol_library.json docs/ctsu-public.json docs/ctsu-public.manifest.json); then
       echo "CTSU pushed ${CTSU_SHA:-nothing new}"
     else
       fail ctsu
@@ -216,7 +236,7 @@ if needed worldwide || [ -n "$ww_missing" ]; then
     ww_build=""
   fi
   if ! activate_publish_tree; then
-    fail worldwide
+    skip_or_fail worldwide || true
   elif ! git_pull_rebase_clean "$WW"; then
     fail worldwide
   elif ! (cd "$WW" && "$PY" build.py $ww_build); then
@@ -225,7 +245,6 @@ if needed worldwide || [ -n "$ww_missing" ]; then
     fail worldwide
   elif [ "$PUSH" -eq 1 ]; then
     if WW_SHA=$(git_publish "$WW" "Protocol briefs from the CTSU library: $REASON." docs/index.html data/trials.json config/protocol_schemas.json); then
-      record worldwide "$stamp_hash"
       echo "Worldwide pushed ${WW_SHA:-nothing new}"
     else
       fail worldwide
@@ -238,7 +257,7 @@ fi
 # WVU
 if needed wvu || [ "$(published wvu_files)" != "$(wvu_files_hash)" ]; then
   if ! activate_publish_tree; then
-    fail wvu
+    skip_or_fail wvu || true
   elif ! (cd "$WVU" && "$PY" enrich_details.py); then
     fail wvu
   elif ! "$SYS" scripts/publish_checks.py wvu "$WVU"; then
@@ -248,18 +267,17 @@ if needed wvu || [ "$(published wvu_files)" != "$(wvu_files_hash)" ]; then
     if ! git_publish "$WVU" "Trial data from the CTSU library: $REASON." Data.gs data/trials.json research/payload_sha256.txt >/dev/null; then
       fail wvu
     elif [ "$(published wvu_files)" = "$files_hash" ]; then
-      record wvu "$stamp_hash"
       echo "WVU Apps Script already has these files."
+      WVU_CONFIRMED=1
     elif ! (cd "$WVU" && "$CLASP" push --force); then
       fail wvu
     elif ! deployed=$(cd "$WVU" && "$CLASP" update-deployment "$WVU_DEPLOYMENT" --description "$REASON" --json); then
       fail wvu
     else
-      record wvu "$stamp_hash"
-      record wvu_files "$files_hash"
       echo "WVU deployed: $(echo "$deployed" | tr -d '\n ')"
       code=$(curl -sL -o /tmp/wvu_publish_check.html -w "%{http_code}" "$WVU_URL")
       if [ "$code" = "200" ] && grep -q "Pulled from the CTSU tracker" /tmp/wvu_publish_check.html; then
+        WVU_CONFIRMED=1
         echo "WVU page answers at $WVU_URL"
       else
         fail "wvu-page(HTTP $code)"
@@ -280,7 +298,11 @@ if [ -n "$CTSU_SHA" ]; then
     esac
     sleep 20
   done
-  case "$run" in completed*) ;; *) fail "ctsu-action(not finished: ${run:-none})" ;; esac
+  case "$run" in
+    "completed success") record ctsu "$publish_key" ;;
+    completed*) ;;
+    *) fail "ctsu-action(not finished: ${run:-none})" ;;
+  esac
 fi
 if [ -n "$WW_SHA" ]; then
   for _ in $(seq 1 30); do
@@ -292,7 +314,15 @@ if [ -n "$WW_SHA" ]; then
     case "$build" in errored*) fail "worldwide-pages($build)"; break ;; esac
     sleep 20
   done
-  case "$build" in "built $WW_SHA"|errored*) ;; *) fail "worldwide-pages(not built: ${build:-none})" ;; esac
+  case "$build" in
+    "built $WW_SHA") record worldwide "$publish_key" ;;
+    errored*) ;;
+    *) fail "worldwide-pages(not built: ${build:-none})" ;;
+  esac
+fi
+if [ "$WVU_CONFIRMED" -eq 1 ]; then
+  record wvu "$publish_key"
+  record wvu_files "$(wvu_files_hash)"
 fi
 
 if [ -n "$FAILED" ]; then
