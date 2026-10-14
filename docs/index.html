@@ -84,17 +84,17 @@
   .filters input[type=search], .filters select { font: inherit; font-size: 13px; padding: 6px 9px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
   .filters input[type=search] { min-width: min(100%, 260px); flex: 1 1 220px; }
   .filters select { max-width: 220px; min-width: 0; width: 160px; }
-  .phase-wrap, .role-wrap { position: relative; }
-  .phase-btn, .role-btn { font: inherit; font-size: 13px; padding: 6px 28px 6px 9px; border: 1px solid var(--line); border-radius: 7px; background: #fff; cursor: pointer; text-align: left; position: relative; }
+  .phase-wrap, .role-wrap, .choice-wrap { position: relative; }
+  .phase-btn, .role-btn, .choice-btn { font: inherit; font-size: 13px; padding: 6px 28px 6px 9px; border: 1px solid var(--line); border-radius: 7px; background: #fff; cursor: pointer; text-align: left; position: relative; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .phase-btn { min-width: 250px; }
-  .role-btn { min-width: 160px; }
-  .phase-btn::after, .role-btn::after { content: "▾"; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 11px; }
-  .phase-btn[aria-expanded="true"]::after, .role-btn[aria-expanded="true"]::after { content: "▴"; }
-  .phase-panel, .role-panel { position: absolute; z-index: 6; top: calc(100% + 4px); left: 0; background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px rgba(20, 30, 50, .12); padding: 8px; gap: 4px; }
+  .role-btn, .choice-btn { min-width: 160px; }
+  .phase-btn::after, .role-btn::after, .choice-btn::after { content: "▾"; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 11px; }
+  .phase-btn[aria-expanded="true"]::after, .role-btn[aria-expanded="true"]::after, .choice-btn[aria-expanded="true"]::after { content: "▴"; }
+  .phase-panel, .role-panel, .choice-panel { position: absolute; z-index: 6; top: calc(100% + 4px); left: 0; background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px rgba(20, 30, 50, .12); padding: 8px; gap: 4px; max-height: 320px; overflow: auto; }
   .phase-panel { min-width: 210px; }
-  .role-panel { min-width: 260px; }
-  .phase-panel:not([hidden]), .role-panel:not([hidden]) { display: grid; }
-  .phase-panel .check, .role-panel .check { width: 100%; }
+  .role-panel, .choice-panel { min-width: 260px; }
+  .phase-panel:not([hidden]), .role-panel:not([hidden]), .choice-panel:not([hidden]) { display: grid; }
+  .phase-panel .check, .role-panel .check, .choice-panel .check { width: 100%; }
   .m-sort { display: none; align-items: center; gap: 6px; font-size: 13px; }
   .check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 7px; background: #fff; cursor: pointer; user-select: none; }
   .check:has(input:checked) { border-color: var(--accent); background: #ebf4ff; color: var(--navy); }
@@ -173,7 +173,7 @@
     main { padding: 12px 12px 28px; }
     .cards { grid-template-columns: 1fr; }
     .filters input[type=search] { flex-basis: 100%; }
-    .filters select, .phase-btn, .role-btn { width: 100%; max-width: 100%; flex: 1 1 calc(50% - 8px); }
+    .filters select, .phase-btn, .role-btn, .choice-btn { width: 100%; max-width: 100%; flex: 1 1 calc(50% - 8px); }
     .combo { flex-basis: 100%; max-width: none; }
     .canvas-wrap { height: 240px; }
     .count { margin-left: 0; }
@@ -241,14 +241,18 @@
     </div>
     <div class="filters" id="mine-filters">
       <input id="mine-q" type="search" placeholder="Search protocol, title, NCT, acronym, disease" aria-label="Filter My trials">
-      <select id="mine-f-status" aria-label="Status">
-        <option value="active">Open to accrual</option>
-        <option value="approved">Approved, not yet open</option>
-        <option value="temporary">Temporarily closed</option>
-        <option value="all">Any status on this list</option>
-      </select>
-      <select id="mine-f-disease" aria-label="Site"><option value="">All sites</option></select>
-      <select id="mine-f-lead" aria-label="Lead group"><option value="">All lead groups</option></select>
+      <div class="choice-wrap">
+        <button type="button" class="choice-btn" id="mine-status-btn" aria-expanded="false" aria-controls="mine-status-panel">Open to accrual</button>
+        <div class="choice-panel" id="mine-status-panel" hidden></div>
+      </div>
+      <div class="choice-wrap">
+        <button type="button" class="choice-btn" id="mine-site-btn" aria-expanded="false" aria-controls="mine-site-panel">All sites</button>
+        <div class="choice-panel" id="mine-site-panel" hidden></div>
+      </div>
+      <div class="choice-wrap">
+        <button type="button" class="choice-btn" id="mine-lead-btn" aria-expanded="false" aria-controls="mine-lead-panel">All lead groups</button>
+        <div class="choice-panel" id="mine-lead-panel" hidden></div>
+      </div>
       <div class="role-wrap">
         <button type="button" class="role-btn" id="mine-role-btn" aria-expanded="false" aria-controls="mine-role-panel">RT roles</button>
         <div class="role-panel" id="mine-role-panel" hidden></div>
@@ -296,14 +300,18 @@
     </div>
     <div class="filters">
       <input id="q" type="search" placeholder="Search protocol, title, NCT, acronym, disease" aria-label="Search studies">
-      <select id="f-status" aria-label="Status">
-        <option value="active">Open to accrual</option>
-        <option value="approved">Approved, not yet open</option>
-        <option value="temporary">Temporarily closed</option>
-        <option value="all">Any status on this list</option>
-      </select>
-      <select id="f-disease" aria-label="Site"><option value="">All sites</option></select>
-      <select id="f-lead" aria-label="Lead group"><option value="">All lead groups</option></select>
+      <div class="choice-wrap">
+        <button type="button" class="choice-btn" id="status-btn" aria-expanded="false" aria-controls="status-panel">Open to accrual</button>
+        <div class="choice-panel" id="status-panel" hidden></div>
+      </div>
+      <div class="choice-wrap">
+        <button type="button" class="choice-btn" id="site-btn" aria-expanded="false" aria-controls="site-panel">All sites</button>
+        <div class="choice-panel" id="site-panel" hidden></div>
+      </div>
+      <div class="choice-wrap">
+        <button type="button" class="choice-btn" id="lead-btn" aria-expanded="false" aria-controls="lead-panel">All lead groups</button>
+        <div class="choice-panel" id="lead-panel" hidden></div>
+      </div>
       <div class="role-wrap">
         <button type="button" class="role-btn" id="role-btn" aria-expanded="false" aria-controls="role-panel">RT roles</button>
         <div class="role-panel" id="role-panel" hidden></div>
@@ -848,7 +856,14 @@ const COLS = [
   {k: "start_date", l: "Start", cls: "date-col"},
   {k: "projected_completion", l: "Projected", cls: "date-col"},
 ];
-const DEFAULTS = {q: "", status: "active", disease: "", lead: ""};
+const DEFAULTS = {q: ""};
+const STATUS_MENU = [
+  ["active", "Open to accrual"],
+  ["approved", "Approved, not yet open"],
+  ["temporary", "Temporarily closed"],
+];
+const BURDEN_SITES = ["Oligoprogressive disease", "Oligometastatic disease", "Polymetastatic disease", "Metastatic disease"];
+function defaultStatuses() { return new Set(["active"]); }
 const ROLE_MENU = [
   ["RT-focused", "RT-focused"],
   ["RT component", "RT component"],
@@ -875,8 +890,8 @@ function phaseCodes() {
 }
 const PHASE_CODES = phaseCodes();
 function defaultPhases() { return new Set(PHASE_CODES.filter(code => code !== "0" && code !== "1")); }
-const state = {...DEFAULTS, phases: defaultPhases(), roles: defaultRoles(), protocol: false, sort: "protocol", dir: 1, expanded: new Set()};
-const mineState = {...DEFAULTS, phases: defaultPhases(), roles: defaultRoles(), protocol: false};
+const state = {...DEFAULTS, statuses: defaultStatuses(), sites: new Set(), leads: new Set(), phases: defaultPhases(), roles: defaultRoles(), protocol: false, sort: "protocol", dir: 1, expanded: new Set()};
+const mineState = {...DEFAULTS, statuses: defaultStatuses(), sites: new Set(), leads: new Set(), phases: defaultPhases(), roles: defaultRoles(), protocol: false};
 let paceMode = "n";
 
 const SITE_MAP = {
@@ -924,16 +939,24 @@ function sitesOf(s) {
     }
   });
   const burdenText = [s.title || "", s.disease || ""].join(" ");
+  let specificBurden = false;
   [
     ["Oligoprogressive disease", /(?<!non[-\s])\boligop/i],
     ["Oligometastatic disease", /(?<!non[-\s])\boligom/i],
     ["Polymetastatic disease", /(?<!non[-\s])\bpolymetast/i],
   ].forEach(([label, pattern]) => {
-    if (pattern.test(burdenText) && !seen.has(label)) {
-      seen.add(label);
-      out.push(label);
+    if (pattern.test(burdenText)) {
+      specificBurden = true;
+      if (!seen.has(label)) {
+        seen.add(label);
+        out.push(label);
+      }
     }
   });
+  if (!specificBurden && /(?<!non[-\s])\bmetast/i.test(burdenText) && !seen.has("Metastatic disease")) {
+    seen.add("Metastatic disease");
+    out.push("Metastatic disease");
+  }
   return out;
 }
 
@@ -951,20 +974,22 @@ function searchBlob(s) {
   return [s.protocol, s.title, s.nct, s.disease, siteLabel(s), s.lead, leadGroup(s), s.alias].join(" ");
 }
 
-function fillSelect(id, values) {
-  const el = $(id);
-  [...new Set(values)].filter(Boolean).sort().forEach(v => el.insertAdjacentHTML("beforeend", `<option>${esc(v)}</option>`));
-}
 function fillChoicePanel(panelId, allId, name, items) {
   $(panelId).innerHTML = `<label class="check"><input type="checkbox" id="${allId}"> All</label>` +
     items.map(([value, text]) => `<label class="check"><input type="checkbox" name="${name}" value="${esc(value)}"> ${esc(text)}</label>`).join("");
 }
-const leadChoices = S.map(leadGroup);
-const siteChoices = S.flatMap(sitesOf);
-fillSelect("f-lead", leadChoices);
-fillSelect("f-disease", siteChoices);
-fillSelect("mine-f-lead", leadChoices);
-fillSelect("mine-f-disease", siteChoices);
+const LEAD_MENU = [...new Set(S.map(leadGroup))].filter(Boolean).sort().map(value => [value, value]);
+const SITE_MENU = [...new Set(S.flatMap(sitesOf))].filter(value => value && !BURDEN_SITES.includes(value)).sort().map(value => [value, value]).concat(BURDEN_SITES.map(value => [value, value]));
+state.sites = new Set(SITE_MENU.map(([value]) => value));
+state.leads = new Set(LEAD_MENU.map(([value]) => value));
+mineState.sites = new Set(state.sites);
+mineState.leads = new Set(state.leads);
+fillChoicePanel("status-panel", "status-all", "status", STATUS_MENU);
+fillChoicePanel("site-panel", "site-all", "site", SITE_MENU);
+fillChoicePanel("lead-panel", "lead-all", "lead", LEAD_MENU);
+fillChoicePanel("mine-status-panel", "mine-status-all", "mine-status", STATUS_MENU);
+fillChoicePanel("mine-site-panel", "mine-site-all", "mine-site", SITE_MENU);
+fillChoicePanel("mine-lead-panel", "mine-lead-all", "mine-lead", LEAD_MENU);
 fillChoicePanel("role-panel", "role-all", "role", ROLE_MENU);
 fillChoicePanel("phase-panel", "phase-all", "phase", PHASE_CODES.map(code => [code, phaseMenuLabel(code)]));
 fillChoicePanel("mine-role-panel", "mine-role-all", "mine-role", ROLE_MENU);
@@ -975,11 +1000,30 @@ function protocolOnFile(s) {
   return !!s.brief;
 }
 
+function statusCode(s) {
+  if (s.status === "Approved") return "approved";
+  if (String(s.status || "").startsWith("Temporarily Closed")) return "temporary";
+  if (s.status === "Active") return "active";
+  return "";
+}
+
 function statusSelected(s, st = state) {
-  if (st.status === "all") return true;
-  if (st.status === "approved") return s.status === "Approved";
-  if (st.status === "temporary") return String(s.status || "").startsWith("Temporarily Closed");
-  return s.status === "Active";
+  if (!st.statuses.size) return false;
+  if (st.statuses.size === STATUS_MENU.length) return true;
+  const code = statusCode(s);
+  return !!code && st.statuses.has(code);
+}
+
+function siteSelected(s, st = state) {
+  if (!st.sites.size) return false;
+  if (st.sites.size === SITE_MENU.length) return true;
+  return sitesOf(s).some(site => st.sites.has(site));
+}
+
+function leadSelected(s, st = state) {
+  if (!st.leads.size) return false;
+  if (st.leads.size === LEAD_MENU.length) return true;
+  return st.leads.has(leadGroup(s));
 }
 
 function matchesState(s, st, ignoreStatus = false) {
@@ -987,8 +1031,8 @@ function matchesState(s, st, ignoreStatus = false) {
   return st.roles.has(s.rt_role) &&
     (ignoreStatus || statusSelected(s, st)) &&
     st.phases.has(String(s.phase || "Other")) &&
-    (!st.lead || leadGroup(s) === st.lead) &&
-    (!st.disease || sitesOf(s).includes(st.disease)) &&
+    leadSelected(s, st) &&
+    siteSelected(s, st) &&
     (!q || searchBlob(s).toLowerCase().includes(q)) &&
     (!st.protocol || protocolOnFile(s));
 }
@@ -1020,6 +1064,11 @@ function rows() {
   });
 }
 
+function statusesAreDefault(st = state) {
+  const want = defaultStatuses();
+  return st.statuses.size === want.size && [...want].every(code => st.statuses.has(code));
+}
+
 function phasesAreDefault() {
   const want = defaultPhases();
   return state.phases.size === want.size && [...want].every(code => state.phases.has(code));
@@ -1030,7 +1079,7 @@ function rolesAreDefault() {
 }
 
 function scopeText() {
-  const custom = state.q || state.disease || state.lead || !phasesAreDefault() || !rolesAreDefault();
+  const custom = state.q || !statusesAreDefault() || state.sites.size !== SITE_MENU.length || state.leads.size !== LEAD_MENU.length || !phasesAreDefault() || !rolesAreDefault();
   const kind = rolesAreDefault() ? "RT-related studies" : "studies";
   return custom ? `open ${kind} matching your filters` : `open ${kind}`;
 }
@@ -1229,12 +1278,19 @@ function render() {
   renderPace();
 }
 
+function resetExplorer(q) {
+  state.q = q || "";
+  state.statuses = q ? new Set(STATUS_MENU.map(([value]) => value)) : defaultStatuses();
+  state.sites = new Set(SITE_MENU.map(([value]) => value));
+  state.leads = new Set(LEAD_MENU.map(([value]) => value));
+  state.phases = q ? new Set(PHASE_CODES) : defaultPhases();
+  state.roles = q ? new Set(ROLE_MENU.map(([value]) => value)) : defaultRoles();
+  state.protocol = false;
+}
+
 function showInTable(p) {
   if (!S.some(s => s.protocol === p && matches(s))) {
-    Object.assign(state, DEFAULTS, {status: "all", q: p});
-    state.phases = new Set(PHASE_CODES);
-    state.roles = new Set(ROLE_MENU.map(([value]) => value));
-    state.protocol = false;
+    resetExplorer(p);
     syncFilterInputs();
   }
   state.expanded.add(p);
@@ -1270,22 +1326,43 @@ function syncRoleInputs() {
   $("role-btn").textContent = roleButtonLabel();
 }
 
+function menuButtonLabel(selected, menu, allLabel, noneLabel) {
+  if (!selected.size) return noneLabel;
+  if (selected.size === menu.length) return allLabel;
+  const picked = menu.filter(([value]) => selected.has(value));
+  if (picked.length > 3) return picked.length + " selected";
+  return picked.map(([, text]) => text).join(", ");
+}
+
+function syncMenu(prefix, menu, selected, allLabel, noneLabel) {
+  document.querySelectorAll(`#${prefix}-panel input[name="${prefix}"]`).forEach(box => { box.checked = selected.has(box.value); });
+  $(prefix + "-all").checked = selected.size === menu.length;
+  const text = menuButtonLabel(selected, menu, allLabel, noneLabel);
+  $(prefix + "-btn").textContent = text;
+  $(prefix + "-btn").title = text;
+}
+
 function syncFilterInputs() {
   $("q").value = state.q;
-  $("f-status").value = state.status;
   $("f-protocol").checked = !!state.protocol;
-  [["f-disease", "disease"], ["f-lead", "lead"]].forEach(([id, k]) => { $(id).value = state[k]; });
+  syncMenu("status", STATUS_MENU, state.statuses, "Any status", "No status");
+  syncMenu("site", SITE_MENU, state.sites, "All sites", "No site");
+  syncMenu("lead", LEAD_MENU, state.leads, "All lead groups", "No lead group");
   syncPhaseInputs();
   syncRoleInputs();
 }
 
+function toggleChoice(btnId, panelId) {
+  const panel = $(panelId);
+  const opening = panel.hidden;
+  closeChoiceMenus(null);
+  if (!opening) return;
+  panel.hidden = false;
+  $(btnId).setAttribute("aria-expanded", "true");
+}
+
 $("q").oninput = e => { state.q = e.target.value; render(); };
-$("f-status").onchange = e => { state.status = e.target.value; render(); };
-$("role-btn").onclick = () => {
-  const panel = $("role-panel");
-  panel.hidden = !panel.hidden;
-  $("role-btn").setAttribute("aria-expanded", String(!panel.hidden));
-};
+$("role-btn").onclick = () => toggleChoice("role-btn", "role-panel");
 $("role-panel").addEventListener("change", ev => {
   const box = ev.target;
   if (box.id === "role-all") {
@@ -1297,11 +1374,7 @@ $("role-panel").addEventListener("change", ev => {
   syncRoleInputs();
   render();
 });
-$("phase-btn").onclick = () => {
-  const panel = $("phase-panel");
-  panel.hidden = !panel.hidden;
-  $("phase-btn").setAttribute("aria-expanded", String(!panel.hidden));
-};
+$("phase-btn").onclick = () => toggleChoice("phase-btn", "phase-panel");
 $("phase-panel").addEventListener("change", ev => {
   const box = ev.target;
   if (box.id === "phase-all") {
@@ -1314,10 +1387,10 @@ $("phase-panel").addEventListener("change", ev => {
   render();
 });
 function closeChoiceMenus(ev) {
-  document.querySelectorAll(".phase-wrap, .role-wrap").forEach(wrap => {
+  document.querySelectorAll(".phase-wrap, .role-wrap, .choice-wrap").forEach(wrap => {
     if (ev && wrap.contains(ev.target)) return;
-    const panel = wrap.querySelector(".phase-panel, .role-panel");
-    const btn = wrap.querySelector(".phase-btn, .role-btn");
+    const panel = wrap.querySelector(".phase-panel, .role-panel, .choice-panel");
+    const btn = wrap.querySelector(".phase-btn, .role-btn, .choice-btn");
     if (panel) panel.hidden = true;
     if (btn) btn.setAttribute("aria-expanded", "false");
   });
@@ -1326,9 +1399,23 @@ document.addEventListener("click", closeChoiceMenus);
 document.addEventListener("keydown", ev => {
   if (ev.key === "Escape") closeChoiceMenus(null);
 });
-[["f-disease", "disease"], ["f-lead", "lead"]].forEach(([id, k]) =>
-  $(id).onchange = e => { state[k] = e.target.value; render(); });
-$("reset").onclick = () => { Object.assign(state, DEFAULTS); state.phases = defaultPhases(); state.roles = defaultRoles(); state.protocol = false; syncFilterInputs(); render(); };
+function bindMenu(prefix, menu, field, owner, onChange, allLabel, noneLabel) {
+  $(prefix + "-btn").onclick = () => toggleChoice(prefix + "-btn", prefix + "-panel");
+  $(prefix + "-panel").addEventListener("change", ev => {
+    const box = ev.target;
+    if (box.id === prefix + "-all") owner[field] = box.checked ? new Set(menu.map(([value]) => value)) : new Set();
+    else if (box.name === prefix) {
+      if (box.checked) owner[field].add(box.value);
+      else owner[field].delete(box.value);
+    } else return;
+    syncMenu(prefix, menu, owner[field], allLabel, noneLabel);
+    onChange();
+  });
+}
+bindMenu("status", STATUS_MENU, "statuses", state, () => render(), "Any status", "No status");
+bindMenu("site", SITE_MENU, "sites", state, () => render(), "All sites", "No site");
+bindMenu("lead", LEAD_MENU, "leads", state, () => render(), "All lead groups", "No lead group");
+$("reset").onclick = () => { resetExplorer(); syncFilterInputs(); render(); };
 $("f-protocol").onchange = e => { state.protocol = e.target.checked; render(); };
 $("m-sort").onchange = e => {
   state.sort = e.target.value;
@@ -1377,10 +1464,10 @@ function choiceButtonLabel(st, kind) {
 
 function syncMineFilters() {
   $("mine-q").value = mineState.q;
-  $("mine-f-status").value = mineState.status;
-  $("mine-f-disease").value = mineState.disease;
-  $("mine-f-lead").value = mineState.lead;
   $("mine-protocol").checked = !!mineState.protocol;
+  syncMenu("mine-status", STATUS_MENU, mineState.statuses, "Any status", "No status");
+  syncMenu("mine-site", SITE_MENU, mineState.sites, "All sites", "No site");
+  syncMenu("mine-lead", LEAD_MENU, mineState.leads, "All lead groups", "No lead group");
   document.querySelectorAll('#mine-phase-panel input[name="mine-phase"]').forEach(box => { box.checked = mineState.phases.has(box.value); });
   $("mine-phase-all").checked = mineState.phases.size === PHASE_CODES.length;
   $("mine-phase-btn").textContent = choiceButtonLabel(mineState, "phase");
@@ -1395,15 +1482,11 @@ function refreshMine() {
 }
 
 $("mine-q").oninput = e => { mineState.q = e.target.value; refreshMine(); };
-$("mine-f-status").onchange = e => { mineState.status = e.target.value; refreshMine(); };
-[["mine-f-disease", "disease"], ["mine-f-lead", "lead"]].forEach(([id, k]) =>
-  $(id).onchange = e => { mineState[k] = e.target.value; refreshMine(); });
 $("mine-protocol").onchange = e => { mineState.protocol = e.target.checked; refreshMine(); };
-$("mine-role-btn").onclick = () => {
-  const panel = $("mine-role-panel");
-  panel.hidden = !panel.hidden;
-  $("mine-role-btn").setAttribute("aria-expanded", String(!panel.hidden));
-};
+bindMenu("mine-status", STATUS_MENU, "statuses", mineState, refreshMine, "Any status", "No status");
+bindMenu("mine-site", SITE_MENU, "sites", mineState, refreshMine, "All sites", "No site");
+bindMenu("mine-lead", LEAD_MENU, "leads", mineState, refreshMine, "All lead groups", "No lead group");
+$("mine-role-btn").onclick = () => toggleChoice("mine-role-btn", "mine-role-panel");
 $("mine-role-panel").addEventListener("change", ev => {
   const box = ev.target;
   if (box.id === "mine-role-all") mineState.roles = box.checked ? new Set(ROLE_MENU.map(([value]) => value)) : new Set();
@@ -1411,11 +1494,7 @@ $("mine-role-panel").addEventListener("change", ev => {
   syncMineFilters();
   refreshMine();
 });
-$("mine-phase-btn").onclick = () => {
-  const panel = $("mine-phase-panel");
-  panel.hidden = !panel.hidden;
-  $("mine-phase-btn").setAttribute("aria-expanded", String(!panel.hidden));
-};
+$("mine-phase-btn").onclick = () => toggleChoice("mine-phase-btn", "mine-phase-panel");
 $("mine-phase-panel").addEventListener("change", ev => {
   const box = ev.target;
   if (box.id === "mine-phase-all") mineState.phases = box.checked ? new Set(PHASE_CODES) : new Set();
@@ -1424,7 +1503,10 @@ $("mine-phase-panel").addEventListener("change", ev => {
   refreshMine();
 });
 $("mine-reset").onclick = () => {
-  Object.assign(mineState, DEFAULTS);
+  mineState.q = "";
+  mineState.statuses = defaultStatuses();
+  mineState.sites = new Set(SITE_MENU.map(([value]) => value));
+  mineState.leads = new Set(LEAD_MENU.map(([value]) => value));
   mineState.phases = defaultPhases();
   mineState.roles = defaultRoles();
   mineState.protocol = false;
@@ -1707,12 +1789,11 @@ packDigest();
 }
 
 function digestFilters(st) {
-  const statusText = {active: "Open to accrual", approved: "Approved, not yet open", temporary: "Temporarily closed", all: "Any status"}[st.status] || st.status;
   return [
     st.q ? `Search: ${st.q}` : "",
-    statusText,
-    st.disease ? `Site: ${st.disease}` : "All sites",
-    st.lead ? `Lead group: ${st.lead}` : "All lead groups",
+    menuButtonLabel(st.statuses, STATUS_MENU, "Any status", "No status"),
+    menuButtonLabel(st.sites, SITE_MENU, "All sites", "No site"),
+    menuButtonLabel(st.leads, LEAD_MENU, "All lead groups", "No lead group"),
     choiceButtonLabel(st, "role"),
     choiceButtonLabel(st, "phase"),
     st.protocol ? "Protocol available" : "Protocol not limited"
@@ -1771,6 +1852,7 @@ store.load();
 readSharedLink();
 syncPhaseInputs();
 syncRoleInputs();
+syncFilterInputs();
 syncMineFilters();
 renderAccount();
 refreshAll();
