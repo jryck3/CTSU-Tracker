@@ -118,7 +118,7 @@
   th.id-col, td.id-cell { width: 188px; }
   .id-stack { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
   .id-lead { color: var(--muted); font-size: 12px; line-height: 1.3; }
-  th.site-col, td.site-cell { width: 132px; }
+  th.site-col, td.site-cell { width: 132px; max-width: 132px; overflow-wrap: anywhere; }
   th.phase-col, td.phase-cell { width: 52px; white-space: nowrap; }
   th.title-col, td.title-cell { width: auto; min-width: 0; max-width: none; }
   th.acc-col, td.acc-cell { width: 132px; }
@@ -250,6 +250,10 @@
         <div class="choice-panel" id="mine-site-panel" hidden></div>
       </div>
       <div class="choice-wrap">
+        <button type="button" class="choice-btn" id="mine-burden-btn" aria-expanded="false" aria-controls="mine-burden-panel">All burdens</button>
+        <div class="choice-panel" id="mine-burden-panel" hidden></div>
+      </div>
+      <div class="choice-wrap">
         <button type="button" class="choice-btn" id="mine-lead-btn" aria-expanded="false" aria-controls="mine-lead-panel">All lead groups</button>
         <div class="choice-panel" id="mine-lead-panel" hidden></div>
       </div>
@@ -309,6 +313,10 @@
         <div class="choice-panel" id="site-panel" hidden></div>
       </div>
       <div class="choice-wrap">
+        <button type="button" class="choice-btn" id="burden-btn" aria-expanded="false" aria-controls="burden-panel">All burdens</button>
+        <div class="choice-panel" id="burden-panel" hidden></div>
+      </div>
+      <div class="choice-wrap">
         <button type="button" class="choice-btn" id="lead-btn" aria-expanded="false" aria-controls="lead-panel">All lead groups</button>
         <div class="choice-panel" id="lead-panel" hidden></div>
       </div>
@@ -365,7 +373,7 @@
       <li><b>History</b> is built from one CTSU snapshot per day, starting <span id="hist-start"></span>. CTSU does not publish past accrual, so the line from the study start date to the first snapshot is a straight-line interpolation (dashed), not observed data.</li>
       <li><b>Average rate</b> = current accrual divided by months since the actual study start date on ClinicalTrials.gov. Early ramp-up makes this lower than the current rate for most young trials. <b>Recent rate</b> = change over the last 30 days of snapshots, scaled to a month. <b>Projected target date</b> assumes the average rate continues.</li>
       <li><b>Accrual pace</b> lists the fastest open studies that match the explorer filters, have been open at least 6 months, and have not reached their target. <i>Patients per month</i> favors large trials; <i>% of target per month</i> adjusts for trial size. The studies under that list start in protocol order. Column headings sort the table. On a phone, the same list is cards, with a Sort menu, and an opened study wraps to the screen.</li>
-      <li><b>Site</b> rolls the CTSU disease list into the same oncology groups used on the WVU tracker. Leukemia, lymphoma, myeloma, myelofibrosis, and other hematopoietic neoplasms are Hematologic Cancer. Kidney, urothelial, and germ cell cancers are Genitourinary Cancers, and prostate studies are listed there as well as under Male Reproductive System Cancer. Bone, endocrine, and soft tissue stay their own sites. The opened study still shows the CTSU disease string. Lead groups that start with LAO are one LAO filter choice. The protocol cell still shows the specific LAO code.</li>
+      <li><b>Site</b> in the table is a short histology, 50 characters or fewer. A study with more than one histology, or a summary that would run past 50 characters, says Variety. The Site filter still rolls the CTSU disease list into the same oncology groups used on the WVU tracker. Leukemia, lymphoma, myeloma, myelofibrosis, and other hematopoietic neoplasms are Hematologic Cancer. Kidney, urothelial, and germ cell cancers are Genitourinary Cancers, and prostate studies are listed there as well as under Male Reproductive System Cancer. Bone, endocrine, and soft tissue stay their own sites. The opened study still shows the CTSU disease string. Disease burden is its own filter. Lead groups that start with LAO are one LAO filter choice. The protocol cell still shows the specific LAO code.</li>
       <li><b>Protocol brief</b> on an opened study is a rendition of the current protocol on file: amendments, schema, eligibility, pre-treatment assessments, assessments during treatment, assessments in follow-up, the study calendar, specimen collection, and data submission, including TRIAD when the protocol requires it. A section is omitted when that protocol does not contain it. When no protocol is on file, the opened study says so instead of leaving the brief blank. It is not a copy of the protocol page. Confirm the current protocol before enrollment.</li>
       <li><b>Role</b> starts with the three radiotherapy roles checked. <i>RT-focused</i>: RT named in the title. <i>RT component</i>: protocol-specified RT intervention, often part of the treatment backbone. <i>Radiopharm</i>: a therapeutic isotope (for example Lu-177 or Ac-225) without external-beam RT. Imaging tracers and MUGA scans are not radiopharmaceuticals. Studies outside those three roles are Imaging, Surgery, Transplant / cellular therapy, Cancer control, Registry / biospecimen, or Systemic therapy. Those boxes start unchecked. Manual overrides are listed in the evidence for each study.</li>
       <li id="m-sync"></li>
@@ -862,7 +870,16 @@ const STATUS_MENU = [
   ["approved", "Approved, not yet open"],
   ["temporary", "Temporarily closed"],
 ];
-const BURDEN_SITES = ["Oligoprogressive disease", "Oligometastatic disease", "Polymetastatic disease", "Metastatic disease"];
+const BURDEN_MENU = [
+  ["Oligoprogressive", "Oligoprogressive"],
+  ["Oligometastatic", "Oligometastatic"],
+  ["Oligopersistent", "Oligopersistent"],
+  ["Polymetastatic", "Polymetastatic"],
+  ["Metastatic, burden not specified", "Metastatic, burden not specified"],
+  ["Curative / definitive", "Curative / definitive"],
+  ["Mixed", "Mixed"],
+];
+function defaultBurdens() { return new Set(BURDEN_MENU.map(([value]) => value)); }
 function defaultStatuses() { return new Set(["active"]); }
 const ROLE_MENU = [
   ["RT-focused", "RT-focused"],
@@ -890,8 +907,8 @@ function phaseCodes() {
 }
 const PHASE_CODES = phaseCodes();
 function defaultPhases() { return new Set(PHASE_CODES.filter(code => code !== "0" && code !== "1")); }
-const state = {...DEFAULTS, statuses: defaultStatuses(), sites: new Set(), leads: new Set(), phases: defaultPhases(), roles: defaultRoles(), protocol: false, sort: "protocol", dir: 1, expanded: new Set()};
-const mineState = {...DEFAULTS, statuses: defaultStatuses(), sites: new Set(), leads: new Set(), phases: defaultPhases(), roles: defaultRoles(), protocol: false};
+const state = {...DEFAULTS, statuses: defaultStatuses(), sites: new Set(), burdens: defaultBurdens(), leads: new Set(), phases: defaultPhases(), roles: defaultRoles(), protocol: false, sort: "protocol", dir: 1, expanded: new Set()};
+const mineState = {...DEFAULTS, statuses: defaultStatuses(), sites: new Set(), burdens: defaultBurdens(), leads: new Set(), phases: defaultPhases(), roles: defaultRoles(), protocol: false};
 let paceMode = "n";
 
 const SITE_MAP = {
@@ -938,31 +955,149 @@ function sitesOf(s) {
       out.push("Genitourinary Cancers");
     }
   });
-  const burdenText = [s.title || "", s.disease || ""].join(" ");
-  let specificBurden = false;
-  [
-    ["Oligoprogressive disease", /(?<!non[-\s])\boligop/i],
-    ["Oligometastatic disease", /(?<!non[-\s])\boligom/i],
-    ["Polymetastatic disease", /(?<!non[-\s])\bpolymetast/i],
-  ].forEach(([label, pattern]) => {
-    if (pattern.test(burdenText)) {
-      specificBurden = true;
-      if (!seen.has(label)) {
-        seen.add(label);
-        out.push(label);
-      }
-    }
-  });
-  if (!specificBurden && /(?<!non[-\s])\bmetast/i.test(burdenText) && !seen.has("Metastatic disease")) {
-    seen.add("Metastatic disease");
-    out.push("Metastatic disease");
-  }
   return out;
 }
 
 function siteLabel(s) {
   const sites = sitesOf(s);
   return sites.length ? sites.join("; ") : (s.disease || "");
+}
+
+const HISTOLOGY = [
+  ["NSCLC", /non[-\s]?small[-\s]?cell lung|\bnsclc\b/i],
+  ["SCLC", /(?<!non[-\s])small[-\s]?cell lung|\bsclc\b/i],
+  ["Mesothelioma", /mesothelioma/i],
+  ["Thymoma", /thymoma|\bthymic\b/i],
+  ["Plasmacytoma", /plasmacytoma/i],
+  ["Myeloma", /myeloma/i],
+  ["Leukemia", /leukemia|leukaemia/i],
+  ["Lymphoma", /lymphoma|hodgkin/i],
+  ["Myelofibrosis", /myelofibrosis/i],
+  ["MDS", /myelodysplas/i],
+  ["Prostate", /prostate|\bcrpc\b/i],
+  ["Bladder", /bladder|urothelial/i],
+  ["Kidney", /renal cell|renal carcinoma|kidney cancer/i],
+  ["Testis", /testicular|\bgerm cell\b/i],
+  ["Penile", /\bpenile\b/i],
+  ["Pancreas", /pancrea/i],
+  ["Colorectal", /colorectal/i],
+  ["Rectal", /\brectal\b/i],
+  ["Colon", /\bcolon\b/i],
+  ["Esophagus", /esophag/i],
+  ["Gastric", /gastric|\bstomach\b/i],
+  ["Liver", /hepatocellular|\bhcc\b|\bliver\b/i],
+  ["Biliary", /biliary|cholangi/i],
+  ["Anal", /\banal\b/i],
+  ["Cervix", /cervix|cervical cancer|cervical carcinoma/i],
+  ["Endometrial", /endometr/i],
+  ["Ovary", /ovarian/i],
+  ["Vulva", /vulvar/i],
+  ["Nasopharynx", /nasopharyn/i],
+  ["Oropharynx", /oropharyn/i],
+  ["Hypopharynx", /hypopharyn/i],
+  ["Larynx", /laryng/i],
+  ["Sinonasal", /sinonasal/i],
+  ["Oral", /oral cavity/i],
+  ["Salivary", /salivary/i],
+  ["Glioma", /glioblastoma|\bglioma|\bgliom/i],
+  ["Meningioma", /meningiom/i],
+  ["Medulloblastoma", /medulloblast/i],
+  ["Ependymoma", /ependym/i],
+  ["Breast", /\bbreast\b/i],
+  ["Sarcoma", /sarcoma/i],
+  ["Melanoma", /melanoma/i],
+  ["Merkel", /merkel/i],
+  ["NET", /neuroendocrine/i],
+];
+const SITE_PARENTS = [
+  [/lung|mesothelioma|thymoma|thymic|pleura|mediastin/i, "Lung"],
+  [/lymphoma|myeloma|leukemia|leukaemia|plasmacytoma|myelofibrosis|myelodysplas|hematolog|hematopoietic/i, "Heme"],
+  [/gastrointestinal|\bGI\b|esophag|gastric|\bstomach\b|pancrea|colorectal|\bcolon\b|\brectal\b|hepatocellular|\bliver\b|biliary|cholangi|\banal\b/i, "GI"],
+  [/prostate|\bGU\b|genitourinary|bladder|urothelial|kidney|renal|testicular|\bpenile\b|male reproductive/i, "GU"],
+  [/gynecolog|cervix|cervical|ovarian|endometr|vulvar|uterine|female reproductive/i, "Gyn"],
+  [/\bbreast\b/i, "Breast"],
+  [/head and neck|nasopharyn|oropharyn|hypopharyn|laryng|sinonasal|oral cavity|salivary/i, "H&N"],
+  [/central nervous|\bcns\b|glioblastoma|\bglioma|meningiom|medulloblast|ependym|\bbrain\b/i, "CNS"],
+  [/sarcoma|soft tissue/i, "Sarcoma"],
+  [/melanoma|merkel|cutaneous|skin cancer/i, "Skin"],
+  [/endocrine/i, "Endocrine"],
+  [/\bbone\b/i, "Bone"],
+];
+function collapseHits(hits) {
+  const drop = new Set();
+  if (hits.includes("Colorectal")) { drop.add("Colon"); drop.add("Rectal"); }
+  return hits.filter(label => !drop.has(label));
+}
+function siteSummary(text, categories) {
+  const blob = String(text || "");
+  const hits = collapseHits(HISTOLOGY.filter(([, pattern]) => pattern.test(blob)).map(([label]) => label));
+  if (hits.length >= 2) return {text: "Variety", title: hits.join(", ")};
+  if (hits.length === 1) return hits[0].length > 50 ? {text: "Variety", title: hits[0]} : {text: hits[0], title: ""};
+  const parents = [...new Set(SITE_PARENTS.filter(([pattern]) => pattern.test(blob + " " + (categories || []).join(" "))).map(([, label]) => label))];
+  if (parents.length >= 2) return {text: "Variety", title: parents.join(", ")};
+  if (parents.length === 1) return {text: parents[0], title: ""};
+  const raw = (categories || []).map(label => String(label || "").trim()).filter(Boolean);
+  if (raw.length >= 2) return {text: "Variety", title: raw.join(", ")};
+  if (raw.length === 1) {
+    if (raw[0].length > 50) return {text: "Variety", title: raw[0]};
+    if (/cancer/i.test(raw[0])) return {text: "Other", title: raw[0]};
+    return {text: raw[0], title: ""};
+  }
+  return {text: "Other", title: ""};
+}
+function siteBrief(s) {
+  return siteSummary([s.title || "", s.disease || ""].join(" "), sitesOf(s));
+}
+const NOT_OLIGO = "(?<!non[-\\s])";
+const MIXED_BURDEN = /locally advanced\s+or\s+metastatic|locally advanced\s+and\s+metastatic|metastatic\s+or\s+locally advanced|oligometastatic\s+or\s+polymetastatic|polymetastatic\s+or\s+oligometastatic|stage\s+(?:IIIC|IIIB|IIIA|III|IIB|IIA|II|IB|IA|I|[1-3])\s*(?:\/|or)\s*(?:IV|4)\b/i;
+const OLIGO_CAP_SRC = "(?:up to|no more than|fewer than|less than|maximum(?: of)?|max(?:imum)?(?: of)?|≤|<=)\\s*(?:[1-5]|one|two|three|four|five)\\s+((?:brain|intracranial|cerebral)\\s+)?(?:metastases|metastasis|lesions|sites)\\b|(?:[1-5]|one|two|three|four|five)\\s*(?:to|–|-)\\s*(?:[1-5]|one|two|three|four|five)\\s+((?:brain|intracranial|cerebral)\\s+)?(?:metastases|metastasis|lesions|sites)\\b|(?:[1-5]|one|two|three|four|five)\\s+or fewer\\s+((?:brain|intracranial|cerebral)\\s+)?(?:metastases|metastasis|lesions|sites)\\b";
+const POLY_BURDEN = new RegExp(NOT_OLIGO + "\\bpolymetast|\\b(?:widespread|extensive)\\s+metast|exclud\\w*\\s+(?:\\w+\\s+){0,4}oligometast\\w*|non[-\\s]oligometast\\w*|not oligometast\\w*|(?:more than|greater than|>)\\s*(?:5|five|[6-9]|[1-9]\\d|six|seven|eight|nine|ten|eleven|twelve)\\s+(?:\\w+\\s+){0,3}(?:metastases|metastasis|lesions|sites)\\b|(?:at least|≥|>=)\\s*(?:[6-9]|[1-9]\\d|six|seven|eight|nine|ten|eleven|twelve)\\s+(?:\\w+\\s+){0,3}(?:metastases|metastasis|lesions|sites)\\b", "i");
+const CURATIVE_BURDEN = /non[-\s]?metastatic|\bM0\b|no distant metast|without distant metast|stage\s+(?:IIIC|IIIB|IIIA|III|IIB|IIA|II|IB|IA|I|[1-3])\b(?!\s*(?:\/|or)\s*(?:IV|4))|locally advanced|locoregional|resectable primary|\badjuvant\b|\bneoadjuvant\b/i;
+const NEGATED_MET_SRC = "non[-\\s]?metast\\w*|no(?:\\s+\\w+){0,3}\\s+metast\\w*|without(?:\\s+\\w+){0,3}\\s+metast\\w*|absence of(?:\\s+\\w+){0,2}\\s+metast\\w*|free of(?:\\s+\\w+){0,2}\\s+metast\\w*|(?:not|excluding|except)\\s+stage\\s+(?:IV|4)\\b";
+const OLIGO_EXCLUSION_SRC = "exclud\\w*\\s+(?:\\w+\\s+){0,4}oligometast\\w*|non[-\\s]oligometast\\w*|not oligometast\\w*";
+function oligoCap(text) {
+  const matches = [...String(text || "").matchAll(new RegExp(OLIGO_CAP_SRC, "gi"))];
+  if (!matches.length) return false;
+  return matches.some(match => !(match[1] || match[2] || match[3]));
+}
+function metastaticSignal(text) {
+  const cleaned = String(text || "").replace(new RegExp(NEGATED_MET_SRC, "gi"), " ");
+  if (new RegExp(NOT_OLIGO + "\\bmetast", "i").test(cleaned)) return true;
+  if (/\bM1[a-c]?\b/.test(cleaned)) return true;
+  return /\bstage\s+(?:IV|4)\b/i.test(cleaned);
+}
+function burdenLabels(text) {
+  text = String(text || "");
+  if (MIXED_BURDEN.test(text)) return ["Mixed"];
+  const enrolled = text.replace(new RegExp(OLIGO_EXCLUSION_SRC, "gi"), " ");
+  const oligop = new RegExp(NOT_OLIGO + "\\boligoprogress", "i").test(enrolled);
+  const oligopersist = new RegExp(NOT_OLIGO + "\\boligopersist", "i").test(enrolled);
+  const oligom = new RegExp(NOT_OLIGO + "\\boligometa|" + NOT_OLIGO + "\\boligorecurren|" + NOT_OLIGO + "\\boligopersist", "i").test(enrolled);
+  const cap = oligoCap(enrolled);
+  const sbrt = /all sites amenable to (?:SBRT|SABR|metastasis-directed)/i.test(enrolled);
+  const poly = POLY_BURDEN.test(text);
+  const curative = CURATIVE_BURDEN.test(text);
+  const metastatic = metastaticSignal(text);
+  if (/\bcohorts?\b/i.test(text)) {
+    const kinds = [oligop, !!(oligom || cap || sbrt), poly, !!(curative && metastatic)].filter(Boolean).length;
+    if (kinds >= 2) return ["Mixed"];
+  }
+  const labels = [];
+  if (oligop) labels.push("Oligoprogressive");
+  if (oligopersist) labels.push("Oligopersistent");
+  if (oligom || cap || sbrt) labels.push("Oligometastatic");
+  if (poly) labels.push("Polymetastatic");
+  const specific = labels.some(label => label === "Oligoprogressive" || label === "Oligometastatic" || label === "Polymetastatic");
+  if (curative && !metastatic && !specific) labels.push("Curative / definitive");
+  else if (metastatic && !specific) labels.push("Metastatic, burden not specified");
+  return labels;
+}
+function burdenText(s) {
+  const eligibility = (s.brief && s.brief.eligibility) || [];
+  return [s.title || "", s.disease || ""].concat(Array.isArray(eligibility) ? eligibility : [eligibility]).join(" ");
+}
+function burdenOf(s) {
+  return burdenLabels(burdenText(s));
 }
 
 function leadGroup(s) {
@@ -979,16 +1114,20 @@ function fillChoicePanel(panelId, allId, name, items) {
     items.map(([value, text]) => `<label class="check"><input type="checkbox" name="${name}" value="${esc(value)}"> ${esc(text)}</label>`).join("");
 }
 const LEAD_MENU = [...new Set(S.map(leadGroup))].filter(Boolean).sort().map(value => [value, value]);
-const SITE_MENU = [...new Set(S.flatMap(sitesOf))].filter(value => value && !BURDEN_SITES.includes(value)).sort().map(value => [value, value]).concat(BURDEN_SITES.map(value => [value, value]));
+const SITE_MENU = [...new Set(S.flatMap(sitesOf))].filter(Boolean).sort().map(value => [value, value]);
 state.sites = new Set(SITE_MENU.map(([value]) => value));
+state.burdens = defaultBurdens();
+mineState.burdens = defaultBurdens();
 state.leads = new Set(LEAD_MENU.map(([value]) => value));
 mineState.sites = new Set(state.sites);
 mineState.leads = new Set(state.leads);
 fillChoicePanel("status-panel", "status-all", "status", STATUS_MENU);
 fillChoicePanel("site-panel", "site-all", "site", SITE_MENU);
+fillChoicePanel("burden-panel", "burden-all", "burden", BURDEN_MENU);
 fillChoicePanel("lead-panel", "lead-all", "lead", LEAD_MENU);
 fillChoicePanel("mine-status-panel", "mine-status-all", "mine-status", STATUS_MENU);
 fillChoicePanel("mine-site-panel", "mine-site-all", "mine-site", SITE_MENU);
+fillChoicePanel("mine-burden-panel", "mine-burden-all", "mine-burden", BURDEN_MENU);
 fillChoicePanel("mine-lead-panel", "mine-lead-all", "mine-lead", LEAD_MENU);
 fillChoicePanel("role-panel", "role-all", "role", ROLE_MENU);
 fillChoicePanel("phase-panel", "phase-all", "phase", PHASE_CODES.map(code => [code, phaseMenuLabel(code)]));
@@ -1020,6 +1159,12 @@ function siteSelected(s, st = state) {
   return sitesOf(s).some(site => st.sites.has(site));
 }
 
+function burdenSelected(s, st = state) {
+  if (!st.burdens.size) return false;
+  if (st.burdens.size === BURDEN_MENU.length) return true;
+  return burdenOf(s).some(label => st.burdens.has(label));
+}
+
 function leadSelected(s, st = state) {
   if (!st.leads.size) return false;
   if (st.leads.size === LEAD_MENU.length) return true;
@@ -1033,6 +1178,7 @@ function matchesState(s, st, ignoreStatus = false) {
     st.phases.has(String(s.phase || "Other")) &&
     leadSelected(s, st) &&
     siteSelected(s, st) &&
+    burdenSelected(s, st) &&
     (!q || searchBlob(s).toLowerCase().includes(q)) &&
     (!st.protocol || protocolOnFile(s));
 }
@@ -1054,7 +1200,7 @@ function mineShown() {
 
 function rows() {
   const k = state.sort, d = state.dir;
-  const sortValue = (s) => k === "disease" ? siteLabel(s) : s[k];
+  const sortValue = (s) => k === "disease" ? siteBrief(s).text : s[k];
   return S.filter(s => matches(s)).sort((a, b) => {
     const x = sortValue(a), y = sortValue(b);
     if (x == null && y == null) return 0;
@@ -1079,7 +1225,7 @@ function rolesAreDefault() {
 }
 
 function scopeText() {
-  const custom = state.q || !statusesAreDefault() || state.sites.size !== SITE_MENU.length || state.leads.size !== LEAD_MENU.length || !phasesAreDefault() || !rolesAreDefault();
+  const custom = state.q || !statusesAreDefault() || state.sites.size !== SITE_MENU.length || state.burdens.size !== BURDEN_MENU.length || state.leads.size !== LEAD_MENU.length || !phasesAreDefault() || !rolesAreDefault();
   const kind = rolesAreDefault() ? "RT-related studies" : "studies";
   return custom ? `open ${kind} matching your filters` : `open ${kind}`;
 }
@@ -1215,7 +1361,7 @@ function studyCard(s) {
       ${starBtn(s.protocol)}
       <button class="sc-open" type="button" aria-expanded="${open}">
         <span class="sc-name"><b>${esc(s.protocol)}</b>${s.alias ? ` <span class="muted">${esc(s.alias)}</span>` : ""}</span>
-        <span class="sc-meta">${esc(s.lead)} · ${esc(siteLabel(s) || "Site n/a")} · Phase ${esc(phaseLabel(s.phase))}</span>
+        <span class="sc-meta">${esc(s.lead)} · ${esc(siteBrief(s).text || "Site n/a")} · Phase ${esc(phaseLabel(s.phase))}</span>
         <span class="sc-title">${esc(s.title)}</span>
         <span class="sc-row">${roleChip(s.rt_role)} ${statusCell(s)} <span>${s.accrual != null ? num(s.accrual, 0) : ""}${s.target ? " / " + num(s.target, 0) : ""}${s.pct != null ? ` (${num(s.pct)}%)` : ""}</span>${s.avg_rate != null ? ` <span class="muted">${num(s.avg_rate)} /mo</span>` : ""}</span>
       </button>
@@ -1249,7 +1395,7 @@ function renderStudies() {
     <tr class="row${store.has(s.protocol) ? " mine" : ""}" data-p="${esc(s.protocol)}" tabindex="0" aria-expanded="${state.expanded.has(s.protocol)}">
       <td class="star-col">${starBtn(s.protocol)}</td>
       <td class="id-cell"><div class="id-stack"><div><b>${esc(s.protocol)}</b>${s.alias ? ` <span class="muted">${esc(s.alias)}</span>` : ""}</div><div class="id-lead">${esc(s.lead)}</div>${s.rt_role ? `<div>${roleChip(s.rt_role)}</div>` : ""}<div>${statusCell(s)}</div></div></td>
-      <td class="site-cell">${esc(siteLabel(s))}</td>
+      <td class="site-cell"${siteBrief(s).text === "Variety" && siteBrief(s).title ? ` title="${esc(siteBrief(s).title)}"` : ""}>${esc(siteBrief(s).text)}</td>
       <td class="phase-cell">${esc(phaseLabel(s.phase))}</td>
       <td class="title-cell">${esc(s.title)}</td>
       <td class="acc-cell">${accBar(s)}${s.avg_rate != null ? `<div class="acc-rate">${num(s.avg_rate)} /mo</div>` : ""}</td>
@@ -1282,6 +1428,7 @@ function resetExplorer(q) {
   state.q = q || "";
   state.statuses = q ? new Set(STATUS_MENU.map(([value]) => value)) : defaultStatuses();
   state.sites = new Set(SITE_MENU.map(([value]) => value));
+  state.burdens = defaultBurdens();
   state.leads = new Set(LEAD_MENU.map(([value]) => value));
   state.phases = q ? new Set(PHASE_CODES) : defaultPhases();
   state.roles = q ? new Set(ROLE_MENU.map(([value]) => value)) : defaultRoles();
@@ -1347,6 +1494,7 @@ function syncFilterInputs() {
   $("f-protocol").checked = !!state.protocol;
   syncMenu("status", STATUS_MENU, state.statuses, "Any status", "No status");
   syncMenu("site", SITE_MENU, state.sites, "All sites", "No site");
+  syncMenu("burden", BURDEN_MENU, state.burdens, "All burdens", "No burden");
   syncMenu("lead", LEAD_MENU, state.leads, "All lead groups", "No lead group");
   syncPhaseInputs();
   syncRoleInputs();
@@ -1414,6 +1562,7 @@ function bindMenu(prefix, menu, field, owner, onChange, allLabel, noneLabel) {
 }
 bindMenu("status", STATUS_MENU, "statuses", state, () => render(), "Any status", "No status");
 bindMenu("site", SITE_MENU, "sites", state, () => render(), "All sites", "No site");
+bindMenu("burden", BURDEN_MENU, "burdens", state, () => render(), "All burdens", "No burden");
 bindMenu("lead", LEAD_MENU, "leads", state, () => render(), "All lead groups", "No lead group");
 $("reset").onclick = () => { resetExplorer(); syncFilterInputs(); render(); };
 $("f-protocol").onchange = e => { state.protocol = e.target.checked; render(); };
@@ -1467,6 +1616,7 @@ function syncMineFilters() {
   $("mine-protocol").checked = !!mineState.protocol;
   syncMenu("mine-status", STATUS_MENU, mineState.statuses, "Any status", "No status");
   syncMenu("mine-site", SITE_MENU, mineState.sites, "All sites", "No site");
+  syncMenu("mine-burden", BURDEN_MENU, mineState.burdens, "All burdens", "No burden");
   syncMenu("mine-lead", LEAD_MENU, mineState.leads, "All lead groups", "No lead group");
   document.querySelectorAll('#mine-phase-panel input[name="mine-phase"]').forEach(box => { box.checked = mineState.phases.has(box.value); });
   $("mine-phase-all").checked = mineState.phases.size === PHASE_CODES.length;
@@ -1485,6 +1635,7 @@ $("mine-q").oninput = e => { mineState.q = e.target.value; refreshMine(); };
 $("mine-protocol").onchange = e => { mineState.protocol = e.target.checked; refreshMine(); };
 bindMenu("mine-status", STATUS_MENU, "statuses", mineState, refreshMine, "Any status", "No status");
 bindMenu("mine-site", SITE_MENU, "sites", mineState, refreshMine, "All sites", "No site");
+bindMenu("mine-burden", BURDEN_MENU, "burdens", mineState, refreshMine, "All burdens", "No burden");
 bindMenu("mine-lead", LEAD_MENU, "leads", mineState, refreshMine, "All lead groups", "No lead group");
 $("mine-role-btn").onclick = () => toggleChoice("mine-role-btn", "mine-role-panel");
 $("mine-role-panel").addEventListener("change", ev => {
@@ -1506,6 +1657,7 @@ $("mine-reset").onclick = () => {
   mineState.q = "";
   mineState.statuses = defaultStatuses();
   mineState.sites = new Set(SITE_MENU.map(([value]) => value));
+  mineState.burdens = defaultBurdens();
   mineState.leads = new Set(LEAD_MENU.map(([value]) => value));
   mineState.phases = defaultPhases();
   mineState.roles = defaultRoles();
@@ -1598,7 +1750,8 @@ function displayName(protocol, alias) {
 function studyArticle(s, mode) {
   const name = displayName(s.protocol, s.alias);
   const meta = [`Phase ${phaseLabel(s.phase) || "not stated"}`, s.lead, s.status === "Active" ? "Open" : (s.status || ""), s.nct].filter(Boolean).join(" · ");
-  const site = siteLabel(s) || "Site not stated";
+  const brief = siteBrief(s);
+  const site = brief.text === "Variety" && brief.title ? brief.title : (brief.text || "Site not stated");
   const steps = s.brief && s.brief.schema;
   const schema = steps && steps.length ? (mode === "brief" ? briefSchema(steps) : schemaBlocks(steps)) : "";
   const accrual = mode === "comprehensive" ? accrualLine(s) : "";
@@ -1793,6 +1946,7 @@ function digestFilters(st) {
     st.q ? `Search: ${st.q}` : "",
     menuButtonLabel(st.statuses, STATUS_MENU, "Any status", "No status"),
     menuButtonLabel(st.sites, SITE_MENU, "All sites", "No site"),
+    menuButtonLabel(st.burdens, BURDEN_MENU, "All burdens", "No burden"),
     menuButtonLabel(st.leads, LEAD_MENU, "All lead groups", "No lead group"),
     choiceButtonLabel(st, "role"),
     choiceButtonLabel(st, "phase"),
