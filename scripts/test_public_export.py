@@ -40,6 +40,7 @@ def payload():
                 "ours": True,
                 "brief": {
                     "eligibility": ["Adults."],
+                    "pretreatment": [{"item": "CBC", "note": "Within 28 days"}],
                     "notes": "local path /Users/jeffryckman/secret.pdf",
                     "locked": True,
                 },
@@ -67,6 +68,7 @@ def main():
     assert "CE.7" in by_id["CCTG CE.7"]["aliases"]
     assert by_id["CCTG CE.7"]["nct"] == "NCT03550391"
     assert "notes" not in (by_id["CCTG CE.7"]["brief"] or {})
+    assert by_id["CCTG CE.7"]["brief"]["pretreatment"][0]["note"] == "Within 28 days"
     assert "ours" not in by_id["CCTG CE.7"]
     assert by_id["NCI-1"]["status_basis"].startswith("ClinicalTrials.gov Not yet recruiting")
     assert by_id["NCI-1"]["phase_normalized"] == "Not stated"

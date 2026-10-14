@@ -13,7 +13,7 @@ BRIEF_KEYS = (
     "eligibility", "pretreatment", "during", "followup", "calendar",
     "specimens", "submission", "schema_source",
 )
-FORBIDDEN_KEYS = re.compile(r"note|password|secret|token|apiKey|institution|credential", re.I)
+FORBIDDEN_KEYS = re.compile(r"password|secret|token|apiKey|institution|credential", re.I)
 FORBIDDEN_VALUES = re.compile(
     r"/Users/|ACCESS_CODE|ghp_|xoxb-|BEGIN PRIVATE|protocols[/\\].+\.pdf",
     re.I,
