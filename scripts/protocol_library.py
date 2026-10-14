@@ -13,12 +13,16 @@ files. The library is located from this file, so it works on either Mac.
 """
 import hashlib
 import json
+import os
 import re
 from functools import lru_cache
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-PROTOCOLS = ROOT / "protocols"
+# PDFs and the manifest stay in the shared library. A publish checkout outside
+# Syncthing sets CTSU_LIBRARY_ROOT to that shared folder.
+_LIBRARY = Path(os.environ["CTSU_LIBRARY_ROOT"]).expanduser() if os.environ.get("CTSU_LIBRARY_ROOT") else ROOT
+PROTOCOLS = _LIBRARY / "protocols"
 MANIFEST = PROTOCOLS / "manifest.json"
 BRIEFS = ROOT / "data" / "protocol_briefs.json"
 STUDIES = ROOT / "data" / "studies.json"

@@ -29,11 +29,15 @@ import json
 import os
 import re
 import ssl
+import subprocess
 import sys
 import urllib.parse
 import urllib.request
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
+
+from public_export import build_public_export, gate_projected_date, unchanged
+from trial_classification import classify_record
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
@@ -50,6 +54,8 @@ MATERIALS = DATA / "patient_materials.json"
 TEMPLATE = ROOT / "dashboard" / "template.html"
 DASHBOARD = ROOT / "dashboard" / "index.html"
 PUBLIC_SITE = ROOT / "docs" / "index.html"
+PUBLIC_EXPORT = ROOT / "docs" / "ctsu-public.json"
+PUBLIC_MANIFEST = ROOT / "docs" / "ctsu-public.manifest.json"
 SITE_URL = "https://jryck3.github.io/CTSU-Tracker/"
 LOCAL_ONLY_FIELDS = ("protocol_on_file", "protocol_version", "ours")
 LOCAL_ONLY_KEYS = ("institution", "institution_label", "institution_missing")
@@ -588,8 +594,7 @@ def build(protocols, history, fetched_at, today, approved_ncts=None):
             months_open = round((today - start).days / DAYS_PER_MONTH, 1)
             if accrual is not None and months_open >= 0.5:
                 avg_rate = round(accrual / months_open, 2)
-                if target and avg_rate > 0 and accrual < target:
-                    projected = (today + timedelta(days=(target - accrual) / avg_rate * DAYS_PER_MONTH)).isoformat()
+                projected = gate_projected_date(today, months_open, accrual, target, avg_rate)
 
         pts = history.get(proto, [])
         doc = manifest.get(proto) or {}
@@ -626,6 +631,18 @@ def build(protocols, history, fetched_at, today, approved_ncts=None):
         })
 
     attach_briefs(studies, manifest)
+    for study in studies:
+        classified = classify_record({
+            "protocol": study.get("protocol"),
+            "title": study.get("title"),
+            "disease": study.get("disease"),
+            "eligibility": (study.get("brief") or {}).get("eligibility"),
+        })
+        study["anatomy"] = classified["anatomy"]
+        study["histology"] = classified["histology"]
+        study["burden"] = classified["burden"]
+        study["intent"] = classified["intent"]
+        study["cancer_types"] = classified["cancer_types"]
 
     ctsu_count = len(studies)
     taken_protocols = {s["protocol"] for s in studies}
@@ -745,6 +762,26 @@ def render_dashboard(payload, out, local, firebase=None):
     out.write_text(html)
 
 
+def producer_revision():
+    try:
+        return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    except (OSError, subprocess.CalledProcessError):
+        return ""
+
+
+def publish_public_files(payload, force=False):
+    """Write the public HTML and export. A matching content hash skips the write."""
+    library_as_of = payload.get("protocol_library_as_of") or ""
+    export, manifest = build_public_export(payload, producer_revision(), library_as_of)
+    if not force and unchanged(PUBLIC_MANIFEST, manifest["content_hash"]):
+        return manifest, False
+    PUBLIC_EXPORT.parent.mkdir(parents=True, exist_ok=True)
+    PUBLIC_EXPORT.write_text(json.dumps(export))
+    PUBLIC_MANIFEST.write_text(json.dumps(manifest, indent=1) + "\n")
+    render_dashboard(payload, PUBLIC_SITE, local=False, firebase=firebase_config())
+    return manifest, True
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--skip-ctgov", action="store_true", help="Use cached ClinicalTrials.gov data only")
@@ -752,34 +789,40 @@ def main():
     ap.add_argument("--no-save", action="store_true",
                     help="Leave the snapshot, history CSV, and public page untouched (local rebuild)")
     ap.add_argument("--page-only", action="store_true",
-                    help="Rebuild the public page (new protocol briefs) without saving a snapshot or history row")
+                    help="Rebuild the public page and today's history row without writing a new raw snapshot file")
     ap.add_argument("--render-only", action="store_true",
                     help="Rebuild both dashboards from data/studies.json without fetching")
     args = ap.parse_args()
 
     if args.render_only:
         payload = render_saved(firebase_config())
+        manifest, wrote = publish_public_files(payload, force=True)
         c = payload["counts"]
-        print(json.dumps({"render_only": True, **c}))
+        print(json.dumps({"render_only": True, "export_hash": manifest["content_hash"], "wrote": wrote, **c}))
         return
 
     today = date.today()
-    save = not args.no_save and not args.page_only
-    protocols, fetched_at = snapshot_ctsu(today, save=save)
-    history = update_history(protocols, today, save=save)
+    save_snapshot = not args.no_save and not args.page_only
+    protocols, fetched_at = snapshot_ctsu(today, save=save_snapshot)
+    history = update_history(protocols, today, save=False)
     approved_ncts = not_yet_recruiting_ncts()
     refreshed = 0
     if not args.skip_ctgov:
         ncts = sorted({p["nctNumber"] for p in protocols if p.get("nctNumber")} | set(approved_ncts))
         refreshed = refresh_ctgov(ncts, force=args.force_ctgov)
     payload = build(protocols, history, fetched_at, today, approved_ncts)
-    if save or args.page_only:
-        render_dashboard(payload, PUBLIC_SITE, local=False, firebase=firebase_config())
+    wrote = False
+    manifest = {}
+    if not args.no_save:
+        manifest, wrote = publish_public_files(payload, force=args.page_only)
+        if wrote:
+            update_history(protocols, today, save=True)
     if MANIFEST.exists():
         render_dashboard(payload, DASHBOARD, local=True)
     c = payload["counts"]
     print(json.dumps({
-        "date": today.isoformat(), "ctgov_refreshed": refreshed, **c,
+        "date": today.isoformat(), "ctgov_refreshed": refreshed, "wrote": wrote,
+        "export_hash": manifest.get("content_hash", ""), **c,
         "institution_missing": payload["institution_missing"],
     }))
 
