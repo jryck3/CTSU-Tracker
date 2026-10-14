@@ -1,0 +1,216 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>My trials</title><style>
+  @page { size: letter; margin: 0.45in 0.55in 0.4in; }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; color: #1b2430; font: 11pt/1.45 Georgia, "Iowan Old Style", Palatino, "Palatino Linotype", serif; }
+  .measure { position: absolute; left: 0; top: 0; width: 7.4in; visibility: hidden; }
+  .probe-sheet { width: 7.4in; height: 10.15in; }
+  .sheet { width: 7.4in; min-height: 10.15in; display: flex; flex-direction: column; break-after: page; page-break-after: always; }
+  .sheet:last-child { break-after: auto; page-break-after: auto; }
+  .sheet > header.run, .sheet > footer.run { flex: none; }
+  .sheet-body { flex: 1 1 auto; }
+  header.run { border-bottom: 2.5px solid #1f3a5f; padding-bottom: 8px; margin-bottom: 6px; }
+  .tracker { margin: 0; font: 650 8.5pt/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #1f3a5f; }
+  .tracker-line { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: baseline; margin: 0; }
+  .loc { font: 700 8.5pt/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: .02em; color: #1f3a5f; }
+  .filters { margin: 7px 0 2px; font: 9.5pt/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #3d4756; }
+  header.run h1 { margin: 2px 0 0; font: 650 18pt/1.15 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1f3a5f; }
+  .when { margin: 4px 0 0; color: #5b6676; font: 10pt/1.3 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  article.study { break-inside: avoid; page-break-inside: avoid; padding: 10px 0 12px; border-bottom: 1px solid #d5dde6; }
+  article.study h2 { margin: 0; font: 650 13pt/1.25 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1f3a5f; }
+  .meta, .title, .accrual, .none { margin: 3px 0 0; }
+  .meta, .accrual, .none { font: 9.5pt/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #3d4756; }
+  .title { font-style: italic; color: #1b2430; }
+  .schema { margin-top: 6px; }
+  .step { margin: 4px 0; }
+  .step > b { color: #1f3a5f; }
+  .arms { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px; }
+  .arm { border: 1px solid #d5dde6; border-left: 3px solid #2b6cb0; border-radius: 4px; padding: 4px 8px; font-size: 10pt; background: #f7f9fc; }
+  .arm b { color: #1f3a5f; }
+  .toc-site { break-inside: avoid; page-break-inside: avoid; padding: 8px 0 10px; border-bottom: 1px solid #d5dde6; }
+  .toc-line { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+  .toc-line b { font: 650 13pt/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1f3a5f; }
+  .toc-num { font: 650 12pt/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1f3a5f; }
+  .toc-site ul { margin: 4px 0 0; padding-left: 18px; }
+  .toc-site li { margin: 1px 0; }
+  footer.run { display: flex; justify-content: space-between; gap: 16px; align-items: flex-end; border-top: 1px solid #d5dde6; padding-top: 6px; margin-top: auto; font: 8.5pt/1.3 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #5b6676; }
+  .pageno { font: 650 12pt/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1f3a5f; }
+</style></head><body data-tracker="Worldwide radiation oncology trials" data-mode="Comprehensive" data-heading="My trials" data-when="October 12, 2026 at 1:39 PM" data-filters="Sample limited to studies present in this tracker · Phase: all · Status: all · RT role: all · Disease: all · Country: all · Accrual: all · Source: all · Brief: all" data-places=""><div id="measure" class="measure"><article class="study" data-site="NSCLC"><h2>A081801</h2><p class="meta">Phase 3 · ALLIANCE, National Cancer Institute (NCI) · recruiting · NCT04267848</p><p class="title">Integration of Immunotherapy Into Adjuvant Therapy for Resected NSCLC: ALCHEMIST Chemo-IO (ACCIO)</p><div class="schema"><div class="step"><b>Eligibility.</b> Completely resected (R0) stage IIA, IIB, IIIA, or IIIB (T3-4N2) NSCLC per AJCC 8th edition, EGFR and ALK negative locally, registered 30-77 days after surgery. 1 cycle = 21 days.</div><div class="step"><b>Stratification.</b> Histology (squamous vs non-squamous), local PD-L1 TPS (50% or higher vs below 50% or not evaluable), smoking status (never vs former/current), pathologic stage (IIA/IIB vs IIIA/IIIB T3-4N2).</div><div class="step"><b>Randomize.</b> Since Update #07, randomization is to Arms B and C (the former Arm A, platinum doublet then observation, is closed). Platinum doublet is physician&#39;s choice: cisplatin/pemetrexed or carboplatin/pemetrexed for non-squamous, cisplatin/gemcitabine or carboplatin/paclitaxel for squamous.<div class="arms"><div class="arm"><b>Arm B (sequential)</b> Platinum doublet x 4 cycles, +/- PORT, then pembrolizumab 400 mg IV every 6 weeks x 8 doses (16 cycles)</div><div class="arm"><b>Arm C (concurrent)</b> Platinum doublet x 4 cycles with pembrolizumab 400 mg on day 1 of cycles 1 and 3, +/- PORT, then pembrolizumab 400 mg every 6 weeks x 6 doses (12 cycles), 16 total cycles of pembrolizumab</div></div></div><div class="step"><b>PORT (optional).</b> At treating physician discretion after the 4 chemotherapy cycles; recommended for occult pN2/N3, R1 margins, or extranodal extension, not for tumor size or pleural involvement alone. 50-54 Gy in 2 Gy (25-27 fractions) or 1.8 Gy (28-30 fractions). Starts 2-6 weeks after the last chemotherapy infusion and before continuation pembrolizumab, with no concurrent systemic therapy; pembrolizumab resumes 5-21 days after PORT.</div><div class="step"><b>Follow-up.</b> Up to 10 years or until death. Primary endpoint DFS.</div></div><p class="accrual">919 / 1210</p></article><article class="study" data-site="Head and neck; Skin"><h2>A222301 (HOPE)</h2><p class="meta">Phase 3 · ALLIANCE, Alliance for Clinical Trials in Oncology, Alliance · recruiting · NCT06992427</p><p class="title">High-Dose Prophylactic Gabapentin (HOPE) to Prevent Opioid Use for Oral Mucositis Pain During Head and Neck Chemoradiotherapy: A Phase III Clinical Trial</p><div class="schema"><div class="step"><b>Arm A.</b> Cisplatin-based chemoradiation, placebo, and the institution&#39;s standard treatment for mucositis.</div><div class="step"><b>Arm B.</b> Cisplatin-based chemoradiation, prophylactic gabapentin titrated to 1200 mg three times a day, and the institution&#39;s standard treatment for mucositis.</div><div class="step"><b>Duration.</b> About 10 weeks: a 12-day ramp up that may start any time from randomization through day 8 of chemoradiation, 7 weeks during radiotherapy, and a 12-day ramp down.</div></div><p class="accrual">26 / 228</p></article><article class="study" data-site="Breast; Gynecologic"><h2>NRG-BR009 (OFSET)</h2><p class="meta">Phase 3 · NRG, NRG Oncology · recruiting · NCT05879926</p><p class="title">A Phase III Adjuvant Trial Evaluating the Addition of Adjuvant Chemotherapy to Ovarian Function Suppression Plus Endocrine Therapy in Premenopausal Patients With pN0-1, ER-Positive/HER2-Negative Breast Cancer and an Oncotype Recurrence Score Less Than or Equal to 25 (OFSET)</p><div class="schema"><div class="step"><b>Population.</b> Premenopausal, resected ER-positive/HER2-negative breast cancer: pN0 with Oncotype RS 21-25, or RS 16-20 with high clinical risk (low grade and &gt;3 cm, intermediate grade and &gt;2 cm, or high grade and &gt;1 cm); or pN1 with RS 0-25.</div><div class="step"><b>Step 1: Pre-entry.</b> Registration. Patients qualifying by MammaPrint Low Risk/MP1 need central Oncotype DX RS before randomization; MammaPrint High Risk/MP2 are ineligible. Intended RT plan declared before pre-entry.</div><div class="step"><b>Stratification.</b> Nodal/RS status (pN0 RS 16-25 vs pN1 RS 0-15 vs pN1 RS 16-25), intent to receive a CDK4/6 inhibitor (yes vs no), age (18-39 vs 40 or older).</div><div class="step"><b>Step 2: Randomize 1:1.</b> Stratified permuted blocks.<div class="arms"><div class="arm"><b>Arm 1</b> Ovarian function suppression (GnRH agonist of investigator&#39;s choice, or bilateral oophorectomy) plus aromatase inhibitor for 5 years.</div><div class="arm"><b>Arm 2</b> Adjuvant chemotherapy of investigator&#39;s choice (NCCN- or ESMO-listed regimen), then ovarian function suppression plus aromatase inhibitor for 5 years.</div></div></div><div class="step"><b>Radiotherapy (both arms).</b> Whole breast irradiation required after lumpectomy (partial breast irradiation not permitted); post-mastectomy and regional nodal RT per protocol guidelines by nodal status. Allowed WBI regimens: 50 Gy/25, 42.56 Gy/16, 40 Gy/15, or 26 Gy/5, with optional sequential or concomitant boost. OFS plus AI preferably started before and given with RT, or within 4 weeks after RT.</div><div class="step"><b>Other therapy.</b> CDK4/6 inhibitor (abemaciclib or other FDA-approved) and bone anti-resorptive therapy allowed per standard use.</div><div class="step"><b>Primary endpoint.</b> Invasive breast cancer-free survival.</div></div><p class="accrual">737 / 3960</p></article><article class="study" data-site="GU"><h2>NRG-GU013 (High Five)</h2><p class="meta">Phase 3 · NRG, NRG Oncology · recruiting · NCT05946213</p><p class="title">The Phase III &#39;High Five Trial&#39; Five Fraction Radiation For High-Risk Prostate Cancer</p><div class="schema"><div class="step"><b>Disease.</b> Pathologically proven adenocarcinoma of the prostate, meeting the high-risk definition in eligibility.</div><div class="step"><b>Stratify.</b> Pelvic nodal radiotherapy yes vs no. ADT duration under 18 months vs over 18 months. Second-generation antiandrogen yes vs no. Intraprostatic microboost yes vs no.</div><div class="step"><b>Randomize 1:1.</b> ADT of 6 to 36 months is required. Intended duration, type, and use of a second-generation antiandrogen are declared at registration.<div class="arms"><div class="arm"><b>Arm 1</b> Ultrahypofractionated SBRT in 5 fractions.</div><div class="arm"><b>Arm 2</b> Conventional or moderate hypofractionation in 20 to 45 fractions.</div></div></div><div class="step"><b>Primary endpoint.</b> Metastasis-free survival on conventional imaging.</div></div><p class="accrual">1201 / 1500</p></article><article class="study" data-site="GU"><h2>NRG-GU015 (ARCHER)</h2><p class="meta">Phase 3 · NRG, NRG Oncology · recruiting · NCT07097142</p><p class="title">The Phase III Adaptive Radiation and Chemotherapy for Muscle Invasive Bladder Cancer Trial (ARCHER)</p><div class="schema"><div class="step"><b>Disease.</b> cT2-cT3N0 muscle-invasive urothelial carcinoma of the bladder.</div><div class="step"><b>Stratify.</b> Clinical stage T2 vs T3. Planned radiosensitizer: cisplatin, gemcitabine, or mitomycin-C/5-FU. Neoadjuvant therapy yes vs no.</div><div class="step"><b>Randomize 1:1.</b> Protocol treatment starts within 28 days after randomization. Arm 2 must use plan-of-the-day or online adaptive radiotherapy.<div class="arms"><div class="arm"><b>Arm 1</b> 4 weeks of radiosensitizing chemotherapy plus hypofractionated radiotherapy, 55 Gy in 20 fractions.</div><div class="arm"><b>Arm 2</b> 4 weeks of radiosensitizing chemotherapy plus SBRT, 32.5 Gy in 5 fractions.</div></div></div><div class="step"><b>Primary question.</b> Non-inferiority of ultra-hypofractionation versus hypofractionation for 3-year bladder-intact event-free survival. The margin is 10% (50% to 40%), corresponding to a hazard ratio below 1.32.</div></div><p class="accrual">97 / 486</p></article><article class="study" data-site="Gynecologic"><h2>NRG-GY037</h2><p class="meta">Phase 3 · NRG, CCTG, National Cancer Institute (NCI) · recruiting · NCT07061977</p><p class="title">A Phase III Study of Induction Pembrolizumab and Chemotherapy Followed by Chemoradiation and Pembrolizumab vs Chemoradiation and Pembrolizumab Both Followed by Pembrolizumab for High Risk Locally Advanced Cervical Cancer</p><div class="schema"><div class="step"><b>Population.</b> Newly diagnosed squamous cell carcinoma, adenocarcinoma, or adenosquamous carcinoma of the cervix, FIGO 2018 stage IIIA, IIIB, IIIC1, IIIC2, or IVA.</div><div class="step"><b>Stratification.</b> FIGO stage III versus IVA, and presence or absence of para-aortic nodes (N2). Randomize 1:1.</div><div class="step"><b>Arm 1.</b> Concurrent chemoradiation: weekly cisplatin 40 mg/m2 for 5 weeks, external-beam radiotherapy, brachytherapy, and pembrolizumab 200 mg every 3 weeks for 5 cycles, then pembrolizumab 400 mg every 6 weeks for 14 maintenance cycles.</div><div class="step"><b>Arm 2.</b> Induction weekly carboplatin AUC 2 and paclitaxel 80 mg/m2 for 6 weeks, plus pembrolizumab 200 mg every 3 weeks for 2 cycles, then the same chemoradiation and pembrolizumab, then pembrolizumab 400 mg every 6 weeks for 15 maintenance cycles.</div></div><p class="accrual">102 / 336</p></article><article class="study" data-site="GU"><h2>S2427 (BRIGHT)</h2><p class="meta">Phase 2 · SWOG, National Cancer Institute (NCI) · recruiting · NCT07061964</p><p class="title">Single Arm Phase II Study of Bladder Preservation With Immunoradiotherapy After a Clinically Meaningful Response to Neoadjuvant Therapy in Patients With Muscle Invasive Bladder Cancer (BRIGHT)</p><div class="schema"><div class="step"><b>Muscle-invasive disease.</b> Histologic cT2-T4aN0 urothelial carcinoma of the bladder.</div><div class="step"><b>Neoadjuvant therapy.</b> Physician&#39;s choice, limited to the FDA-approved regimens in the eligibility criteria.</div><div class="step"><b>Response assessment.</b> cT0 or cT1 on a repeat TURBT with systematic biopsies. That TURBT is within 90 days before registration.</div><div class="step"><b>Registration.</b> Within 90 days after the last neoadjuvant dose.</div><div class="step"><b>Treatment.</b> Bladder radiotherapy plus pembrolizumab for 1 year. Central radiation-plan approval is required before treatment starts. Radiotherapy is whole bladder only, 55 Gy in 20 fractions of 2.75 Gy, with no pelvic nodes and no tumor boost.</div><div class="step"><b>On-study assessment.</b> Cystoscopy, cytology, and imaging.</div><div class="step"><b>Endpoint.</b> 3-year bladder-intact event-free survival. Follow-up continues for 5 years after registration.</div></div><p class="accrual">56 / 111</p></article></div><div id="out"></div><script>
+function packDigest() {
+  var measure = document.getElementById("measure");
+  var tracker = document.body.dataset.tracker;
+  var mode = document.body.dataset.mode;
+  var heading = document.body.dataset.heading;
+  var when = document.body.dataset.when;
+  var filters = document.body.dataset.filters || "";
+  var places = document.body.dataset.places || "";
+  var studies = Array.prototype.slice.call(measure.querySelectorAll("article.study"));
+  var whenText = mode + " · " + heading + " · " + studies.length + (studies.length === 1 ? " study" : " studies") + " · " + when;
+  var caveat = "Clinic rendition of the protocol brief on file. Confirm the current protocol before enrollment.";
+  function makeHeader(kind, title) {
+    var header = document.createElement("header");
+    header.className = "run " + kind;
+    header.innerHTML = '<p class="tracker-line"><span class="tracker"><\/span><\/p><h1><\/h1>' + (kind === "toc-head" ? '<p class="when"><\/p>' : "");
+    header.querySelector(".tracker").textContent = tracker;
+    if (places) {
+      var loc = document.createElement("b");
+      loc.className = "loc";
+      loc.textContent = places;
+      header.querySelector(".tracker-line").appendChild(loc);
+    }
+    if (kind === "toc-head" && filters) {
+      var line = document.createElement("p");
+      line.className = "filters";
+      line.textContent = filters;
+      header.insertBefore(line, header.querySelector("h1"));
+    }
+    header.querySelector("h1").textContent = title;
+    if (kind === "toc-head") header.querySelector(".when").textContent = whenText;
+    return header;
+  }
+  function makeFooter(pageNo) {
+    var footer = document.createElement("footer");
+    footer.className = "run";
+    footer.innerHTML = '<span class="caveat"><\/span><span class="pageno"><\/span>';
+    footer.querySelector(".caveat").textContent = caveat;
+    footer.querySelector(".pageno").textContent = String(pageNo);
+    return footer;
+  }
+  var probeSheet = document.createElement("div");
+  probeSheet.className = "probe-sheet";
+  var siteProbe = makeHeader("site-head", "Site");
+  var tocProbe = makeHeader("toc-head", "Contents");
+  var footProbe = makeFooter("00");
+  measure.insertBefore(footProbe, measure.firstChild);
+  measure.insertBefore(tocProbe, measure.firstChild);
+  measure.insertBefore(siteProbe, measure.firstChild);
+  measure.insertBefore(probeSheet, measure.firstChild);
+  function outerH(el) {
+    var s = getComputedStyle(el);
+    return el.offsetHeight + (parseFloat(s.marginTop) || 0) + (parseFloat(s.marginBottom) || 0);
+  }
+  var sheetH = probeSheet.offsetHeight;
+  var footH = outerH(footProbe);
+  var slack = 48;
+  function contentAvail(site) {
+    siteProbe.querySelector("h1").textContent = site || "Site";
+    return sheetH - outerH(siteProbe) - footH - slack;
+  }
+  var tocAvail = sheetH - outerH(tocProbe) - footH - slack;
+  var groups = [];
+  var seen = {};
+  studies.forEach(function(article) {
+    var site = article.dataset.site || "Site not stated";
+    if (!seen[site]) { seen[site] = {site: site, articles: []}; groups.push(seen[site]); }
+    seen[site].articles.push({el: article, h: outerH(article)});
+  });
+  groups.sort(function(a, b) { return a.site.localeCompare(b.site, undefined, {numeric: true}); });
+  function packStudies() {
+    var pages = [];
+    groups.forEach(function(group) {
+      var avail = contentAvail(group.site);
+      var bucket = [];
+      var used = 0;
+      function flush() {
+        if (!bucket.length) return;
+        pages.push({site: group.site, items: bucket});
+        bucket = [];
+        used = 0;
+      }
+      group.articles.forEach(function(item) {
+        if (bucket.length && used + item.h > avail) flush();
+        bucket.push(item);
+        used += item.h;
+        if (item.h > avail) flush();
+      });
+      flush();
+    });
+    return pages;
+  }
+  function tocBlocks(start) {
+    return groups.map(function(group) {
+      var block = document.createElement("section");
+      block.className = "toc-site";
+      var line = document.createElement("div");
+      line.className = "toc-line";
+      var name = document.createElement("b");
+      name.textContent = group.site;
+      var num = document.createElement("span");
+      num.className = "toc-num";
+      num.textContent = String(start[group.site] || "");
+      line.appendChild(name);
+      line.appendChild(num);
+      var list = document.createElement("ul");
+      group.articles.forEach(function(item) {
+        var li = document.createElement("li");
+        li.textContent = item.el.querySelector("h2").textContent;
+        list.appendChild(li);
+      });
+      block.appendChild(line);
+      block.appendChild(list);
+      measure.appendChild(block);
+      return {el: block, h: outerH(block)};
+    });
+  }
+  function packBlocks(blocks, avail) {
+    var pages = [];
+    var bucket = [];
+    var used = 0;
+    function flush() {
+      if (!bucket.length) return;
+      pages.push(bucket);
+      bucket = [];
+      used = 0;
+    }
+    blocks.forEach(function(block) {
+      if (bucket.length && used + block.h > avail) flush();
+      bucket.push(block);
+      used += block.h;
+      if (block.h > avail) flush();
+    });
+    flush();
+    return pages;
+  }
+  function makeSheet(title, pageNo, contents) {
+    var section = document.createElement("section");
+    section.className = "sheet";
+    var header = makeHeader(contents ? "toc-head" : "site-head", title);
+    var body = document.createElement("div");
+    body.className = "sheet-body";
+    section.appendChild(header);
+    section.appendChild(body);
+    section.appendChild(makeFooter(pageNo));
+    return section;
+  }
+  var tocPageCount = 1;
+  var contentPages = [];
+  var tocPages = [];
+  var pass;
+  for (pass = 0; pass < 5; pass++) {
+    Array.prototype.forEach.call(measure.querySelectorAll(".toc-site"), function(el) { el.remove(); });
+    contentPages = packStudies();
+    var start = {};
+    contentPages.forEach(function(page, i) {
+      if (start[page.site] == null) start[page.site] = tocPageCount + 1 + i;
+    });
+    tocPages = packBlocks(tocBlocks(start), tocAvail);
+    if (tocPages.length === tocPageCount) break;
+    tocPageCount = Math.max(1, tocPages.length);
+  }
+  var out = document.getElementById("out");
+  var pageNo = 1;
+  tocPages.forEach(function(bucket) {
+    var sheet = makeSheet("Contents", pageNo, true);
+    bucket.forEach(function(block) { sheet.querySelector(".sheet-body").appendChild(block.el); });
+    out.appendChild(sheet);
+    pageNo++;
+  });
+  contentPages.forEach(function(page) {
+    var sheet = makeSheet(page.site, pageNo, false);
+    page.items.forEach(function(item) { sheet.querySelector(".sheet-body").appendChild(item.el); });
+    out.appendChild(sheet);
+    pageNo++;
+  });
+  measure.remove();
+}
+packDigest();
+</script></body></html>

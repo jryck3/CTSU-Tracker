@@ -6,6 +6,11 @@ For each study on data/studies.json it reports:
 - brief defects of the kinds fixed by hand on October 10, 2026: table-of-contents
   text, schema text inside eligibility, joined lab columns, spaced-out
   RANDOMIZE letters, criteria that lost their leading "No", glued words
+- schema and eligibility failures of the S2511 kind: repeated or empty arms,
+  objectives prose inside the schema, day-counting boilerplate kept as a
+  criterion, a deleted "a", a section letter glued onto the previous
+  criterion, and eligibility that stops before a later registration step
+  still present in the protocol
 - for studies classed as not RT-related, radiotherapy that the protocol itself
   specifies (dose prescriptions and RT terms on the schema page)
 
@@ -33,6 +38,29 @@ GLUED = re.compile(r"\b[a-z]{3,}(?:a|the|of|for|and)[A-Z][a-z]{2,}|\b(?:a|the)(?
 SPLIT_WORD = re.compile(r"\b(?:pa rticipants|system ic|week s|C isplatin|G emcitabine|multi -centre|non -inferiority)\b|\b[a-z]{2,} (?!(?:of|or|to|in|at|by|an|on|as|is|if|no|up|be|vs|a)\b)[a-z]{1,2}\b(?= [a-z]{3,}tion)")
 PAGE_TAIL = re.compile(r"\s\d{2,3}$")
 FOOTNOTE_GLUE = re.compile(r"\b(?:Arm|Step)\s+[A-Z]?\d{2,}\b|\bRev\.\s|\bAdd\d")
+FRAG_ARM = re.compile(r"^(?:\)|\.|,|versus\b|who\b|per protocol\b)", re.I)
+OBJECTIVES_IN_SCHEMA = re.compile(r"\bprimary objectives?\b|\b1\.0\s+objectives\b|\bversus those who\b", re.I)
+BOILER_FIRST = re.compile(r"falls onaweekend|falls on a weekend|weekend or holiday|NCI policy does not allow|considered Day 0", re.I)
+DELETED_A = re.compile(
+    r"\b(?:onaweekend|ofasoft|ofadistant|biopsyametastatic|byasurgeon|areagood|foralimb|Asapart|haveaprimary|"
+    r"ona[a-z]{4,}|ofas[a-z]{3,}|byas[a-z]{4,}|foral[a-z]{3,})\b"
+)
+SECTION_GLUE = re.compile(r"\b[a-e]\.\s+(?:Disease|Prior/?Concurrent|Clinical|Additional|Regulatory)\b")
+FOOTNOTE_ITEM = re.compile(r"\b[A-Za-z]{3,}\s[a-z]$")
+LATER_STEP_LINE = re.compile(
+    r"^(?:\d+(?:\.\d+)+\.?\s+)?Registration\s+Step\s+[2-9]\b"
+    r"|^Step\s+[2-9]\s*[-–:]\s*(?:Cohort|Registration|Randomization)\b",
+    re.I,
+)
+BRIEF_LATER = re.compile(r"\bStep\s+[2-9]\b", re.I)
+SCHEMA_FURNITURE = re.compile(
+    r"footnote|detailing|recommended|paragraph|confidential|alliance|oncology|version|update|protocol",
+    re.I,
+)
+ELIG_START = re.compile(r"^\s*(?:\d+(?:\.\d+)*\.?\s+)?ELIGIBILITY CRITERIA\b", re.I)
+ELIG_STOP = re.compile(r"^\s*(?:6\.0|7\.0)\s+[A-Z]|^\s*STRATIFICATION\b|^\s*TREATMENT PLAN\b", re.I)
+SCHEMA_START = re.compile(r"^\s*(?:EXPERIMENTAL DESIGN SCHEMA|STUDY SCHEMA|TREATMENT SCHEMA|SCHEMA)\b", re.I)
+SCHEMA_STOP = re.compile(r"^\s*1\.0\s+[A-Z]|^\s*OBJECTIVES\b", re.I)
 
 DOSE = re.compile(r"\b\d{1,3}(?:\.\d)?\s*(?:Gy|cGy)\b")
 RT_TERM = re.compile(r"radiation therapy|radiotherapy|chemoradiation|chemoradiotherapy|\bSBRT\b|\bSABR\b|\bIMRT\b|brachytherapy|stereotactic radiosurgery|\bSRS\b|whole brain|\bTBI\b|total body irradiation|involved[- ]site|\bISRT\b|\bXRT\b", re.I)
@@ -94,6 +122,123 @@ def brief_defects(brief):
         found.append({"section": "eligibility", "tag": "missing"})
     if not brief.get("schema"):
         found.append({"section": "schema", "tag": "missing"})
+    found.extend(format_defects(brief))
+    return found
+
+
+def format_defects(brief):
+    """Failures the October 10 patterns miss: a flowchart read out of order,
+    objectives prose turned into arms, and eligibility cut off or glued."""
+    found = []
+    schema = brief.get("schema") or []
+    arms = [arm for step in schema for arm in (step.get("arms") or [])]
+    labels = [arm.get("label") or "" for arm in arms]
+    if labels and len(labels) != len(set(labels)):
+        found.append({"section": "schema", "tag": "duplicate-arm-labels", "text": ", ".join(labels[:8])})
+    for arm in arms:
+        text = (arm.get("text") or "").strip()
+        if len(text) < 8 or FRAG_ARM.match(text):
+            found.append({
+                "section": "schema",
+                "tag": "fragment-arm",
+                "text": "%s: %s" % (arm.get("label") or "", text[:80]),
+            })
+            break
+    schema_blob = " ".join(texts({"schema": schema}))
+    if OBJECTIVES_IN_SCHEMA.search(schema_blob):
+        found.append({"section": "schema", "tag": "objectives-in-schema", "text": schema_blob[:160]})
+    elig = [item for item in (brief.get("eligibility") or []) if isinstance(item, str)]
+    if elig and BOILER_FIRST.search(elig[0]):
+        found.append({"section": "eligibility", "tag": "boilerplate-first", "text": elig[0][:160]})
+    for section in ("schema", "eligibility", "pretreatment", "during", "followup"):
+        for text in texts(brief.get(section) or []):
+            if DELETED_A.search(text):
+                found.append({"section": section, "tag": "deleted-a", "text": text[:160]})
+                break
+    for item in elig:
+        if SECTION_GLUE.search(item) and len(item) > 80:
+            found.append({"section": "eligibility", "tag": "section-header-glued", "text": item[:160]})
+            break
+    for section in ("pretreatment", "during", "followup"):
+        for row in brief.get(section) or []:
+            item = row.get("item") or ""
+            if FOOTNOTE_ITEM.search(item) and len(item) < 48:
+                found.append({"section": section, "tag": "footnote-on-row", "text": item[:160]})
+                break
+    return found
+
+
+def _page_text(page):
+    try:
+        return page.extract_text() or ""
+    except Exception:
+        return ""
+
+
+def pdf_format_check(path, brief):
+    """Compare the brief with the schema page and the eligibility section.
+
+    A later registration step in the protocol that the brief never mentions is
+    the S2511 cutoff. The opening schema words are a check that the brief is
+    still about the same page.
+    """
+    from pypdf import PdfReader
+    reader = PdfReader(str(path))
+    found = []
+    schema_words = []
+    elig_text = []
+    in_schema = False
+    in_elig = False
+    for index, page in enumerate(reader.pages[:40]):
+        text = _page_text(page)
+        if "TABLE OF CONTENTS" in text.upper() and text.upper().count("...") > 3:
+            continue
+        lines = [re.sub(r"\s+", " ", line).strip() for line in text.splitlines()]
+        lines = [line for line in lines if line]
+        for line in lines:
+            if not in_schema and index < 20 and SCHEMA_START.match(line) and len(line) < 48:
+                in_schema = True
+                continue
+            if in_schema:
+                if SCHEMA_STOP.match(line):
+                    in_schema = False
+                elif len(schema_words) < 40 and not SCHEMA_FURNITURE.search(line):
+                    schema_words.extend(word for word in re.findall(r"[A-Za-z]{6,}", line))
+            if not in_elig and ELIG_START.match(line) and len(line) < 120:
+                in_elig = True
+                continue
+            if in_elig:
+                if ELIG_STOP.match(line):
+                    in_elig = False
+                    break
+                if LATER_STEP_LINE.match(line):
+                    elig_text.append(line)
+        if elig_text and not in_elig:
+            break
+    brief_schema = " ".join(texts(brief.get("schema") or [])).lower()
+    if schema_words and brief.get("schema"):
+        distinctive = []
+        for word in schema_words:
+            low = word.lower()
+            if SCHEMA_FURNITURE.search(low):
+                continue
+            if low not in distinctive and low not in {"protocol", "version", "page", "schema", "participants", "participant", "section", "summary", "dosing", "details"}:
+                distinctive.append(low)
+        sample = distinctive[:8]
+        hits = sum(1 for word in sample if word in brief_schema)
+        if len(sample) >= 4 and hits == 0:
+            found.append({
+                "section": "schema",
+                "tag": "schema-opening-mismatch",
+                "text": " ".join(sample),
+            })
+    brief_elig = " ".join(item for item in (brief.get("eligibility") or []) if isinstance(item, str))
+    if elig_text and not BRIEF_LATER.search(brief_elig):
+        found.append({
+            "section": "eligibility",
+            "tag": "eligibility-stops-early",
+            "text": elig_text[0][:160],
+        })
     return found
 
 
@@ -147,6 +292,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--only", nargs="*")
     parser.add_argument("--skip-pdf", action="store_true", help="Brief checks only")
+    parser.add_argument("--format", action="store_true", help="Schema and eligibility checks only. Skip the radiotherapy scan.")
     args = parser.parse_args()
     studies = json.loads(lib.STUDIES.read_text())["studies"]
     manifest, briefs = lib.manifest(), lib.briefs()
@@ -171,7 +317,12 @@ def main():
             "reviewed": brief.get("reviewed"),
             "defects": brief_defects(brief) if pdf else [],
         }
-        if pdf and not args.skip_pdf and not row["rt_related"]:
+        if pdf and not args.skip_pdf:
+            try:
+                row["defects"].extend(pdf_format_check(pdf, brief))
+            except Exception as exc:
+                row["defects"].append({"section": "pdf", "tag": "pdf-error", "text": str(exc)[:160]})
+        if pdf and not args.skip_pdf and not args.format and not row["rt_related"]:
             try:
                 row["rt_signal"] = pdf_rt_signal(pdf)
                 row["rt_flag"] = rt_flag(row["rt_signal"])
@@ -180,19 +331,24 @@ def main():
         rows.append(row)
     OUT.parent.mkdir(exist_ok=True)
     OUT.write_text(json.dumps(rows, indent=1, ensure_ascii=False))
-    non = [row for row in rows if not row["rt_related"]]
-    with_pdf = [row for row in non if row["pdf"]]
-    tags = Counter(defect["tag"] for row in with_pdf for defect in row["defects"])
-    flagged = [row["protocol"] for row in with_pdf if any(d["tag"] != "missing" for d in row["defects"])]
+    on_file = [row for row in rows if row["pdf"]]
+    missing_pdf = [row for row in rows if not row["pdf"]]
+    tags = Counter(defect["tag"] for row in on_file for defect in row["defects"])
+    queue = []
+    for row in on_file:
+        seen = []
+        for defect in row["defects"]:
+            if defect["tag"] not in seen:
+                seen.append(defect["tag"])
+        if seen:
+            queue.append({"protocol": row["protocol"], "reviewed": bool(row.get("reviewed")), "tags": seen})
     print(json.dumps({
         "studies": len(rows),
-        "non_rt": len(non),
-        "non_rt_with_protocol": len(with_pdf),
-        "non_rt_without_protocol": Counter(row["manifest_status"] or "never checked" for row in non if not row["pdf"]),
-        "non_rt_defect_tags": tags,
-        "non_rt_briefs_with_defects": len(flagged),
-        "rt_flags": Counter(row.get("rt_flag") or "none" for row in with_pdf),
-        "rt_flagged": {row["protocol"]: row["rt_flag"] for row in with_pdf if row.get("rt_flag")},
+        "with_protocol": len(on_file),
+        "without_protocol": Counter(row["manifest_status"] or "never checked" for row in missing_pdf),
+        "defect_tags": tags,
+        "flagged": len(queue),
+        "queue": queue,
     }, indent=1, default=dict))
 
 

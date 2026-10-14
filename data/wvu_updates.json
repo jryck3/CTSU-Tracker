@@ -1,3 +1,4 @@
 {
- "line": "CTSU protocols are checked Sunday evening, and changed briefs publish automatically. ClinicalTrials.gov, OnCore, and CTSU accrual checks run Monday at 7:00 AM Eastern. Ingest now checks ClinicalTrials.gov and the public WVU pages. It does not download CTSU protocol PDFs."
+ "line": "Checked Monday, Oct 12, 7:00 AM. Baseline saved for ClinicalTrials.gov and the public WVU pages. No prior snapshot to compare. CTSU accrual: A012103 1123 to 1125; A012303 267 to 269; A032103 346 to 347; A032201 394 to 400. Protocol PDFs are not downloaded by this job. Protocol PDFs are not downloaded by this job. The copies in the CTSU project stay as they are until a new file is saved there by hand.",
+ "checked": "Monday, Oct 12, 7:00 AM"
 }
