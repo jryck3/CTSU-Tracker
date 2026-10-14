@@ -12,8 +12,14 @@
 #
 # --if-stale  republish only the trackers whose last publish used an older library.
 # --no-push   build and check only. Nothing is committed, pushed, or deployed.
+# A real publish runs in the clean checkout from TRACKER_CHECKOUT_ROOT.
+# It refuses a dirty tree and does not autostash.
 set -u
 cd "$(dirname "$0")/.."
+# shellcheck disable=SC1091
+. "$(pwd)/scripts/publish_tree.sh"
+SYNCED_CTSU="$(pwd)"
+export CTSU_LIBRARY_ROOT="$SYNCED_CTSU"
 CTSU="$(pwd)"
 PROJECTS="$(cd .. && pwd)"
 WORKSPACE="$(cd ../.. && pwd)"
@@ -122,6 +128,7 @@ PY
 
 # git_publish REPO_DIR MESSAGE PATH... : commit only PATHs, rebase on origin, push (one retry).
 # Prints the pushed commit when it committed something, and nothing otherwise.
+# Refuses to rebase when tracked edits are still uncommitted. Does not autostash.
 git_publish() {
   local dir="$1" message="$2"
   shift 2
@@ -135,8 +142,12 @@ git_publish() {
       git commit -q -m "$message" -- "$@" || exit 1
       committed=1
     fi
+    if ! git diff --quiet || ! git diff --cached --quiet; then
+      echo "Refusing to rebase $(basename "$dir"). Tracked changes are still uncommitted." >&2
+      exit 1
+    fi
     for attempt in 1 2; do
-      git pull -q --rebase --autostash >&2 || exit 1
+      git pull -q --rebase --no-autostash >&2 || exit 1
       if git push -q >&2; then
         [ "$committed" -eq 1 ] && git rev-parse HEAD
         exit 0
@@ -147,12 +158,42 @@ git_publish() {
   )
 }
 
+PUBLISH_READY=0
+activate_publish_tree() {
+  if [ "$PUBLISH_READY" -eq 1 ]; then
+    return 0
+  fi
+  if [ "$PUSH" -eq 0 ]; then
+    assert_clean_repo "$CTSU" || return 1
+    assert_clean_repo "$WW" || return 1
+    assert_clean_repo "$WVU" || return 1
+    PUBLISH_READY=1
+    return 0
+  fi
+  local new_ctsu new_ww new_wvu
+  new_ctsu="$(require_publish_checkout "CTSU Trials Workspace")" || return 1
+  new_ww="$(require_publish_checkout "Worldwide RT Trials")" || return 1
+  new_wvu="$(require_publish_checkout "WVU Trials Demo")" || return 1
+  sync_publish_checkout "$new_ctsu" >/dev/null || return 1
+  sync_publish_checkout "$new_ww" >/dev/null || return 1
+  sync_publish_checkout "$new_wvu" >/dev/null || return 1
+  link_ctsu_library "$SYNCED_CTSU" "$new_ctsu"
+  CTSU="$new_ctsu"
+  WW="$new_ww"
+  WVU="$new_wvu"
+  CLASP="$WVU/node_modules/.bin/clasp"
+  cd "$CTSU"
+  PUBLISH_READY=1
+}
+
 CTSU_SHA=""
 WW_SHA=""
 
 # CTSU
 if needed ctsu; then
-  if ! "$SYS" scripts/publish_checks.py briefs; then
+  if ! activate_publish_tree; then
+    fail ctsu
+  elif ! "$SYS" scripts/publish_checks.py briefs; then
     fail ctsu
   elif [ "$PUSH" -eq 1 ]; then
     if CTSU_SHA=$(git_publish "$CTSU" "Protocol briefs: $REASON." data/protocol_briefs.json data/protocol_library.json); then
@@ -174,7 +215,9 @@ if needed worldwide || [ -n "$ww_missing" ]; then
     echo "Worldwide is missing CTSU studies ($ww_missing); running the full build."
     ww_build=""
   fi
-  if ! (cd "$WW" && git pull -q --rebase --autostash); then
+  if ! activate_publish_tree; then
+    fail worldwide
+  elif ! git_pull_rebase_clean "$WW"; then
     fail worldwide
   elif ! (cd "$WW" && "$PY" build.py $ww_build); then
     fail worldwide
@@ -194,7 +237,9 @@ fi
 
 # WVU
 if needed wvu || [ "$(published wvu_files)" != "$(wvu_files_hash)" ]; then
-  if ! (cd "$WVU" && "$PY" enrich_details.py); then
+  if ! activate_publish_tree; then
+    fail wvu
+  elif ! (cd "$WVU" && "$PY" enrich_details.py); then
     fail wvu
   elif ! "$SYS" scripts/publish_checks.py wvu "$WVU"; then
     fail wvu
