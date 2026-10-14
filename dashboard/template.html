@@ -873,15 +873,8 @@ const STATUS_MENU = [
   ["approved", "Approved, not yet open"],
   ["temporary", "Temporarily closed"],
 ];
-const BURDEN_MENU = [
-  ["Oligoprogressive", "Oligoprogressive"],
-  ["Oligometastatic", "Oligometastatic"],
-  ["Oligopersistent", "Oligopersistent"],
-  ["Polymetastatic", "Polymetastatic"],
-  ["Metastatic, burden not specified", "Metastatic, burden not specified"],
-  ["Curative / definitive", "Curative / definitive"],
-  ["Mixed", "Mixed"],
-];
+const BURDEN_ORDER = ["Oligoprogressive", "Oligometastatic", "Polymetastatic", "Other"];
+let BURDEN_MENU = [];
 function defaultBurdens() { return new Set(BURDEN_MENU.map(([value]) => value)); }
 function defaultStatuses() { return new Set(["active"]); }
 const ROLE_MENU = [
@@ -1082,7 +1075,15 @@ function metastaticSignal(text) {
   if (/\bM1[a-c]?\b/.test(cleaned)) return true;
   return /\bstage\s+(?:IV|4)\b/i.test(cleaned);
 }
-function burdenLabels(text) {
+function burdenName(labels) {
+  const specific = [];
+  (labels || []).forEach(label => {
+    const mapped = label === "Oligopersistent" ? "Oligometastatic" : label;
+    if (["Oligoprogressive", "Oligometastatic", "Polymetastatic"].includes(mapped) && !specific.includes(mapped)) specific.push(mapped);
+  });
+  return specific.length === 1 ? specific[0] : "Other";
+}
+function burdenLabelsRaw(text) {
   text = String(text || "");
   if (MIXED_BURDEN.test(text)) return ["Mixed"];
   const enrolled = text.replace(new RegExp(OLIGO_EXCLUSION_SRC, "gi"), " ");
@@ -1112,9 +1113,14 @@ function burdenText(s) {
   const eligibility = (s.brief && s.brief.eligibility) || [];
   return [s.title || "", s.disease || ""].concat(Array.isArray(eligibility) ? eligibility : [eligibility]).join(" ");
 }
+function burdenLabels(text) {
+  return [burdenName(burdenLabelsRaw(text))];
+}
 function burdenOf(s) {
+  if (s.burden && s.burden.length) return [burdenName(s.burden)];
   return burdenLabels(burdenText(s));
 }
+BURDEN_MENU = BURDEN_ORDER.filter(label => S.some(s => burdenOf(s)[0] === label)).map(label => [label, label]);
 
 function leadGroup(s) {
   const lead = s.lead || "";

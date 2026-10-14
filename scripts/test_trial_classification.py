@@ -18,7 +18,7 @@ CASES = [
         },
         "cancer_types": ["Breast"],
         "forbid_types": ["Ovary", "Gyn", "Gynecologic"],
-        "burden": ["Curative / definitive"],
+        "burden": ["Other"],
     },
     {
         "id": "MYELOMATCH",
@@ -53,7 +53,7 @@ CASES = [
                 "Primary endpoint is metastasis-free survival.",
             ],
         },
-        "burden": ["Curative / definitive"],
+        "burden": ["Other"],
         "forbid_burden": ["Metastatic, burden not specified"],
     },
     {
@@ -66,7 +66,7 @@ CASES = [
                 "No distant metastases on FDG PET/CT.",
             ],
         },
-        "burden": ["Curative / definitive"],
+        "burden": ["Other"],
         "require_any_type": ["NSCLC", "Lung"],
     },
     {
@@ -79,7 +79,7 @@ CASES = [
                 "No clinical evidence of cervical nodal or distant metastases.",
             ],
         },
-        "burden": ["Curative / definitive"],
+        "burden": ["Other"],
         "require_any_type": ["Oral cavity", "Head and neck", "H&N"],
     },
     {
@@ -92,7 +92,7 @@ CASES = [
                 "No para-aortic node metastasis above the T12/L1 interspace.",
             ],
         },
-        "burden": ["Curative / definitive"],
+        "burden": ["Other"],
         "require_any_type": ["Cervix", "Gyn"],
     },
     {
@@ -119,7 +119,31 @@ CASES = [
             ],
         },
         "burden": ["Oligometastatic"],
-        "forbid_burden": ["Mixed"],
+        "forbid_burden": ["Mixed", "Other"],
+    },
+    {
+        "id": "oligopersistent",
+        "record": {
+            "protocol": "OLIGO-P",
+            "title": "A trial for oligopersistent lung cancer",
+        },
+        "burden": ["Oligometastatic"],
+    },
+    {
+        "id": "both-specific",
+        "record": {
+            "protocol": "BOTH",
+            "title": "Oligometastatic or polymetastatic breast cancer",
+        },
+        "burden": ["Other"],
+    },
+    {
+        "id": "polymetastatic",
+        "record": {
+            "protocol": "POLY",
+            "title": "Widespread metastatic prostate cancer with more than ten metastases",
+        },
+        "burden": ["Polymetastatic"],
     },
     {
         "id": "WVU010924",
@@ -151,7 +175,7 @@ CASES = [
             "disease": ["Miscellaneous and Metastatic Cancer"],
         },
         "cancer_types": ["Biorepository"],
-        "burden": ["Not applicable"],
+        "burden": ["Other"],
         "forbid_burden": ["Metastatic, burden not specified"],
     },
     {
@@ -162,7 +186,7 @@ CASES = [
             "disease": ["Miscellaneous and Metastatic Cancer"],
         },
         "cancer_types": ["Registry"],
-        "burden": ["Not applicable"],
+        "burden": ["Other"],
     },
     {
         "id": "A211901",
@@ -172,7 +196,7 @@ CASES = [
             "disease": ["Brain Cancer", "Breast Cancer", "Miscellaneous and Metastatic Cancer"],
         },
         "cancer_types": ["Smoking cessation"],
-        "burden": ["Not applicable"],
+        "burden": ["Other"],
         "forbid_burden": ["Metastatic, burden not specified", "Curative / definitive"],
     },
     {
@@ -183,7 +207,7 @@ CASES = [
             "disease": ["Miscellaneous and Metastatic Cancer"],
         },
         "cancer_types": ["Early detection"],
-        "burden": ["Not applicable"],
+        "burden": ["Other"],
         "forbid_burden": ["Curative / definitive", "Metastatic, burden not specified"],
     },
 ]

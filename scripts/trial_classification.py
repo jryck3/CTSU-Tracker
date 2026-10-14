@@ -224,67 +224,54 @@ def _nontherapeutic(text):
     return ""
 
 
+BURDEN_ORDER = ("Oligoprogressive", "Oligometastatic", "Polymetastatic", "Other")
+_BURDEN_FOLD = {"Oligopersistent": "Oligometastatic"}
+
+
+def one_burden(labels):
+    """Keep a single specific burden. Anything else, including curative and screening, is Other."""
+    specific = []
+    for label in labels or []:
+        mapped = _BURDEN_FOLD.get(label, label)
+        if mapped in BURDEN_ORDER[:3] and mapped not in specific:
+            specific.append(mapped)
+    ordered = [label for label in BURDEN_ORDER if label in specific]
+    if len(ordered) == 1:
+        return [ordered[0]]
+    return ["Other"]
+
+
 def burden_labels(text):
-    """One burden list. An explicit oligometastatic population is not Mixed."""
+    """One of four labels. Oligopersistent counts as oligometastatic."""
     original = text or ""
     enrolled = _enrolled_text(original)
     if _nontherapeutic(original):
-        return ["Not applicable"]
-    if _MIXED_BURDEN.search(enrolled):
-        explicit_oligo = re.search(_NOT_OLIGO + r"\boligometa", enrolled, re.I)
-        poly_or = re.search(r"oligometast\w*\s+or\s+polymetast|polymetast\w*\s+or\s+oligometast", enrolled, re.I)
-        if not (explicit_oligo and not poly_or):
-            return ["Mixed"]
+        return ["Other"]
     oligop = re.search(_NOT_OLIGO + r"\boligoprogress", enrolled, re.I)
     oligopersist = re.search(_NOT_OLIGO + r"\boligopersist", enrolled, re.I)
     oligom = re.search(_NOT_OLIGO + r"\boligometa|" + _NOT_OLIGO + r"\boligorecurren", enrolled, re.I)
     cap = _oligo_cap(enrolled)
     sbrt = re.search(r"all sites amenable to (?:SBRT|SABR|metastasis-directed)", enrolled, re.I)
     poly = _POLY.search(enrolled)
-    curative = _CURATIVE.search(original)
-    metastatic = _metastatic_signal(enrolled)
-    if re.search(r"\bcohorts?\b", enrolled, re.I):
-        oligo_kind = bool(oligom or cap or sbrt or oligopersist)
-        kinds = sum([
-            bool(oligop),
-            oligo_kind,
-            bool(poly),
-            bool(curative and metastatic and not oligo_kind),
-        ])
-        if kinds >= 2:
-            return ["Mixed"]
-    labels = []
+    specific = []
     if oligop:
-        labels.append("Oligoprogressive")
-    if oligopersist:
-        labels.append("Oligopersistent")
-    if oligom or cap or sbrt:
-        labels.append("Oligometastatic")
+        specific.append("Oligoprogressive")
+    if oligopersist or oligom or cap or sbrt:
+        specific.append("Oligometastatic")
     if poly:
-        labels.append("Polymetastatic")
-    specific = any(label in labels for label in ("Oligoprogressive", "Oligometastatic", "Polymetastatic"))
-    if curative and not metastatic and not specific:
-        labels.append("Curative / definitive")
-    elif metastatic and not specific and not curative:
-        labels.append("Metastatic, burden not specified")
-    elif metastatic and not specific and curative:
-        if re.search(r"\bM0\b|no distant metast|locally advanced|high-risk prostate|early-stage", original, re.I):
-            labels.append("Curative / definitive")
-        else:
-            labels.append("Metastatic, burden not specified")
-    return labels
+        specific.append("Polymetastatic")
+    return one_burden(specific)
 
 
 def _intent(burden):
-    if "Not applicable" in burden:
-        return "not_applicable"
-    if "Curative / definitive" in burden:
-        return "curative"
-    if "Oligometastatic" in burden or "Oligoprogressive" in burden or "Oligopersistent" in burden:
+    label = (burden or ["Other"])[0]
+    if label == "Oligoprogressive":
+        return "oligoprogressive"
+    if label == "Oligometastatic":
         return "oligometastatic"
-    if burden:
-        return "metastatic"
-    return "not_classified"
+    if label == "Polymetastatic":
+        return "polymetastatic"
+    return "other"
 
 
 def _clean_labels(labels):
@@ -308,7 +295,7 @@ def classify_record(record):
     anatomy = _hits(ANATOMY, text)
     burden = burden_labels(text)
     if special:
-        burden = ["Not applicable"]
+        burden = ["Other"]
         if not histology:
             histology = []
     cancer_types = _clean_labels(histology or anatomy)
@@ -331,7 +318,7 @@ def classify_record(record):
     if reviewed.get("cancer_types"):
         result["cancer_types"] = _clean_labels(reviewed["cancer_types"]) or ["Not classified"]
     if reviewed.get("burden"):
-        result["burden"] = [str(item) for item in reviewed["burden"]]
+        result["burden"] = one_burden(reviewed["burden"])
         result["intent"] = _intent(result["burden"])
     if reviewed.get("intent"):
         result["intent"] = reviewed["intent"]
