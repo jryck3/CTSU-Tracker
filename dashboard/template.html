@@ -806,14 +806,20 @@ function drawCharts() {
   $("trend-note").textContent =
     `Solid lines: daily CTSU snapshots (${n === 1 ? "first snapshot taken " + start : n + " snapshots since " + start}). Dashed: a straight line from study start to that first snapshot. Interval accrual before then cannot be tracked.`;
 
-  $("rates-wrap").style.height = Math.max(330, 80 + 34 * list.length) + "px";
+  const currentRate = s => {
+    if (s.trailing30 && s.trailing30.per_month != null) return s.trailing30.per_month;
+    if (s.avg_rate != null) return s.avg_rate;
+    return -1;
+  };
+  const rates = list.slice().sort((a, b) => currentRate(b) - currentRate(a) || String(a.alias || a.protocol).localeCompare(String(b.alias || b.protocol), undefined, {numeric: true}));
+  $("rates-wrap").style.height = Math.max(330, 80 + 34 * rates.length) + "px";
   rateChart = new Chart($("rates"), {
     type: "bar",
     data: {
-      labels: list.map(s => s.alias || s.protocol),
+      labels: rates.map(s => s.alias || s.protocol),
       datasets: [
-        {label: "Average since activation", data: list.map(s => s.avg_rate), backgroundColor: "#2b6cb0"},
-        {label: "Last 30 days", data: list.map(s => s.trailing30 ? s.trailing30.per_month : null), backgroundColor: "#ed8936"},
+        {label: "Average since activation", data: rates.map(s => s.avg_rate), backgroundColor: "#2b6cb0"},
+        {label: "Last 30 days", data: rates.map(s => s.trailing30 ? s.trailing30.per_month : null), backgroundColor: "#ed8936"},
       ],
     },
     options: {
@@ -915,6 +921,17 @@ function sitesOf(s) {
     if (mapped === "Male Reproductive System Cancer" && !seen.has("Genitourinary Cancers")) {
       seen.add("Genitourinary Cancers");
       out.push("Genitourinary Cancers");
+    }
+  });
+  const burdenText = [s.title || "", s.disease || ""].join(" ");
+  [
+    ["Oligoprogressive disease", /(?<!non[-\s])\boligop/i],
+    ["Oligometastatic disease", /(?<!non[-\s])\boligom/i],
+    ["Polymetastatic disease", /(?<!non[-\s])\bpolymetast/i],
+  ].forEach(([label, pattern]) => {
+    if (pattern.test(burdenText) && !seen.has(label)) {
+      seen.add(label);
+      out.push(label);
     }
   });
   return out;
