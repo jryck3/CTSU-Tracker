@@ -802,8 +802,9 @@ function drawCharts() {
     },
   });
   const n = DATA.snapshot_days;
+  const start = fmtDate(DATA.history_start);
   $("trend-note").textContent =
-    `Solid lines: daily CTSU snapshots (${n === 1 ? "first snapshot taken " + fmtDate(DATA.history_start) : n + " snapshots since " + fmtDate(DATA.history_start)}). Dashed: straight line from study start to first snapshot.`;
+    `Solid lines: daily CTSU snapshots (${n === 1 ? "first snapshot taken " + start : n + " snapshots since " + start}). Dashed: a straight line from study start to that first snapshot. Interval accrual before then cannot be tracked.`;
 
   $("rates-wrap").style.height = Math.max(330, 80 + 34 * list.length) + "px";
   rateChart = new Chart($("rates"), {
