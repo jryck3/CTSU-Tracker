@@ -230,6 +230,7 @@
     <div class="digest-actions">
       <button class="btn digest-btn" id="print-mine-brief" type="button">Print brief PDF of filtered studies displayed below</button>
       <button class="btn digest-btn" id="print-mine-full" type="button">Print comprehensive PDF of filtered studies displayed below</button>
+      <button class="btn digest-btn" id="print-mine-detail" type="button">Print full PDF of filtered studies displayed below</button>
     </div>
     <div id="shared"></div>
     <div class="mine-tools">
@@ -304,6 +305,7 @@
     <div class="digest-actions">
       <button class="btn digest-btn" id="print-explore-brief" type="button">Print brief PDF of filtered studies displayed below</button>
       <button class="btn digest-btn" id="print-explore-full" type="button">Print comprehensive PDF of filtered studies displayed below</button>
+      <button class="btn digest-btn" id="print-explore-detail" type="button">Print full PDF of filtered studies displayed below</button>
     </div>
     <div class="filters">
       <input id="q" type="search" placeholder="Search protocol, title, NCT, acronym, disease" aria-label="Search studies">
@@ -739,7 +741,7 @@ function card(s, color) {
 function renderMine() {
   const shown = mineShown();
   $("share").disabled = $("clear").disabled = !store.list.length;
-  $("print-mine-brief").disabled = $("print-mine-full").disabled = !shown.length;
+  $("print-mine-brief").disabled = $("print-mine-full").disabled = $("print-mine-detail").disabled = !shown.length;
   $("mine-count").textContent = `${shown.length} ${shown.length === 1 ? "study" : "studies"}`;
   if (!store.list.length) {
     $("mine").innerHTML = `<div class="empty"><p><b>No trials selected.</b> Search above to add trials one at a time, for example the trials open at your institution, or click ☆ next to any study below. The fastest accruing open studies are shown in the explorer as examples.</p></div>`;
@@ -1397,7 +1399,7 @@ const mobileQuery = window.matchMedia("(max-width: 760px)");
 function renderStudies() {
   const r = rows();
   $("count").textContent = `${r.length} ${r.length === 1 ? "study" : "studies"}`;
-  $("print-explore-brief").disabled = $("print-explore-full").disabled = !r.length;
+  $("print-explore-brief").disabled = $("print-explore-full").disabled = $("print-explore-detail").disabled = !r.length;
   if ($("m-sort").querySelector(`option[value="${state.sort}"]`)) $("m-sort").value = state.sort;
   const phone = mobileQuery.matches;
   document.querySelector(".table-wrap").style.display = phone ? "none" : "";
@@ -1718,6 +1720,15 @@ const DIGEST_CSS = `
   header.run h1 { margin: 2px 0 0; font: 650 18pt/1.15 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1f3a5f; }
   .when { margin: 4px 0 0; color: #5b6676; font: 10pt/1.3 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
   article.study { break-inside: avoid; page-break-inside: avoid; padding: 10px 0 12px; border-bottom: 1px solid #d5dde6; }
+  article.study.long { break-inside: auto; page-break-inside: auto; }
+  .brief h4 { margin: 8px 0 3px; font: 650 11pt/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1f3a5f; }
+  .brief ul, .brief ol { margin: 2px 0 0; padding-left: 18px; }
+  .brief li { margin: 1px 0; }
+  .brief table { width: 100%; border-collapse: collapse; margin-top: 4px; font: 9pt/1.3 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .brief th, .brief td { border: 1px solid #d5dde6; padding: 3px 6px; text-align: left; vertical-align: top; }
+  .brief .caveat, .brief .detail-grid { margin: 4px 0; font: 9pt/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #3d4756; }
+  .brief .flow { list-style: none; margin: 0; padding: 0; }
+  .brief .flow > li { display: block; margin: 6px 0; }
   article.study h2 { margin: 0; font: 650 13pt/1.25 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1f3a5f; }
   .meta, .title, .accrual, .none { margin: 3px 0 0; }
   .meta, .accrual, .none { font: 9.5pt/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #3d4756; }
@@ -1784,10 +1795,16 @@ function studyArticle(s, mode) {
   const meta = [`Phase ${phaseLabel(s.phase) || "not stated"}`, s.lead, s.status === "Active" ? "Open" : (s.status || ""), s.nct].filter(Boolean).join(" · ");
   const brief = siteBrief(s);
   const site = brief.text === "Variety" && brief.title ? brief.title : (brief.text || "Site not stated");
+  const accrualText = mode === "brief" ? "" : accrualLine(s);
+  const accrual = accrualText ? `<p class="accrual">${esc(accrualText)}</p>` : "";
+  const head = `<h2>${esc(name)}</h2><p class="meta">${esc(meta)}</p>${s.title ? `<p class="title">${esc(s.title)}</p>` : ""}`;
+  if (mode === "detail") {
+    return `<article class="study long" data-site="${esc(site)}">${head}${briefHtml(s)}${accrual}</article>`;
+  }
   const steps = s.brief && s.brief.schema;
   const schema = steps && steps.length ? (mode === "brief" ? briefSchema(steps) : schemaBlocks(steps)) : "";
-  const accrual = mode === "comprehensive" ? accrualLine(s) : "";
-  return `<article class="study" data-site="${esc(site)}"><h2>${esc(name)}</h2><p class="meta">${esc(meta)}</p>${s.title ? `<p class="title">${esc(s.title)}</p>` : ""}${schema ? `<div class="schema">${schema}</div>` : (mode === "brief" && s.brief ? "" : `<p class="none">${s.brief ? "No schema is on file for this protocol brief." : "No protocol brief is on file."}</p>`)}${accrual ? `<p class="accrual">${esc(accrual)}</p>` : ""}</article>`;
+  const none = schema ? "" : (mode === "brief" && s.brief ? "" : `<p class="none">${s.brief ? "No schema is on file for this protocol brief." : "No protocol brief is on file."}</p>`);
+  return `<article class="study" data-site="${esc(site)}">${head}${schema ? `<div class="schema">${schema}</div>` : none}${accrual}</article>`;
 }
 
 function digestDocument(meta) {
@@ -1988,10 +2005,15 @@ function digestFilters(st) {
 
 function openDigest(items, heading, mode, filters) {
   if (!items.length) return;
-  if (items.length > DIGEST_LIMIT && !confirm("You have selected to print more than 25 studies. Are you sure?")) return;
+  const full = mode === "detail";
+  const limit = full ? 5 : DIGEST_LIMIT;
+  const prompt = full
+    ? "Unlike the comprehensive reports, these reports print all details on this study. You have selected to print more than 5 studies. Are you sure?"
+    : "You have selected to print more than 25 studies. Are you sure?";
+  if (items.length > limit && !confirm(prompt)) return;
   const when = new Date().toLocaleString("en-US", {dateStyle: "long", timeStyle: "short"});
   const articles = items.map(item => item.study ? studyArticle(item.study, mode) : `<article class="study" data-site="Not on the current list"><h2>${esc(item.protocol)}</h2><p class="none">Not on the current CTSU list. No protocol brief is on file.</p></article>`).join("");
-  const kind = mode === "brief" ? "Brief" : "Comprehensive";
+  const kind = mode === "brief" ? "Brief" : full ? "Full" : "Comprehensive";
   const now = new Date();
   const stamp = String(now.getMonth() + 1).padStart(2, "0") + String(now.getDate()).padStart(2, "0") + now.getFullYear();
   const html = digestDocument({
@@ -2014,8 +2036,10 @@ function openDigest(items, heading, mode, filters) {
 
 $("print-mine-brief").onclick = () => openDigest(mineShown(), "My trials", "brief", digestFilters(mineState));
 $("print-mine-full").onclick = () => openDigest(mineShown(), "My trials", "comprehensive", digestFilters(mineState));
+$("print-mine-detail").onclick = () => openDigest(mineShown(), "My trials", "detail", digestFilters(mineState));
 $("print-explore-brief").onclick = () => openDigest(rows().map(study => ({protocol: study.protocol, study})), "Explore CTSU studies", "brief", digestFilters(state));
 $("print-explore-full").onclick = () => openDigest(rows().map(study => ({protocol: study.protocol, study})), "Explore CTSU studies", "comprehensive", digestFilters(state));
+$("print-explore-detail").onclick = () => openDigest(rows().map(study => ({protocol: study.protocol, study})), "Explore CTSU studies", "detail", digestFilters(state));
 
 // --------------------------------------------------------------------- Start
 function refreshAll() {
