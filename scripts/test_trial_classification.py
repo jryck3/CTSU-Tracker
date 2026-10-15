@@ -109,6 +109,19 @@ CASES = [
         "forbid_burden": ["Mixed", "Metastatic, burden not specified"],
     },
     {
+        "id": "S2104",
+        "record": {
+            "protocol": "S2104",
+            "title": "Randomized Phase II Trial of Postoperative Adjuvant Capecitabine and Temozolomide Versus Observation in High-Risk Pancreatic Neuroendocrine Tumors",
+            "eligibility": [
+                "Resection or ablation of up to 5 liver oligometastases at the time of pNET resection is allowed; no unresected or unablated metastatic disease.",
+                "Imaging showing no metastatic disease (other than resected/ablated liver oligometastases).",
+            ],
+        },
+        "burden": ["Other"],
+        "forbid_burden": ["Oligometastatic"],
+    },
+    {
         "id": "S2511",
         "record": {
             "protocol": "S2511",
