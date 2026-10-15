@@ -13,12 +13,13 @@
     --chip: #edf2f7; --rt: #2c5282; --rtc: #4a6fa5; --rp: #805ad5; --star: #d69e2e;
   }
   * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--ink); background: var(--bg); }
   header { background: var(--navy); color: #fff; padding: 16px 28px; }
   header h1 { margin: 0; font-size: 22px; font-weight: 600; }
   header .sub { opacity: .85; font-size: 13px; margin-top: 4px; }
   .head-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-  .account { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .account { display: flex; align-items: center; gap: 10px; font-size: 13px; flex-wrap: wrap; max-width: 100%; min-width: 0; }
   .gbtn { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: #1f1f1f; border: 1px solid #dadce0; border-radius: 999px; padding: 7px 14px 7px 10px; font: inherit; font-weight: 500; cursor: pointer; }
   .gbtn:disabled { opacity: .6; cursor: progress; }
   main { max-width: 1400px; margin: 0 auto; padding: 20px 24px 40px; }
@@ -30,12 +31,13 @@
   .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 14px; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
   .card.missing { border-style: dashed; color: var(--muted); }
-  .card .top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-  .card .top-right { display: flex; align-items: center; gap: 6px; }
-  .card .name { font-weight: 650; font-size: 16px; }
-  .card .proto { color: var(--muted); font-size: 12.5px; }
-  .card .title { font-size: 13px; color: #333d4a; }
-  .card .x { all: unset; cursor: pointer; color: var(--muted); font-size: 19px; line-height: 1; padding: 0 4px; border-radius: 4px; }
+  .card .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
+  .card .top > div:first-child { min-width: 0; }
+  .card .top-right { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; max-width: 100%; }
+  .card .name { font-weight: 650; font-size: 16px; overflow-wrap: anywhere; }
+  .card .proto { color: var(--muted); font-size: 12.5px; overflow-wrap: anywhere; }
+  .card .title { font-size: 13px; color: #333d4a; overflow-wrap: anywhere; }
+  .card .x { all: unset; cursor: pointer; color: var(--muted); font-size: 19px; line-height: 1; padding: 0 4px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; min-width: 32px; min-height: 32px; }
   .card .x:hover { color: var(--red); }
   .card .x:focus-visible { outline: 2px solid var(--accent); }
   .metrics { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 14px; }
@@ -45,7 +47,7 @@
   .bar > span { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 6px; }
   .bar.big { height: 14px; }
   .acc-text { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
-  .chip { display: inline-block; padding: 1px 8px; border-radius: 999px; background: var(--chip); font-size: 11.5px; white-space: nowrap; }
+  .chip { display: inline-block; padding: 1px 8px; border-radius: 999px; background: var(--chip); font-size: 11.5px; white-space: normal; overflow-wrap: anywhere; max-width: 100%; }
   .chip.active { background: #e6f4ea; color: var(--green); }
   .chip.closed { background: #fdf3e1; color: var(--amber); }
   .chip.approved { background: #edf2f7; color: #2a4365; }
@@ -58,13 +60,13 @@
   .filters, .pace, main { min-width: 0; }
   .mine-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
   .combo { position: relative; flex: 1 1 380px; max-width: 640px; }
-  .combo input { width: 100%; font: inherit; font-size: 14px; padding: 9px 12px; border: 1px solid #c3ccd8; border-radius: 8px; }
+  .combo input { width: 100%; font: inherit; font-size: 16px; padding: 9px 12px; border: 1px solid #c3ccd8; border-radius: 8px; }
   .combo input:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
-  #add-list { position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 4px); margin: 0; padding: 4px; list-style: none; background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px rgba(20, 30, 50, .14); max-height: 420px; overflow-y: auto; }
+  #add-list { position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 4px); margin: 0; padding: 4px; list-style: none; background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px rgba(20, 30, 50, .14); max-height: min(420px, 70vh); overflow-y: auto; }
   #add-list li { padding: 7px 9px; border-radius: 6px; cursor: pointer; }
   #add-list li.act { background: #edf2f7; }
   #add-list li.o-none { color: var(--muted); cursor: default; }
-  .o-title { font-size: 12.5px; color: #3d4756; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .o-title { font-size: 12.5px; color: #3d4756; overflow-wrap: anywhere; white-space: normal; }
   .save-state { color: var(--muted); font-size: 12.5px; margin: 8px 0 12px; }
   .save-state.err { color: var(--red); }
   .empty { grid-column: 1 / -1; color: var(--muted); border: 1px dashed #c9d2dd; border-radius: 10px; padding: 16px 18px; background: #fbfcfd; }
@@ -79,21 +81,29 @@
   .seg button { border: 0; background: #fff; padding: 5px 11px; cursor: pointer; font: inherit; font-size: 12.5px; color: var(--muted); }
   .seg button.on { background: var(--navy); color: #fff; }
   .note { color: var(--muted); font-size: 12px; margin-top: 8px; }
-  .canvas-wrap { position: relative; height: 330px; }
+  .canvas-wrap { position: relative; height: 330px; max-width: 100%; min-width: 0; overflow: hidden; }
+  .canvas-wrap canvas { max-width: 100%; }
+  #charts, .chart-grid, .chart-fallback { min-width: 0; max-width: 100%; }
+  .chart-fallback { margin-top: 8px; }
+  .chart-data { overflow-x: auto; max-width: 100%; min-width: 0; }
+  .chart-data table { border-collapse: collapse; font-size: 13px; }
+  .chart-data th, .chart-data td { border: 1px solid var(--line); padding: 4px 6px; text-align: left; white-space: nowrap; }
+  .chart-data th[scope="row"] { position: sticky; left: 0; background: #fff; }
   .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
-  .filters input[type=search], .filters select { font: inherit; font-size: 13px; padding: 6px 9px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
+  .filters input[type=search], .filters select { font: inherit; font-size: 16px; padding: 6px 9px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
   .filters input[type=search] { min-width: min(100%, 260px); flex: 1 1 220px; }
   .filters select { max-width: 220px; min-width: 0; width: 160px; }
   .phase-wrap, .role-wrap, .choice-wrap { position: relative; }
   .phase-btn, .role-btn, .choice-btn { font: inherit; font-size: 13px; padding: 6px 28px 6px 9px; border: 1px solid var(--line); border-radius: 7px; background: #fff; cursor: pointer; text-align: left; position: relative; max-width: min(280px, calc(100vw - 24px)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .choice-panel, .phase-panel, .role-panel { max-width: calc(100vw - 24px); max-height: min(320px, 70vh); overflow: auto; }
-  .type-btn { font: inherit; font-size: 12px; background: #fff; border: 1px solid var(--line); border-radius: 7px; padding: 2px 8px; cursor: pointer; }
-  .type-popover { position: absolute; z-index: 8; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 8px; max-width: calc(100vw - 24px); max-height: 50vh; overflow: auto; }
+  .choice-panel, .phase-panel, .role-panel { max-width: min(320px, calc(100vw - 16px)); max-height: min(320px, 70vh); overflow: auto; }
+  .type-anchor { position: relative; display: inline-block; max-width: 100%; min-width: 0; }
+  .type-btn { font: inherit; font-size: 13px; background: #fff; border: 1px solid var(--line); border-radius: 7px; padding: 6px 10px; cursor: pointer; min-height: 32px; }
+  .type-popover { position: absolute; z-index: 8; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 8px; max-width: min(320px, calc(100vw - 16px)); max-height: min(50vh, 320px); overflow: auto; }
   .phase-btn { min-width: 250px; }
   .role-btn, .choice-btn { min-width: 160px; }
   .phase-btn::after, .role-btn::after, .choice-btn::after { content: "▾"; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 11px; }
   .phase-btn[aria-expanded="true"]::after, .role-btn[aria-expanded="true"]::after, .choice-btn[aria-expanded="true"]::after { content: "▴"; }
-  .phase-panel, .role-panel, .choice-panel { position: absolute; z-index: 6; top: calc(100% + 4px); left: 0; background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px rgba(20, 30, 50, .12); padding: 8px; gap: 4px; max-height: 320px; overflow: auto; }
+  .phase-panel, .role-panel, .choice-panel { position: absolute; z-index: 6; top: calc(100% + 4px); left: 0; background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px rgba(20, 30, 50, .12); padding: 8px; gap: 4px; overflow: auto; }
   .phase-panel { min-width: 210px; }
   .role-panel, .choice-panel { min-width: 260px; }
   .phase-panel:not([hidden]), .role-panel:not([hidden]), .choice-panel:not([hidden]) { display: grid; }
@@ -109,7 +119,7 @@
   .pace-list li.none { display: block; color: var(--muted); font-size: 12.5px; }
   .pi-title { font-size: 12.5px; color: #3d4756; overflow-wrap: anywhere; }
   .pi-meta { font-size: 11.5px; color: var(--muted); }
-  .pi-val { font-weight: 650; color: var(--navy); white-space: nowrap; font-size: 14px; }
+  .pi-val { font-weight: 650; color: var(--navy); font-size: 14px; }
   .table-wrap { overflow-x: auto; container-type: inline-size; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   .table-wrap > table { table-layout: fixed; }
@@ -160,34 +170,52 @@
   .pre th, .pre td { border: 1px solid var(--line); padding: 5px 8px; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
   .pre th { background: #f4f7fb; color: var(--muted); font-weight: 600; }
   .study-cards { display: none; }
-  .study-card { border: 1px solid var(--line); border-radius: 10px; background: #fff; overflow: hidden; }
+  .study-card { border: 1px solid var(--line); border-radius: 10px; background: #fff; display: grid; gap: 8px; padding: 10px 12px; min-width: 0; }
   .study-card.mine { box-shadow: inset 3px 0 0 var(--star); }
-  .sc-top { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 8px; align-items: start; padding: 10px 10px 8px; }
-  .sc-open { all: unset; cursor: pointer; display: grid; gap: 3px; min-width: 0; }
-  .sc-open:focus-visible { outline: 2px solid var(--accent); border-radius: 4px; }
-  .sc-name { font-size: 15px; }
-  .sc-meta, .sc-title, .sc-row { overflow-wrap: anywhere; }
-  .sc-meta { color: var(--muted); font-size: 12.5px; }
-  .sc-title { color: #333d4a; }
-  .sc-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .sc-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .sc-open { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 2px 6px; width: 100%; min-height: 44px; padding: 4px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+  .sc-open:focus-visible, .type-btn:focus-visible, .star:focus-visible, .choice-btn:focus-visible, .role-btn:focus-visible, .phase-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .sc-open .chev { width: 10px; height: 10px; margin-top: 6px; border-right: 2px solid var(--navy); border-bottom: 2px solid var(--navy); transform: rotate(-45deg); }
+  .sc-open[aria-expanded="true"] .chev { transform: rotate(45deg); margin-top: 3px; }
+  .sc-name { font-size: 15px; grid-column: 2; min-width: 0; overflow-wrap: anywhere; }
+  .sc-title { grid-column: 2; color: #333d4a; min-width: 0; overflow-wrap: anywhere; }
+  .sc-facts { display: grid; gap: 6px; min-width: 0; }
+  .meta-line { display: grid; gap: 1px; min-width: 0; }
+  .meta-k { color: var(--muted); font-size: 11px; font-weight: 650; letter-spacing: .03em; text-transform: uppercase; }
+  .acc-figure { overflow-wrap: anywhere; }
+  .sc-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-width: 0; }
+  .card-detail[hidden], .mine-detail[hidden] { display: none; }
+  .mine-detail { min-width: 0; border-top: 1px solid var(--line); margin-top: 8px; padding-top: 8px; }
   .study-card .detail-inner { position: static; width: auto; max-width: none; border-top: 1px solid var(--line); background: #fafbfd; }
-  @media (max-width: 760px) {
+  .print-note { color: var(--red); margin: 8px 0; }
+  @media (max-width: 1100px) {
     header { padding: 14px 16px; }
     main { padding: 12px 12px 28px; }
     .cards { grid-template-columns: 1fr; }
-    .filters input[type=search] { flex-basis: 100%; }
-    .filters select, .phase-btn, .role-btn, .choice-btn { width: 100%; max-width: 100%; flex: 1 1 calc(50% - 8px); }
+    .filters { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: stretch; }
+    .filters > input[type=search], .filters > .count, .filters > .check, .filters > .linkbtn, .filters > .m-sort { grid-column: 1 / -1; }
+    .phase-wrap, .role-wrap, .choice-wrap { min-width: 0; width: 100%; max-width: 100%; }
+    .phase-btn, .role-btn, .choice-btn { width: 100%; min-width: 0; max-width: 100%; white-space: normal; min-height: 44px; }
     .combo { flex-basis: 100%; max-width: none; }
     .canvas-wrap { height: 240px; }
+    .canvas-wrap canvas { width: 100% !important; }
+    .panel, #charts { width: 100%; }
     .count { margin-left: 0; }
     .table-wrap { display: none; }
     .study-cards { display: grid; gap: 10px; }
-    .m-sort { display: inline-flex; }
-    .pre thead { display: none; }
-    .pre, .pre tbody, .pre tr, .pre td { display: block; width: auto; }
-    .pre tr { padding: 8px 0; border-bottom: 1px solid var(--line); }
-    .pre td { border: 0; padding: 1px 0; }
-    .pre td:first-child { font-weight: 650; color: var(--navy); }
+    .m-sort { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .m-sort select, #m-dir { min-height: 44px; font-size: 16px; }
+    .star, .card .x { min-width: 44px; min-height: 44px; }
+    .seg { flex-wrap: wrap; max-width: 100%; }
+    .seg button { min-height: 44px; }
+    .pace-list li { grid-template-columns: auto minmax(0, 1fr); }
+    .pi-val { grid-column: 2; }
+    .pre { display: block; width: 100%; }
+    .pre thead { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    .pre tbody, .pre tr, .pre td { display: block; width: 100%; }
+    .pre tr { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; margin: 0 0 8px; background: #fff; }
+    .pre td { border: 0; padding: 4px 0; }
+    .pre td::before { content: attr(data-label); display: block; font-weight: 650; color: var(--muted); font-size: 11px; letter-spacing: .03em; text-transform: uppercase; }
   }
   a { color: var(--accent); }
   .btn { font: inherit; font-size: 12.5px; padding: 5px 11px; border-radius: 6px; border: 1px solid var(--accent); background: #fff; color: var(--accent); cursor: pointer; }
@@ -298,6 +326,11 @@
         <div class="note">Average since activation uses the ClinicalTrials.gov actual study start date. The recent rate appears once a week of daily CTSU snapshots exists.</div>
       </div>
     </div>
+    <details class="chart-fallback">
+      <summary>Show accrual values as a table</summary>
+      <div id="trend-table"></div>
+      <div id="rates-table"></div>
+    </details>
   </section>
 
   <h2 id="explore-h">Explore CTSU studies</h2>
@@ -342,6 +375,7 @@
           <option value="pct">Accrual</option>
           <option value="avg_rate">Average per month</option>
         </select>
+        <button type="button" id="m-dir">Ascending</button>
       </label>
       <label class="check"><input type="checkbox" id="f-protocol"> Protocol available?</label>
       <button class="linkbtn" id="reset" type="button">Reset filters</button>
@@ -650,6 +684,7 @@ function renderOpts() {
   addList.hidden = false;
   addQ.setAttribute("aria-expanded", "true");
   if (active >= 0) addQ.setAttribute("aria-activedescendant", `opt-${active}`); else addQ.removeAttribute("aria-activedescendant");
+  fitAddList();
 }
 
 function setActive(i) {
@@ -682,17 +717,35 @@ function pick(i) {
 
 addQ.addEventListener("input", renderOpts);
 addQ.addEventListener("focus", () => { if (addQ.value.trim()) renderOpts(); });
-addQ.addEventListener("blur", () => setTimeout(closeOpts, 150));
+let addPickLock = false;
+function activateOption(i) {
+  if (addPickLock) return;
+  addPickLock = true;
+  pick(i);
+  setTimeout(() => { addPickLock = false; }, 0);
+}
+function fitAddList() {
+  if (addList.hidden) return;
+  const vv = window.visualViewport;
+  const top = addList.getBoundingClientRect().top;
+  const limit = vv ? vv.offsetTop + vv.height : window.innerHeight;
+  addList.style.maxHeight = Math.max(120, limit - top - 12) + "px";
+}
+addQ.addEventListener("blur", () => setTimeout(() => {
+  if (addPickLock || addList.contains(document.activeElement)) return;
+  closeOpts();
+}, 200));
 addQ.addEventListener("keydown", e => {
   if (e.key === "ArrowDown") { e.preventDefault(); addList.hidden ? renderOpts() : setActive(active + 1); }
   else if (e.key === "ArrowUp") { e.preventDefault(); setActive(active - 1); }
-  else if (e.key === "Enter" && !addList.hidden && active >= 0) { e.preventDefault(); pick(active); }
+  else if (e.key === "Enter" && !addList.hidden && active >= 0) { e.preventDefault(); activateOption(active); }
   else if (e.key === "Escape") closeOpts();
 });
-addList.addEventListener("mousedown", e => {
+addList.addEventListener("pointerdown", e => {
   const li = e.target.closest("li[data-i]");
+  if (!li) return;
   e.preventDefault();
-  if (li) pick(+li.dataset.i);
+  activateOption(+li.dataset.i);
 });
 
 $("share").onclick = async () => {
@@ -712,6 +765,7 @@ function colorsFor(protocols) {
   return out;
 }
 
+const mineOpen = new Set();
 const starBtn = p => {
   const on = store.has(p);
   return `<button type="button" class="star${on ? " on" : ""}" data-star="${esc(p)}" aria-pressed="${on}" aria-label="${on ? `Remove ${esc(p)} from` : `Add ${esc(p)} to`} My trials" title="${on ? "In My trials (click to remove)" : "Add to My trials"}">${on ? "★" : "☆"}</button>`;
@@ -719,6 +773,9 @@ const starBtn = p => {
 
 function card(s, color) {
   const recent = s.trailing30 ? `${num(s.trailing30.per_month)} /mo` : "Pending";
+  const open = mineOpen.has(s.protocol);
+  const slug = String(s.protocol).replace(/[^A-Za-z0-9_-]/g, "");
+  const detailId = `mine-detail-${slug}`;
   return `
   <article class="card" style="border-left: 4px solid ${color}">
     <div class="top">
@@ -735,6 +792,8 @@ function card(s, color) {
     </div>
     <div>${roleChip(s.rt_role)} ${DATA.local && s.protocol_on_file ? '<span class="chip file">Protocol on file</span>' : ""}
       ${s.nct ? `<a href="${ctgov(s.nct)}" target="_blank" rel="noopener" style="font-size:12.5px;margin-left:6px">${esc(s.nct)}</a>` : ""}</div>
+    <button type="button" class="btn" data-mine-detail="${esc(s.protocol)}" aria-expanded="${open}" aria-controls="${detailId}">${open ? "Hide study details" : "View study details"}</button>
+    <div class="mine-detail" id="${detailId}" role="region"${open ? "" : " hidden"}>${open ? detailInner(s) : ""}</div>
   </article>`;
 }
 
@@ -797,9 +856,10 @@ function drawCharts() {
   if (trendChart) trendChart.destroy();
   if (rateChart) rateChart.destroy();
   trendChart = rateChart = null;
+  fillChartTables(list);
   if (!list.length) return;
   if (typeof Chart === "undefined") {
-    $("trend-note").textContent = "Charts need an internet connection to load the Chart.js library.";
+    $("trend-note").textContent = "Charts need an internet connection to load the Chart.js library. The table below still lists the snapshot values.";
     return;
   }
   const col = colorsFor(list.map(s => s.protocol));
@@ -808,6 +868,7 @@ function drawCharts() {
     data: {datasets: list.map(s => seriesFor(s, col[s.protocol]))},
     options: {
       maintainAspectRatio: false, animation: false, parsing: false,
+      events: ["mousemove", "mouseout", "click", "touchstart", "touchmove", "touchend"],
       interaction: {mode: "nearest", intersect: false},
       scales: {
         x: {type: "linear", ticks: {maxTicksLimit: 8, callback: v => new Date(v).toLocaleDateString("en-US", {month: "short", year: "2-digit"})}},
@@ -845,10 +906,37 @@ function drawCharts() {
     },
     options: {
       indexAxis: "y", maintainAspectRatio: false, animation: false,
+      events: ["mousemove", "mouseout", "click", "touchstart", "touchmove", "touchend"],
       scales: {x: {beginAtZero: true, title: {display: true, text: "Patients per month"}}},
-      plugins: {legend: {position: "bottom", labels: {boxWidth: 12}}},
+      plugins: {legend: {position: "bottom", labels: {boxWidth: 12}}, tooltip: {enabled: true}},
     },
   });
+}
+
+function fillChartTables(list) {
+  const trend = $("trend-table");
+  const ratesBox = $("rates-table");
+  if (!trend || !ratesBox) return;
+  if (!list.length) { trend.innerHTML = ""; ratesBox.innerHTML = ""; return; }
+  const dates = [];
+  const seen = new Set();
+  list.forEach(s => (DATA.history[s.protocol] || []).forEach(p => {
+    if (p[1] == null || seen.has(p[0])) return;
+    seen.add(p[0]);
+    dates.push(p[0]);
+  }));
+  dates.sort();
+  trend.innerHTML = dates.length ? `<h3>Cumulative accrual</h3><div class="chart-data"><table><thead><tr><th>Trial</th>${dates.map(d => `<th>${esc(fmtDate(d))}</th>`).join("")}</tr></thead><tbody>${list.map(s => {
+    const map = {};
+    (DATA.history[s.protocol] || []).forEach(p => { if (p[1] != null) map[p[0]] = p; });
+    return `<tr><th scope="row">${esc(label(s))}</th>${dates.map(d => {
+      const p = map[d];
+      if (!p) return "<td></td>";
+      const pct = p[2] ? ` (${num(100 * p[1] / p[2])}%)` : "";
+      return `<td>${num(p[1], 0)}${pct}</td>`;
+    }).join("")}</tr>`;
+  }).join("")}</tbody></table></div>` : "<p>No snapshot values are on file for the selected trials.</p>";
+  ratesBox.innerHTML = `<h3>Accrual rate</h3><div class="chart-data"><table><thead><tr><th>Trial</th><th>Average since activation</th><th>Last 30 days</th></tr></thead><tbody>${list.map(s => `<tr><th scope="row">${esc(label(s))}</th><td>${s.avg_rate != null ? num(s.avg_rate) + " /mo" : ""}</td><td>${s.trailing30 && s.trailing30.per_month != null ? num(s.trailing30.per_month) + " /mo" : ""}</td></tr>`).join("")}</tbody></table></div>`;
 }
 
 function setY(mode) {
@@ -1054,7 +1142,65 @@ function cancerTypeHtml(labels, id) {
   if (!clean.length) return "Not classified";
   if (clean.length <= 2 && clean.join("").length <= 40) return esc(clean.join(", "));
   const pop = "type-pop-" + String(id).replace(/[^A-Za-z0-9_-]/g, "");
-  return `<button type="button" class="type-btn" aria-expanded="false" aria-controls="${pop}">Multiple cancer types (${clean.length})</button><div class="type-popover" id="${pop}" hidden><ul>${clean.map(label => `<li>${esc(label)}</li>`).join("")}</ul></div>`;
+  return `<span class="type-anchor"><button type="button" class="type-btn" aria-expanded="false" aria-controls="${pop}">Multiple cancer types (${clean.length})</button><div class="type-popover" id="${pop}" hidden><ul>${clean.map(label => `<li>${esc(label)}</li>`).join("")}</ul></div></span>`;
+}
+function clearFloat(panel) {
+  if (!panel) return;
+  ["position", "left", "top", "right", "bottom", "width", "minWidth", "maxWidth", "maxHeight"].forEach(key => { panel.style[key] = ""; });
+}
+function visualBox() {
+  const vv = window.visualViewport;
+  return {
+    left: vv ? vv.offsetLeft : 0,
+    top: vv ? vv.offsetTop : 0,
+    width: vv ? vv.width : document.documentElement.clientWidth,
+    height: vv ? vv.height : window.innerHeight,
+  };
+}
+function placeFloat(anchor, panel) {
+  if (!anchor || !panel || panel.hidden) return;
+  panel.style.position = "fixed";
+  panel.style.right = "auto";
+  panel.style.bottom = "auto";
+  panel.style.minWidth = "0";
+  const box = visualBox();
+  const margin = 8;
+  const maxW = Math.max(160, box.width - margin * 2);
+  const cap = panel.classList.contains("type-popover") ? box.height * 0.5 : Math.min(320, box.height * 0.7);
+  panel.style.maxWidth = maxW + "px";
+  panel.style.maxHeight = Math.max(120, Math.min(cap, box.height - margin * 2)) + "px";
+  panel.style.width = Math.min(Math.max(panel.scrollWidth, 180), maxW) + "px";
+  const rect = anchor.getBoundingClientRect();
+  let left = rect.left;
+  const width = panel.offsetWidth;
+  if (left + width > box.left + box.width - margin) left = box.left + box.width - margin - width;
+  if (left < box.left + margin) left = box.left + margin;
+  let top = rect.bottom + 4;
+  const height = panel.offsetHeight;
+  if (top + height > box.top + box.height - margin) {
+    const above = rect.top - 4 - height;
+    top = above >= box.top + margin ? above : Math.max(box.top + margin, box.top + box.height - margin - height);
+  }
+  panel.style.left = Math.round(left) + "px";
+  panel.style.top = Math.round(top) + "px";
+}
+function closeTypePopovers() {
+  document.querySelectorAll(".type-popover").forEach(pop => {
+    pop.hidden = true;
+    clearFloat(pop);
+    const btn = document.querySelector(`.type-btn[aria-controls="${pop.id}"]`);
+    if (btn) btn.setAttribute("aria-expanded", "false");
+  });
+}
+function repositionFloats() {
+  document.querySelectorAll(".phase-panel, .role-panel, .choice-panel, .type-popover").forEach(panel => {
+    if (panel.hidden) return;
+    const btn = panel.classList.contains("type-popover")
+      ? document.querySelector(`.type-btn[aria-controls="${panel.id}"]`)
+      : document.querySelector(`[aria-controls="${panel.id}"]`);
+    placeFloat(btn, panel);
+  });
+  fitAddList();
 }
 function siteBrief(s) {
   return siteSummary([s.title || "", s.disease || ""].join(" "), sitesOf(s));
@@ -1314,12 +1460,12 @@ function briefHtml(s) {
     </li>`;
   }).join("");
   const eligibility = (b.eligibility || []).map(item => `<li>${esc(item)}</li>`).join("");
-  const assessRows = (rows) => (rows || []).map(row => `<tr><td>${esc(row.item)}</td><td>${esc(row.window)}</td><td>${esc(row.note || "")}</td></tr>`).join("");
-  const preRows = assessRows(b.pretreatment);
-  const duringRows = assessRows(b.during);
-  const followRows = assessRows(b.followup);
-  const calendarRows = assessRows(b.calendar);
-  const specimenRows = assessRows(b.specimens);
+  const assessRows = (rows, heads) => (rows || []).map(row => `<tr><td data-label="${esc(heads[0])}">${esc(row.item)}</td><td data-label="${esc(heads[1])}">${esc(row.window)}</td><td data-label="${esc(heads[2])}">${esc(row.note || "")}</td></tr>`).join("");
+  const preRows = assessRows(b.pretreatment, ["Assessment", "Window", "Note"]);
+  const duringRows = assessRows(b.during, ["Assessment", "Timing", "Note"]);
+  const followRows = assessRows(b.followup, ["Assessment", "Timing", "Note"]);
+  const calendarRows = assessRows(b.calendar, ["Assessment", "Timing", "Note"]);
+  const specimenRows = assessRows(b.specimens, ["Specimen", "Timing", "Note"]);
   const amendments = (b.amendments || []).map(item => `<li><b>${esc(item.date)}</b> ${esc(item.text)}</li>`).join("");
   const submission = (b.submission || []).map(item => `<li><b>${esc(item.label)}</b> ${esc(item.text)}</li>`).join("");
   return `<div class="brief">
@@ -1380,27 +1526,46 @@ function detailRow(s) {
 
 function studyCard(s) {
   const open = state.expanded.has(s.protocol);
+  const slug = String(s.protocol).replace(/[^A-Za-z0-9_-]/g, "");
+  const openId = `open-${slug}`;
+  const detailId = `detail-${slug}`;
+  const accrual = `${s.accrual != null ? num(s.accrual, 0) : "Not reported"}${s.target ? " / " + num(s.target, 0) : ""}${s.pct != null ? ` (${num(s.pct)}%)` : ""}`;
   return `<article class="study-card${store.has(s.protocol) ? " mine" : ""}" data-p="${esc(s.protocol)}">
-    <div class="sc-top">
-      ${starBtn(s.protocol)}
-      <button class="sc-open" type="button" aria-expanded="${open}">
-        <span class="sc-name"><b>${esc(s.protocol)}</b>${s.alias ? ` <span class="muted">${esc(s.alias)}</span>` : ""}</span>
-        <span class="sc-meta">${esc(s.lead)} · ${cancerTypeHtml(cancerLabels(s), "card-" + s.protocol)} · Phase ${esc(phaseLabel(s.phase))}</span>
-        <span class="sc-title">${esc(s.title)}</span>
-        <span class="sc-row">${roleChip(s.rt_role)} ${statusCell(s)} <span>${s.accrual != null ? num(s.accrual, 0) : ""}${s.target ? " / " + num(s.target, 0) : ""}${s.pct != null ? ` (${num(s.pct)}%)` : ""}</span>${s.avg_rate != null ? ` <span class="muted">${num(s.avg_rate)} /mo</span>` : ""}</span>
-      </button>
+    <div class="sc-tools">${starBtn(s.protocol)}${cancerTypeHtml(cancerLabels(s), "card-" + s.protocol)}</div>
+    <button class="sc-open" id="${openId}" type="button" aria-expanded="${open}" aria-controls="${detailId}">
+      <span class="chev" aria-hidden="true"></span>
+      <span class="sc-name"><b>${esc(s.protocol)}</b>${s.alias ? ` <span class="muted">${esc(s.alias)}</span>` : ""}</span>
+      <span class="sc-title">${esc(s.title)}</span>
+    </button>
+    <div class="sc-facts">
+      <div class="meta-line"><span class="meta-k">Lead group</span><span>${esc(s.lead || "Not listed")}</span></div>
+      <div class="meta-line"><span class="meta-k">Phase</span><span>${esc(phaseLabel(s.phase) || "Not listed")}</span></div>
+      <div class="sc-row">${roleChip(s.rt_role)} ${statusCell(s)}</div>
+      <div class="meta-line"><span class="meta-k">Study-wide accrual</span><span class="acc-figure">${accrual}${s.avg_rate != null ? ` <span class="muted">${num(s.avg_rate)} /mo</span>` : ""}</span></div>
     </div>
-    ${open ? detailInner(s) : ""}
+    <div class="card-detail" id="${detailId}" role="region" aria-labelledby="${openId}"${open ? "" : " hidden"}>${open ? detailInner(s) : ""}</div>
   </article>`;
 }
 
-const mobileQuery = window.matchMedia("(max-width: 760px)");
+const mobileQuery = window.matchMedia("(max-width: 1100px)");
 
+function syncMobileSort() {
+  const sel = $("m-sort");
+  if (sel && sel.querySelector(`option[value="${state.sort}"]`)) sel.value = state.sort;
+  const dir = $("m-dir");
+  if (!dir) return;
+  const asc = state.dir > 0;
+  dir.textContent = asc ? "Ascending" : "Descending";
+  dir.setAttribute("aria-label", asc ? "Sort ascending. Activate for descending." : "Sort descending. Activate for ascending.");
+}
 function renderStudies() {
+  const active = document.activeElement;
+  const restoreOpen = active && active.classList && active.classList.contains("sc-open") && active.closest("[data-p]") ? active.closest("[data-p]").dataset.p : "";
+  const scrollY = window.scrollY;
   const r = rows();
   $("count").textContent = `${r.length} ${r.length === 1 ? "study" : "studies"}`;
   $("print-explore-brief").disabled = $("print-explore-full").disabled = $("print-explore-detail").disabled = !r.length;
-  if ($("m-sort").querySelector(`option[value="${state.sort}"]`)) $("m-sort").value = state.sort;
+  syncMobileSort();
   const phone = mobileQuery.matches;
   document.querySelector(".table-wrap").style.display = phone ? "none" : "";
   $("study-cards").style.display = phone ? "grid" : "none";
@@ -1440,10 +1605,25 @@ function renderStudies() {
       const pop = document.getElementById(btn.getAttribute("aria-controls"));
       if (!pop) return;
       const opening = pop.hidden;
-      pop.hidden = !opening;
-      btn.setAttribute("aria-expanded", opening ? "true" : "false");
+      closeTypePopovers();
+      if (!opening) {
+        btn.focus();
+        return;
+      }
+      pop.hidden = false;
+      btn.setAttribute("aria-expanded", "true");
+      placeFloat(btn, pop);
     };
   });
+  if (restoreOpen) {
+    const again = document.querySelector(`article.study-card[data-p="${CSS.escape(restoreOpen)}"] .sc-open`);
+    if (again) {
+      try { again.focus({preventScroll: true}); }
+      catch (e) { again.focus(); }
+    }
+  }
+  if (Math.abs(window.scrollY - scrollY) > 1) window.scrollTo(0, scrollY);
+  repositionFloats();
 }
 
 function fitDetails() {
@@ -1536,11 +1716,14 @@ function syncFilterInputs() {
 
 function toggleChoice(btnId, panelId) {
   const panel = $(panelId);
+  const btn = $(btnId);
   const opening = panel.hidden;
   closeChoiceMenus(null);
+  closeTypePopovers();
   if (!opening) return;
   panel.hidden = false;
-  $(btnId).setAttribute("aria-expanded", "true");
+  btn.setAttribute("aria-expanded", "true");
+  placeFloat(btn, panel);
 }
 
 $("q").oninput = e => { state.q = e.target.value; render(); };
@@ -1573,13 +1756,20 @@ function closeChoiceMenus(ev) {
     if (ev && wrap.contains(ev.target)) return;
     const panel = wrap.querySelector(".phase-panel, .role-panel, .choice-panel");
     const btn = wrap.querySelector(".phase-btn, .role-btn, .choice-btn");
-    if (panel) panel.hidden = true;
+    if (panel) { panel.hidden = true; clearFloat(panel); }
     if (btn) btn.setAttribute("aria-expanded", "false");
   });
 }
-document.addEventListener("click", closeChoiceMenus);
+document.addEventListener("click", ev => {
+  closeChoiceMenus(ev);
+  if (!ev.target.closest(".type-anchor")) closeTypePopovers();
+});
 document.addEventListener("keydown", ev => {
-  if (ev.key === "Escape") closeChoiceMenus(null);
+  if (ev.key !== "Escape") return;
+  const back = document.querySelector('.type-btn[aria-expanded="true"], .phase-btn[aria-expanded="true"], .role-btn[aria-expanded="true"], .choice-btn[aria-expanded="true"]');
+  closeChoiceMenus(null);
+  closeTypePopovers();
+  if (back) back.focus();
 });
 function bindMenu(prefix, menu, field, owner, onChange, allLabel, noneLabel) {
   $(prefix + "-btn").onclick = () => toggleChoice(prefix + "-btn", prefix + "-panel");
@@ -1602,11 +1792,15 @@ $("reset").onclick = () => { resetExplorer(); syncFilterInputs(); render(); };
 $("f-protocol").onchange = e => { state.protocol = e.target.checked; render(); };
 $("m-sort").onchange = e => {
   state.sort = e.target.value;
-  state.dir = ["pct", "avg_rate", "accrual"].includes(state.sort) ? -1 : 1;
   render();
 };
+$("m-dir").onclick = () => { state.dir *= -1; render(); };
 mobileQuery.addEventListener("change", () => render());
-window.addEventListener("resize", fitDetails);
+window.addEventListener("resize", () => { fitDetails(); repositionFloats(); });
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", repositionFloats);
+  window.visualViewport.addEventListener("scroll", repositionFloats);
+}
 
 function setPace(mode) {
   paceMode = mode;
@@ -1627,6 +1821,16 @@ document.addEventListener("click", e => {
   }
   const rm = e.target.closest("[data-remove]");
   if (rm) { store.remove(rm.dataset.remove); return; }
+  const view = e.target.closest("[data-mine-detail]");
+  if (view) {
+    const p = view.dataset.mineDetail;
+    if (mineOpen.has(p)) mineOpen.delete(p);
+    else mineOpen.add(p);
+    renderMine();
+    const again = document.querySelector(`[data-mine-detail="${CSS.escape(p)}"]`);
+    if (again) again.focus();
+    return;
+  }
   const show = e.target.closest("[data-show]");
   if (show) showInTable(show.dataset.show);
 });
@@ -2027,7 +2231,22 @@ function openDigest(items, heading, mode, filters) {
     articles
   });
   const w = window.open("", "_blank");
-  if (!w) return;
+  if (!w) {
+    const anchor = document.activeElement && document.activeElement.parentElement;
+    let note = document.getElementById("print-note");
+    if (!note) {
+      note = document.createElement("p");
+      note.id = "print-note";
+      note.className = "print-note";
+      note.setAttribute("role", "status");
+      (anchor || document.querySelector("main") || document.body).appendChild(note);
+    }
+    note.hidden = false;
+    note.textContent = "The report window did not open. Allow pop-up windows for this site, then use the print button again.";
+    return;
+  }
+  const noteOk = document.getElementById("print-note");
+  if (noteOk) noteOk.hidden = true;
   w.document.open();
   w.document.write(html);
   w.document.close();
