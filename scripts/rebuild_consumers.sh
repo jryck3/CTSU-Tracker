@@ -244,7 +244,7 @@ if needed worldwide || [ -n "$ww_missing" ]; then
   elif ! "$SYS" scripts/publish_checks.py worldwide "$WW"; then
     fail worldwide
   elif [ "$PUSH" -eq 1 ]; then
-    if WW_SHA=$(git_publish "$WW" "Protocol briefs from the CTSU library: $REASON." docs/index.html data/trials.json config/protocol_schemas.json); then
+    if WW_SHA=$(git_publish "$WW" "Protocol briefs from the CTSU library: $REASON." docs/index.html docs/details data/trials.json config/protocol_schemas.json); then
       echo "Worldwide pushed ${WW_SHA:-nothing new}"
     else
       fail worldwide

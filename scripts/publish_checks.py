@@ -90,6 +90,42 @@ def worldwide(folder):
     briefed_new = sum(1 for trial in new if (trial.get("brief") or {}).get("eligibility") or (trial.get("brief") or {}).get("schema"))
     if briefed_old and briefed_new < (1 - TOLERANCE) * briefed_old:
         problems.append("Worldwide trials with a brief fell from %d to %d." % (briefed_old, briefed_new))
+    problems.extend(shard_problems(folder, html))
+    return problems
+
+
+def shard_problems(folder, html):
+    start = html.find('<script id="payload" type="application/json">')
+    if start < 0:
+        return ["Worldwide page has no detail payload."]
+    start = html.find(">", start) + 1
+    end = html.find("</script>", start)
+    try:
+        payload = json.loads(html[start:end])
+    except Exception as exc:
+        return ["Worldwide page payload does not parse: %s" % exc]
+    loaded = {}
+    problems = []
+    for trial in payload.get("trials") or []:
+        shard = trial.get("detail_shard")
+        if shard is None:
+            continue
+        if shard not in loaded:
+            path = folder / "docs" / "details" / ("%s.json" % shard)
+            if not path.is_file():
+                problems.append("Missing detail shard %s." % shard)
+                loaded[shard] = set()
+            else:
+                try:
+                    rows = json.loads(path.read_text())
+                except Exception as exc:
+                    problems.append("Detail shard %s does not parse: %s" % (shard, exc))
+                    rows = []
+                loaded[shard] = {row.get("id") for row in rows}
+        if trial.get("id") not in loaded[shard]:
+            problems.append("Detail shard %s is missing %s." % (shard, trial.get("id")))
+        if len(problems) > 20:
+            break
     return problems
 
 

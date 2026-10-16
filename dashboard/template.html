@@ -97,7 +97,7 @@
   .phase-btn, .role-btn, .choice-btn { font: inherit; font-size: 13px; padding: 6px 28px 6px 9px; border: 1px solid var(--line); border-radius: 7px; background: #fff; cursor: pointer; text-align: left; position: relative; max-width: min(280px, calc(100vw - 24px)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .choice-panel, .phase-panel, .role-panel { max-width: min(320px, calc(100vw - 16px)); max-height: min(320px, 70vh); overflow: auto; }
   .type-anchor { position: relative; display: inline-block; max-width: 100%; min-width: 0; }
-  .type-btn { font: inherit; font-size: 13px; background: #fff; border: 1px solid var(--line); border-radius: 7px; padding: 6px 10px; cursor: pointer; min-height: 32px; }
+  .type-btn { font: inherit; font-size: 13px; background: #fff; border: 1px solid var(--line); border-radius: 7px; padding: 6px 10px; cursor: pointer; min-height: 44px; }
   .type-popover { position: absolute; z-index: 8; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 8px; max-width: min(320px, calc(100vw - 16px)); max-height: min(50vh, 320px); overflow: auto; }
   .phase-btn { min-width: 250px; }
   .role-btn, .choice-btn { min-width: 160px; }
@@ -180,6 +180,7 @@
   .sc-name { font-size: 15px; grid-column: 2; min-width: 0; overflow-wrap: anywhere; }
   .sc-title { grid-column: 2; color: #333d4a; min-width: 0; overflow-wrap: anywhere; }
   .sc-facts { display: grid; gap: 6px; min-width: 0; }
+  .sc-open { appearance: none; -webkit-appearance: none; }
   .meta-line { display: grid; gap: 1px; min-width: 0; }
   .meta-k { color: var(--muted); font-size: 11px; font-weight: 650; letter-spacing: .03em; text-transform: uppercase; }
   .acc-figure { overflow-wrap: anywhere; }
@@ -208,6 +209,9 @@
     .star, .card .x { min-width: 44px; min-height: 44px; }
     .seg { flex-wrap: wrap; max-width: 100%; }
     .seg button { min-height: 44px; }
+    .sc-facts { grid-template-columns: 1fr 1fr; }
+    .sc-facts .span-all { grid-column: 1 / -1; }
+    .type-popover { position: static; top: auto; left: auto; width: auto; max-width: 100%; min-width: 0; box-shadow: none; margin-top: 6px; }
     .pace-list li { grid-template-columns: auto minmax(0, 1fr); }
     .pi-val { grid-column: 2; }
     .pre { display: block; width: 100%; }
@@ -1134,15 +1138,178 @@ function siteSummary(text, categories) {
 function cancerLabels(s) {
   if (s.cancer_types && s.cancer_types.length) return s.cancer_types;
   const brief = siteBrief(s);
-  if (brief.text === "Variety" && brief.title) return brief.title.split(", ");
-  return [brief.text || "Not classified"];
+  if (brief.title) return brief.title.split(",").map(label => label.trim()).filter(Boolean);
+  if (brief.text && brief.text !== "Variety") return [brief.text];
+  return [];
 }
+/* BEGIN cancer-type-ui */
+(function (root) {
+  function escHtml(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return {"&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"}[c];
+    });
+  }
+  function normalize(labels) {
+    var out = [];
+    var seen = {};
+    (labels || []).forEach(function (label) {
+      var text = String(label == null ? "" : label).replace(/\s+/g, " ").trim();
+      if (!text) return;
+      var key = text.toLowerCase();
+      if (key === "variety" || seen[key]) return;
+      seen[key] = 1;
+      out.push(text);
+    });
+    return out;
+  }
+  var phoneQuery = "(max-width: 1100px)";
+  function isPhone() {
+    return window.matchMedia(phoneQuery).matches;
+  }
+  function html(labels, id) {
+    var clean = normalize(labels);
+    var safe = String(id || "type").replace(/[^A-Za-z0-9_-]/g, "");
+    if (!clean.length) return "Not classified";
+    if (clean.length === 1) return escHtml(clean[0]);
+    var pop = "type-pop-" + safe;
+    return '<span class="type-anchor"><button type="button" class="type-btn" aria-expanded="false" aria-controls="' + pop + '">Multiple cancer types (' + clean.length + ')</button><div class="type-popover" id="' + pop + '" hidden><ul>' + clean.map(function (label) { return "<li>" + escHtml(label) + "</li>"; }).join("") + "</ul></div></span>";
+  }
+  function buttonFor(pop) {
+    return document.querySelector('.type-btn[aria-controls="' + pop.id + '"]');
+  }
+  function clearFloat(panel) {
+    if (!panel) return;
+    ["position", "left", "top", "right", "bottom", "width", "minWidth", "maxWidth", "maxHeight"].forEach(function (key) {
+      panel.style[key] = "";
+    });
+  }
+  function closeAll(exceptBtn) {
+    document.querySelectorAll(".type-popover").forEach(function (pop) {
+      var btn = buttonFor(pop);
+      if (exceptBtn && btn === exceptBtn) return;
+      pop.hidden = true;
+      clearFloat(pop);
+      if (btn) btn.setAttribute("aria-expanded", "false");
+    });
+  }
+  function visualBox() {
+    var vv = window.visualViewport;
+    return {
+      left: vv ? vv.offsetLeft : 0,
+      top: vv ? vv.offsetTop : 0,
+      width: vv ? vv.width : document.documentElement.clientWidth,
+      height: vv ? vv.height : window.innerHeight
+    };
+  }
+  function place(anchor, panel) {
+    if (!anchor || !panel || panel.hidden || isPhone()) return;
+    var rect = anchor.getBoundingClientRect();
+    var box = visualBox();
+    if (rect.bottom < box.top + 4 || rect.top > box.top + box.height - 4) {
+      closeAll(null);
+      return;
+    }
+    panel.style.position = "fixed";
+    panel.style.right = "auto";
+    panel.style.bottom = "auto";
+    panel.style.minWidth = "0";
+    var margin = 8;
+    var maxW = Math.max(160, box.width - margin * 2);
+    panel.style.maxWidth = maxW + "px";
+    panel.style.maxHeight = Math.max(120, Math.min(box.height * 0.5, box.height - margin * 2)) + "px";
+    panel.style.width = Math.min(Math.max(panel.scrollWidth, 180), maxW) + "px";
+    var width = panel.offsetWidth;
+    var left = rect.left;
+    if (left + width > box.left + box.width - margin) left = box.left + box.width - margin - width;
+    if (left < box.left + margin) left = box.left + margin;
+    var top = rect.bottom + 4;
+    var height = panel.offsetHeight;
+    if (top + height > box.top + box.height - margin) {
+      var above = rect.top - 4 - height;
+      if (above < box.top + margin) {
+        closeAll(null);
+        return;
+      }
+      top = above;
+    }
+    panel.style.left = Math.round(left) + "px";
+    panel.style.top = Math.round(top) + "px";
+  }
+  function open(btn, hooks) {
+    var pop = document.getElementById(btn.getAttribute("aria-controls"));
+    if (!pop) return;
+    var opening = pop.hidden;
+    closeAll(null);
+    if (hooks && hooks.closeMenus) hooks.closeMenus();
+    if (!opening) {
+      btn.focus();
+      return;
+    }
+    pop.hidden = false;
+    btn.setAttribute("aria-expanded", "true");
+    if (!isPhone()) place(btn, pop);
+  }
+  function scrollCloses(ev) {
+    if (isPhone()) return;
+    var openPop = document.querySelector(".type-popover:not([hidden])");
+    if (!openPop) return;
+    var target = ev && ev.target;
+    if (target && target.nodeType === 1 && (target === openPop || openPop.contains(target))) return;
+    closeAll(null);
+  }
+  var MENU = {
+    Prostate: ["GU"], Bladder: ["GU"], Kidney: ["GU"], Testis: ["GU"], Penile: ["GU"],
+    GU: ["GU"], "Genitourinary Cancers": ["GU"], "Male Reproductive System Cancer": ["GU"],
+    Liver: ["GI"], Pancreas: ["GI"], Colorectal: ["GI"], Colon: ["GI"], Rectal: ["GI"],
+    Esophagus: ["GI"], Gastric: ["GI"], Biliary: ["GI"], Anal: ["GI"], GI: ["GI"],
+    "Gastrointestinal Cancer": ["GI"],
+    Breast: ["Breast"], "Breast Cancer": ["Breast"],
+    NSCLC: ["NSCLC"], SCLC: ["SCLC"], "Lung, other": ["Lung, other"],
+    Lung: ["NSCLC", "SCLC", "Lung, other"], "Lung Cancer": ["NSCLC", "SCLC", "Lung, other"],
+    "Lung, Mediastinal, and Pleural Cancer": ["NSCLC", "SCLC", "Lung, other"],
+    "Head and neck": ["Head and neck"], "Head and Neck Cancer": ["Head and neck"],
+    CNS: ["CNS"], Glioma: ["CNS"], Meningioma: ["CNS"], Medulloblastoma: ["CNS"], Ependymoma: ["CNS"],
+    Gynecologic: ["Gynecologic"], Gyn: ["Gynecologic"], Cervix: ["Gynecologic"],
+    Endometrial: ["Gynecologic"], Ovary: ["Gynecologic"], Vulva: ["Gynecologic"],
+    "Female Reproductive System Cancer": ["Gynecologic"],
+    Lymphoma: ["Lymphoma"], Hematologic: ["Hematologic"], Leukemia: ["Hematologic"],
+    Myeloma: ["Hematologic"], Myelofibrosis: ["Hematologic"], "Hematologic Cancer": ["Hematologic"],
+    Sarcoma: ["Sarcoma"], Skin: ["Skin"], Melanoma: ["Skin"], Merkel: ["Skin"], "Skin Cancer": ["Skin"],
+    NET: ["other-mixed"], "Not classified": ["other-mixed"], Biorepository: ["other-mixed"], Other: ["other-mixed"]
+  };
+  function menuKeys(labels) {
+    var keys = [];
+    var seen = {};
+    normalize(labels).forEach(function (label) {
+      (MENU[label] || [label]).forEach(function (key) {
+        if (seen[key]) return;
+        seen[key] = 1;
+        keys.push(key);
+      });
+    });
+    return keys;
+  }
+  if (typeof document !== "undefined") {
+    document.addEventListener("click", function (ev) {
+      var pop = ev.target && ev.target.closest && ev.target.closest(".type-popover");
+      if (pop) ev.stopPropagation();
+    }, true);
+  }
+  root.CancerType = {
+    normalize: normalize,
+    html: html,
+    closeAll: closeAll,
+    place: place,
+    open: open,
+    scrollCloses: scrollCloses,
+    isPhone: isPhone,
+    menuKeys: menuKeys,
+    setPhoneQuery: function (q) { phoneQuery = q; }
+  };
+})(typeof window !== "undefined" ? window : globalThis);
+/* END cancer-type-ui */
 function cancerTypeHtml(labels, id) {
-  const clean = (labels || []).filter(Boolean);
-  if (!clean.length) return "Not classified";
-  if (clean.length <= 2 && clean.join("").length <= 40) return esc(clean.join(", "));
-  const pop = "type-pop-" + String(id).replace(/[^A-Za-z0-9_-]/g, "");
-  return `<span class="type-anchor"><button type="button" class="type-btn" aria-expanded="false" aria-controls="${pop}">Multiple cancer types (${clean.length})</button><div class="type-popover" id="${pop}" hidden><ul>${clean.map(label => `<li>${esc(label)}</li>`).join("")}</ul></div></span>`;
+  return CancerType.html(labels, id);
 }
 function clearFloat(panel) {
   if (!panel) return;
@@ -1185,19 +1352,12 @@ function placeFloat(anchor, panel) {
   panel.style.top = Math.round(top) + "px";
 }
 function closeTypePopovers() {
-  document.querySelectorAll(".type-popover").forEach(pop => {
-    pop.hidden = true;
-    clearFloat(pop);
-    const btn = document.querySelector(`.type-btn[aria-controls="${pop.id}"]`);
-    if (btn) btn.setAttribute("aria-expanded", "false");
-  });
+  CancerType.closeAll(null);
 }
 function repositionFloats() {
-  document.querySelectorAll(".phase-panel, .role-panel, .choice-panel, .type-popover").forEach(panel => {
+  document.querySelectorAll(".phase-panel, .role-panel, .choice-panel").forEach(panel => {
     if (panel.hidden) return;
-    const btn = panel.classList.contains("type-popover")
-      ? document.querySelector(`.type-btn[aria-controls="${panel.id}"]`)
-      : document.querySelector(`[aria-controls="${panel.id}"]`);
+    const btn = document.querySelector(`[aria-controls="${panel.id}"]`);
     placeFloat(btn, panel);
   });
   fitAddList();
@@ -1541,7 +1701,7 @@ function studyCard(s) {
       <div class="meta-line"><span class="meta-k">Lead group</span><span>${esc(s.lead || "Not listed")}</span></div>
       <div class="meta-line"><span class="meta-k">Phase</span><span>${esc(phaseLabel(s.phase) || "Not listed")}</span></div>
       <div class="sc-row">${roleChip(s.rt_role)} ${statusCell(s)}</div>
-      <div class="meta-line"><span class="meta-k">Study-wide accrual</span><span class="acc-figure">${accrual}${s.avg_rate != null ? ` <span class="muted">${num(s.avg_rate)} /mo</span>` : ""}</span></div>
+      <div class="meta-line span-all"><span class="meta-k">Study-wide accrual</span><span class="acc-figure">${accrual}${s.avg_rate != null ? ` <span class="muted">${num(s.avg_rate)} /mo</span>` : ""}</span></div>
     </div>
     <div class="card-detail" id="${detailId}" role="region" aria-labelledby="${openId}"${open ? "" : " hidden"}>${open ? detailInner(s) : ""}</div>
   </article>`;
@@ -1594,7 +1754,7 @@ function renderStudies() {
     `<tr><td colspan="${COLS.length + 1}" class="muted">No studies match these filters.</td></tr>`;
     document.querySelectorAll("tr.row").forEach(tr => {
       const toggle = () => { const p = tr.dataset.p; state.expanded.has(p) ? state.expanded.delete(p) : state.expanded.add(p); render(); };
-      tr.onclick = e => { if (!e.target.closest("button, a")) toggle(); };
+      tr.onclick = e => { if (e.target.closest("button, a, .type-anchor, .type-popover")) return; toggle(); };
       tr.onkeydown = e => { if (e.target === tr && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); toggle(); } };
     });
     fitDetails();
@@ -1602,17 +1762,7 @@ function renderStudies() {
   document.querySelectorAll(".type-btn").forEach(btn => {
     btn.onclick = ev => {
       ev.stopPropagation();
-      const pop = document.getElementById(btn.getAttribute("aria-controls"));
-      if (!pop) return;
-      const opening = pop.hidden;
-      closeTypePopovers();
-      if (!opening) {
-        btn.focus();
-        return;
-      }
-      pop.hidden = false;
-      btn.setAttribute("aria-expanded", "true");
-      placeFloat(btn, pop);
+      CancerType.open(btn, {closeMenus: () => closeChoiceMenus(null)});
     };
   });
   if (restoreOpen) {
@@ -1796,10 +1946,15 @@ $("m-sort").onchange = e => {
 };
 $("m-dir").onclick = () => { state.dir *= -1; render(); };
 mobileQuery.addEventListener("change", () => render());
-window.addEventListener("resize", () => { fitDetails(); repositionFloats(); });
+window.addEventListener("resize", () => { CancerType.closeAll(null); fitDetails(); repositionFloats(); });
+window.addEventListener("scroll", ev => {
+  CancerType.scrollCloses(ev);
+  if (ev.target && ev.target.closest && ev.target.closest(".type-popover")) return;
+  repositionFloats();
+}, true);
 if (window.visualViewport) {
-  window.visualViewport.addEventListener("resize", repositionFloats);
-  window.visualViewport.addEventListener("scroll", repositionFloats);
+  window.visualViewport.addEventListener("resize", () => { CancerType.closeAll(null); repositionFloats(); });
+  window.visualViewport.addEventListener("scroll", ev => CancerType.scrollCloses(ev));
 }
 
 function setPace(mode) {

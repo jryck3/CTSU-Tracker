@@ -631,18 +631,6 @@ def build(protocols, history, fetched_at, today, approved_ncts=None):
         })
 
     attach_briefs(studies, manifest)
-    for study in studies:
-        classified = classify_record({
-            "protocol": study.get("protocol"),
-            "title": study.get("title"),
-            "disease": study.get("disease"),
-            "eligibility": (study.get("brief") or {}).get("eligibility"),
-        })
-        study["anatomy"] = classified["anatomy"]
-        study["histology"] = classified["histology"]
-        study["burden"] = classified["burden"]
-        study["intent"] = classified["intent"]
-        study["cancer_types"] = classified["cancer_types"]
 
     ctsu_count = len(studies)
     taken_protocols = {s["protocol"] for s in studies}
@@ -654,6 +642,19 @@ def build(protocols, history, fetched_at, today, approved_ncts=None):
             study["ours"] = True
             study["alias"] = ours[study["protocol"]].get("alias") or study.get("alias")
     studies.extend(approved)
+    for study in studies:
+        classified = classify_record({
+            "protocol": study.get("protocol"),
+            "title": study.get("title"),
+            "disease": study.get("disease"),
+            "eligibility": (study.get("brief") or {}).get("eligibility"),
+            "reviewed": study.get("reviewed") or {},
+        })
+        study["anatomy"] = classified["anatomy"]
+        study["histology"] = classified["histology"]
+        study["burden"] = classified["burden"]
+        study["intent"] = classified["intent"]
+        study["cancer_types"] = classified["cancer_types"]
     attach_patient_materials(studies)
 
     missing = sorted(set(ours) - {s["protocol"] for s in studies})
