@@ -1,10 +1,10 @@
 {
  "schema_version": 1,
  "taxonomy_version": 1,
- "producer_revision": "b0cb631e518341592abdea0f5c1c73d5fc46f6e7",
- "snapshot_fetched_at": "2026-10-17T04:28:34+00:00",
+ "producer_revision": "23cdaf42f6da382e94333b72009f3f1aae26e656",
+ "snapshot_fetched_at": "2026-10-17T10:46:25+00:00",
  "history_start": "2026-10-07",
  "protocol_library_as_of": "2026-10-12",
  "record_count": 284,
- "content_hash": "c503aaad47a58fae99990d0c0968b7b58b9e6d3f418cbec2212b48b0f3a36bcb"
+ "content_hash": "d7ae877354d684ea41d7232cb3e60e88e10660eda287a2af386b4ab5b9fbbc7c"
 }
